@@ -11,7 +11,6 @@
         <jackson.version>1.8.6</jackson.version>
     </properties>
 	<dependencies>
-		
 		<dependency>
 			<groupId>info.rmapproject</groupId>
 			<artifactId>rmap-core2</artifactId>

@@ -28,7 +28,8 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 /**
  * 
@@ -39,7 +40,7 @@ import org.openrdf.model.vocabulary.DC;
 
 public class IDiscoResponseManager {
 
-	private final Logger log = Logger.getLogger(this.getClass());
+	private final Logger log = LogManager.getLogger(this.getClass());
 	
 	//TODO SYSAGENT will eventually come from oauth module, BASE_URLS will be in properties file
 	private static URI SYSAGENT_URI; //defaults to IEEE user for now until authentication in place!

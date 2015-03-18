@@ -28,7 +28,8 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 /**
  * 
@@ -39,7 +40,7 @@ import org.openrdf.model.vocabulary.DC;
 
 public class IProfileResponseManager {
 
-	private final Logger log = Logger.getLogger(this.getClass());
+	private final Logger log = LogManager.getLogger(this.getClass());
 	
 	//TODO SYSAGENT will eventually come from oauth module, BASE_URLS will be in properties file
 	private static URI SYSAGENT_URI; //defaults to IEEE user for now until authentication in place!
@@ -103,7 +104,7 @@ public class IProfileResponseManager {
 	public Response getRMapProfile(String strProfileUri, String acceptsType)	{
 		
 		Response response = null;
-		
+		/*
 		try {
     		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
     		URI uriProfileUri = new URI(strProfileUri);
@@ -171,7 +172,7 @@ public class IProfileResponseManager {
     	catch(Exception ex)	{ //catch the rest
     		log.fatal("Error trying to retrieve Profile: " + strProfileUri + "Error: " + ex.getMessage());
         	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    	}
+    	}*/
     	return response;
     }
 		
@@ -184,6 +185,7 @@ public class IProfileResponseManager {
 	 */
 	public Response createRMapProfile(InputStream profileRdf, String contentType) {
 	Response response = null;
+	/*
 	try	{
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		RMapProfile rmapProfile = rdfHandler.rdf2RMapProfile(profileRdf, BASE_PROFILE_URL, contentType);
@@ -224,7 +226,7 @@ public class IProfileResponseManager {
 	catch(Exception ex)	{
 		log.fatal("Profile creation unsuccessful to due Internal Server Error. Error: " + ex.getMessage());
     	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-	}
+	}*/
 	return response;  
 	}
 	
@@ -232,7 +234,7 @@ public class IProfileResponseManager {
 	
 	public Response updateRMapProfile(String origProfileUri, InputStream profileRdf, String contentType) {
 		Response response = null;
-		
+		/*
 		try	{
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
@@ -292,7 +294,7 @@ public class IProfileResponseManager {
     	catch(Exception ex)	{ //catch the rest
     		log.fatal("Error trying to update Profile: " + origProfileUri + "Error: " + ex.getMessage());
         	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    	}
+    	}*/
     	return response;
 				
 	}

@@ -2,10 +2,17 @@ package info.rmapproject.api.responsemgr;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import info.rmapproject.core.model.impl.openrdf.ORAdapter;
+import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
+import info.rmapproject.core.rmapservice.impl.openrdf.ORMapAgentMgr;
+import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
+import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.core.Response;
@@ -29,6 +36,13 @@ public class DiscoResponseManagerTest {
 		}
 	}
 		
+
+	@Test
+	public void testDiSCOResponseManager() {
+		assertTrue (responseManager instanceof DiscoResponseManager);
+	}
+
+	
 	@Test
 	public void testGetDiSCOServiceHead() {
 		Response response = null;
@@ -70,6 +84,7 @@ public class DiscoResponseManagerTest {
 						+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
 						+ " xmlns:fabio=\"http://purl.org/spar/fabio/\">"  
 						+ "<rmap:DiSCO>"  
+						+ "<dcterms:creator rdf:resource=\"http://orcid.org/00000-00000-00000-00000\"/>"
 						+ "<dc:description>"  
 						+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
 						+ "</dc:description>"  
@@ -98,8 +113,23 @@ public class DiscoResponseManagerTest {
 		    	    	+ "</rdf:RDF>";
 		
 		try {
+			//create new ORMapAgent
+			URI SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
+			ORMapAgent agent = new ORMapAgent(ORAdapter.uri2OpenRdfUri(SYSAGENT_URI),  
+												ORAdapter.uri2OpenRdfUri(SYSAGENT_URI));
+			//create through ORMapAgentMgr
+			SesameTriplestore ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();
+			ORMapAgentMgr rmapService = new ORMapAgentMgr();
+			rmapService.createAgentTriples (agent, ts);
+			ts.commitTransaction();
+			
+			Boolean blIsAgent = rmapService.isAgentId(ORAdapter.uri2OpenRdfUri(SYSAGENT_URI), ts);
+			assertEquals(true,blIsAgent);
+			
 			InputStream stream = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
 			response = responseManager.createRMapDiSCO(stream, "RDFXML");
+				
+			
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			

@@ -3,12 +3,17 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
+import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.agent.RMapAgent;
+import info.rmapproject.core.model.disco.RMapDiSCO;
+import info.rmapproject.core.model.event.RMapEventCreation;
+import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
@@ -21,10 +26,18 @@ import org.openrdf.model.vocabulary.DC;
 public class AgentResponseManager {
 
 	private final Logger log = LogManager.getLogger(this.getClass());
-	
+
 	//TODO SYSAGENT will eventually come from oauth module, BASE_URLS will be in properties file
+	private static URI SYSAGENT_URI; //defaults to IEEE user for now until authentication in place!
 	private static String BASE_AGENT_URL = "http://rmapdns.ddns.net:8080/api/agent/";
-	//private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
+	private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
+
+	static{
+		try {
+			SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
+		}
+		catch (Exception e){}
+	}
 
 
 	public AgentResponseManager() {
@@ -152,4 +165,27 @@ public class AgentResponseManager {
     	return response;
     }
 
+	public Response createRMapAgent(InputStream agentRdf, String contentType) {
+		
+		Response response = null;
+		
+		try {
+			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(agentRdf, BASE_AGENT_URL, contentType);
+			String discoURI = "";
+								
+			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			
+			//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
+			RMapEventCreation agentEvent = (RMapEventCreation)rmapService.createAgent(new RMapUri(SYSAGENT_URI), rmapAgent);
+    		
+    		
+    		
+		}
+		catch(Exception ex)
+			{
+			response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			}
+		return response;
+	
 }

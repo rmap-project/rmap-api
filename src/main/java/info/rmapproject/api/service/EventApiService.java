@@ -1,7 +1,6 @@
 package info.rmapproject.api.service;
 
-import info.rmapproject.api.responsemgr.ResponseManager;
-import info.rmapproject.api.responsemgr.ResponseManagerFactoryIOC;
+import info.rmapproject.api.responsemgr.EventResponseManager;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -22,11 +21,11 @@ import javax.ws.rs.core.UriInfo;
 @Path("/event")
 public class EventApiService {
 
-	protected static ResponseManager responseManager = null;
+	protected static EventResponseManager responseManager = null;
 	
 	static{
 		try {
-			responseManager = ResponseManagerFactoryIOC.getFactory().createService();
+			responseManager = new EventResponseManager();
 		}
 		catch (Exception e){}
 	}

@@ -1,10 +1,10 @@
 package info.rmapproject.api.service;
 
-import info.rmapproject.api.responsemgr.ResponseManager;
-import info.rmapproject.api.responsemgr.ResponseManagerFactoryIOC;
+import info.rmapproject.api.responsemgr.AgentResponseManager;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -18,14 +18,15 @@ import org.openrdf.rio.RDFHandlerException;
 @Path("/agent")
 public class AgentApiService {
 
-	protected static ResponseManager responseManager = null;
+	protected static AgentResponseManager responseManager = null;
 	
 	static{
 		try {
-			responseManager = ResponseManagerFactoryIOC.getFactory().createService();
+			responseManager = new AgentResponseManager();
 		}
 		catch (Exception e){}
 	}
+	
 	
 	@Context
 	UriInfo uriInfo;
@@ -48,8 +49,15 @@ public class AgentApiService {
      */
     @HEAD
     @Path("/")
-    public Response getDiscoApiDetails()	{
-    	Response response = responseManager.getDiSCOServiceHead();
+    public Response getAgentApiDetails()	{
+    	Response response = responseManager.getAgentServiceHead();
+	    return response;
+    }
+    
+    @OPTIONS
+    @Path("/")
+    public Response getAgentApiDetailedOptions()	{
+    	Response response = responseManager.getAgentServiceHead();
 	    return response;
     }
     

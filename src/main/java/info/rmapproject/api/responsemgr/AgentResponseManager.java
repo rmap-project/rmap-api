@@ -1,4 +1,4 @@
-package info.rmapproject.api.responsemgr.impl;
+package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
@@ -18,7 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 
-public class IAgentResponseManager {
+public class AgentResponseManager {
 
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
@@ -27,7 +27,7 @@ public class IAgentResponseManager {
 	//private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 
 
-	public IAgentResponseManager() {
+	public AgentResponseManager() {
 	}		
 	
 	

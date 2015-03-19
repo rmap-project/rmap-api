@@ -1,10 +1,8 @@
-package info.rmapproject.api.responsemgr.impl;
+package info.rmapproject.api.responsemgr;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import info.rmapproject.api.responsemgr.ResponseManager;
-import info.rmapproject.api.responsemgr.ResponseManagerFactoryIOC;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -15,16 +13,16 @@ import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-public class IDiscoResponseManagerTest {
+public class DiscoResponseManagerTest {
 
-	protected ResponseManager responseManager = null;
+	protected DiscoResponseManager responseManager = null;
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
 		try {
-			responseManager = ResponseManagerFactoryIOC.getFactory().createService();
+			responseManager = new DiscoResponseManager();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();

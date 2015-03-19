@@ -1,4 +1,4 @@
-package info.rmapproject.api.responsemgr.impl;
+package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
@@ -21,13 +21,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 
-public class IStatementResponseManager {
+public class StatementResponseManager {
 
 	private static String BASE_STATEMENT_URL = "http://rmapdns.ddns.net:8080/api/stmt/";
 	//private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
-	public IStatementResponseManager() {
+	public StatementResponseManager() {
 	}		
 	
 	

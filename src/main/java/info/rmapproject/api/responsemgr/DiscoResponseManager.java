@@ -1,30 +1,22 @@
-package info.rmapproject.api.responsemgr.impl;
+package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
+import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.RMapUri;
-import info.rmapproject.core.model.agent.RMapAgent;
 import info.rmapproject.core.model.disco.RMapDiSCO;
-import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.event.RMapEventCreation;
 import info.rmapproject.core.model.event.RMapEventDerivation;
-import info.rmapproject.core.model.event.RMapEventType;
-import info.rmapproject.core.model.impl.openrdf.ORAdapter;
-import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.ORMapEventMgr;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
 import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -38,7 +30,7 @@ import org.openrdf.model.vocabulary.DC;
  *
  */
 
-public class IDiscoResponseManager {
+public class DiscoResponseManager {
 
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
@@ -49,12 +41,12 @@ public class IDiscoResponseManager {
 
 	static{
 		try {
-			SYSAGENT_URI = new URI("http://orcid.org/00000-00000-00000-00000");
+			SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
 		}
 		catch (Exception e){}
 	}
 
-	public IDiscoResponseManager() {
+	public DiscoResponseManager() {
 	}		
 	
 	/**
@@ -129,9 +121,10 @@ public class IDiscoResponseManager {
         	
     		//rmapService.getDiSCOEvents(uriDiscoUri)
         	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a disco.
-    		List <RMapEvent> lstEvents = rmapDisco.getRelatedEvents();
-    		for (RMapEvent event : lstEvents){
+        	//TODO: Need to fix this... awkward to get the effect of an event.
+    		/*
+    		List<URI> lstEvents = rmapService.getDiSCOEvents(uriDiscoUri);
+    		for (URI event : lstEvents){
     			if (event.getEventType() == RMapEventType.CREATION){
    	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
     			}
@@ -147,7 +140,13 @@ public class IDiscoResponseManager {
     			else if (event.getEventType() == RMapEventType.UPDATE){
    	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
     			}
-    		}
+    		}*/
+    		
+    		RMapStatus status = rmapService.getDiSCOStatus(uriDiscoUri);
+
+    		//TODO: fix this linkrel, it's wrong!
+    		if (status == RMapStatus.ACTIVE)
+       		linkRel.concat(",<" + status + ">" + ";rel=\"rmap:Status\"");
     		    		
         	response = Response.status(Response.Status.OK)
         				.entity(discoOutput)
@@ -191,24 +190,11 @@ public class IDiscoResponseManager {
 		String discoURI = "";
 				
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-		SesameTriplestore ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();  
 		
-		//TODO: This is a fudge for system agent, need to correct this code when proper agent handling available.
+		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
+		RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(new RMapUri(SYSAGENT_URI), rmapDisco);
+		discoURI = rmapDisco.getId().toString();		
 		
-		RMapAgent rmapAgent = new ORMapAgent(ORAdapter.uri2OpenRdfUri(SYSAGENT_URI));
-		    		
-		RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(rmapAgent, rmapDisco.getAggregratedResources(), 
-														rmapDisco.getCreator(), rmapDisco.getRelatedStatements(), rmapDisco.getDescription());
-		
-		ORMapEventMgr eventmgr = new ORMapEventMgr();
-		List <RMapUri> lstCreatedObjs = discoEvent.getCreatedObjectIds();	    
-		for (RMapUri createdObjUri : lstCreatedObjs)	{
-			if (eventmgr.isDiscoId(ORAdapter.rMapUri2OpenRdfUri(createdObjUri), ts)) {
-				discoURI = createdObjUri.toString();
-				break;
-			}
-		}
-		    
         if (discoURI.length() > 0){
         	String linkRel = "<" + discoEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
         	response = Response.status(Response.Status.CREATED)
@@ -237,35 +223,23 @@ public class IDiscoResponseManager {
 		try	{
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			SesameTriplestore ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore(); 
-			RMapUri discoURI = null;		
+			String discoURI = null;		
 						
 			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, BASE_DISCO_URL, contentType);
 			
 			//TODO: This is a fudge for system agent, need to correct this code when proper agent handling available.
 			
-			RMapAgent rmapAgent = new ORMapAgent(ORAdapter.uri2OpenRdfUri(SYSAGENT_URI));
-			    					
-			RMapEventDerivation discoEvent = (RMapEventDerivation)rmapService.updateDiSCO(rmapAgent, new URI(origDiscoUri), newRmapDisco.getAggregratedResources(), 
-											newRmapDisco.getRelatedStatements(), newRmapDisco.getCreator(), newRmapDisco.getDescription());
-			
+			RMapEventDerivation discoEvent = (RMapEventDerivation)rmapService.updateDiSCO(new RMapUri(SYSAGENT_URI), 
+																							new URI(origDiscoUri), 
+																							newRmapDisco);
+				
 			//This chunk of code just gets the DiSCO ID of the newly created DiSCO to return to user.
-			ORMapEventMgr eventmgr = new ORMapEventMgr();
-			List <RMapUri> lstCreatedObjs = discoEvent.getCreatedObjectIds();	    
-			for (RMapUri createdObjUri : lstCreatedObjs)	{
-				if (eventmgr.isDiscoId(ORAdapter.rMapUri2OpenRdfUri(createdObjUri), ts)) {
-					discoURI = createdObjUri;
-					break;
-				}
-			}
+			discoURI = newRmapDisco.getId().toString();
 			    
-	        if (discoURI != null){
+	        if (discoURI.length() > 0){
 	        	String linkRel = "<" + BASE_EVENT_URL + discoEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
-
-	    		String prevDiscoVersUrl = rmapService.getDiSCOPreviousVersion(new URI(discoURI.toString())).getId().toString();
-	        	if (prevDiscoVersUrl != null) {
-	        		linkRel.concat(",<" + prevDiscoVersUrl + ">" + ";rel=\"predecessor-version\"");
-	        	}
+	        	//TODO:is predecessor version appropriate?
+	        	linkRel.concat(",<" + origDiscoUri + ">" + ";rel=\"predecessor-version\"");
 	        	
 	        	response = Response.status(Response.Status.CREATED)
 	        				.entity(discoURI)

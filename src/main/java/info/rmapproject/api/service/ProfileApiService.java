@@ -1,7 +1,6 @@
 package info.rmapproject.api.service;
 
-import info.rmapproject.api.responsemgr.ResponseManager;
-import info.rmapproject.api.responsemgr.ResponseManagerFactoryIOC;
+import info.rmapproject.api.responsemgr.ProfileResponseManager;
 
 import java.io.InputStream;
 
@@ -27,11 +26,11 @@ import javax.ws.rs.core.UriInfo;
 @Path("/profile")
 public class ProfileApiService {
 
-	protected static ResponseManager responseManager = null;
+	protected static ProfileResponseManager responseManager = null;
 	
 	static{
 		try {
-			responseManager = ResponseManagerFactoryIOC.getFactory().createService();
+			responseManager = new ProfileResponseManager();
 		}
 		catch (Exception e){}
 	}

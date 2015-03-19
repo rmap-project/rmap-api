@@ -1,30 +1,7 @@
-package info.rmapproject.api.responsemgr.impl;
-
-import info.rmapproject.core.exception.RMapDeletedObjectException;
-import info.rmapproject.core.exception.RMapObjectNotFoundException;
-import info.rmapproject.core.exception.RMapTombstonedObjectException;
-import info.rmapproject.core.model.RMapUri;
-import info.rmapproject.core.model.agent.RMapAgent;
-import info.rmapproject.core.model.agent.RMapProfile;
-import info.rmapproject.core.model.event.RMapEvent;
-import info.rmapproject.core.model.event.RMapEventCreation;
-import info.rmapproject.core.model.event.RMapEventDerivation;
-import info.rmapproject.core.model.event.RMapEventType;
-import info.rmapproject.core.model.impl.openrdf.ORAdapter;
-import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
-import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
-import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.ORMapEventMgr;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
+package info.rmapproject.api.responsemgr;
 
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -38,7 +15,7 @@ import org.openrdf.model.vocabulary.DC;
  *
  */
 
-public class IProfileResponseManager {
+public class ProfileResponseManager {
 
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
@@ -54,7 +31,7 @@ public class IProfileResponseManager {
 		catch (Exception e){}
 	}
 
-	public IProfileResponseManager() {
+	public ProfileResponseManager() {
 	}		
 	
 	/**

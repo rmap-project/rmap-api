@@ -1,4 +1,4 @@
-package info.rmapproject.api.responsemgr.impl;
+package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
@@ -16,12 +16,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 
-public class IResourceResponseManager {
+public class ResourceResponseManager {
 
 	private static String BASE_RESOURCE_URL = "http://rmapdns.ddns.net:8080/api/resource/";
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
-	public IResourceResponseManager() {
+	public ResourceResponseManager() {
 	}		
 
 	/**

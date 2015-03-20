@@ -4,15 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import info.rmapproject.core.model.impl.openrdf.ORAdapter;
-import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
-import info.rmapproject.core.rmapservice.impl.openrdf.ORMapAgentMgr;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.core.Response;
@@ -114,7 +108,8 @@ public class DiscoResponseManagerTest {
 		
 		try {
 			//create new ORMapAgent
-			URI SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
+			/*URI SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
+			
 			ORMapAgent agent = new ORMapAgent(ORAdapter.uri2OpenRdfUri(SYSAGENT_URI),  
 												ORAdapter.uri2OpenRdfUri(SYSAGENT_URI));
 			//create through ORMapAgentMgr
@@ -125,13 +120,13 @@ public class DiscoResponseManagerTest {
 			
 			Boolean blIsAgent = rmapService.isAgentId(ORAdapter.uri2OpenRdfUri(SYSAGENT_URI), ts);
 			assertEquals(true,blIsAgent);
-			
+			*/
 			InputStream stream = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
 			response = responseManager.createRMapDiSCO(stream, "RDFXML");
-				
 			
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
+			System.out.print(e.getMessage());
 			e.printStackTrace();			
 		}
 	

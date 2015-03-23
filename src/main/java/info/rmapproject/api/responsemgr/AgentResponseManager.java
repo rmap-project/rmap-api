@@ -3,11 +3,7 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
-import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.agent.RMapAgent;
-import info.rmapproject.core.model.disco.RMapDiSCO;
-import info.rmapproject.core.model.event.RMapEventCreation;
-import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
@@ -145,7 +141,7 @@ public class AgentResponseManager {
     		}*/
     		    		
         	response = Response.status(Response.Status.OK)
-        				.entity(agentOutput)
+        				.entity(agentOutput.toString())
         				.location(new URI (BASE_AGENT_URL + strAgentUri))
         				//.header("Link",linkRel)						//switch this to link() or links()?
         				.build();	
@@ -174,7 +170,7 @@ public class AgentResponseManager {
 	public Response createRMapAgent(InputStream agentRdf, String contentType) {
 		
 		Response response = null;
-		
+		/*
 		try {
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(agentRdf, BASE_AGENT_URL, contentType);
@@ -191,7 +187,8 @@ public class AgentResponseManager {
 		catch(Exception ex)
 			{
 			response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			}
+			}*/
 		return response;
+	}	
 	
 }

@@ -93,7 +93,7 @@ public class EventResponseManager {
     		if (rmapEvent!=null){
 			    			
 				response = Response.status(Response.Status.OK)
-							.entity(eventOutput)
+							.entity(eventOutput.toString())
 							.location(new URI (BASE_EVENT_URL + strEventId))
 							.build();
     			
@@ -154,7 +154,7 @@ public class EventResponseManager {
     		
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
-							.entity(outputString)
+							.entity(outputString.toString())
 							.location(new URI (BASE_EVENT_URL + strEventId))
 							.build();    			
 	        }

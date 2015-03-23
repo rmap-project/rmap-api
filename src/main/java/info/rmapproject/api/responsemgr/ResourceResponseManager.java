@@ -129,7 +129,7 @@ public class ResourceResponseManager {
     		
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
-							.entity(outputString)
+							.entity(outputString.toString())
 							.location(new URI (BASE_RESOURCE_URL + strResourceId))
 							.build();    			
 	        }

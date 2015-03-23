@@ -149,7 +149,7 @@ public class DiscoResponseManager {
        		linkRel.concat(",<" + status + ">" + ";rel=\"rmap:Status\"");
     		    		
         	response = Response.status(Response.Status.OK)
-        				.entity(discoOutput)
+        				.entity(discoOutput.toString())
         				.location(new URI (BASE_DISCO_URL + strDiscoUri))
         				.header("Link",linkRel)						//switch this to link() or links()?
         				.build();	

@@ -84,7 +84,7 @@ public class StatementApiService {
     @GET
     @Path("/{stmtid}")
     @Produces("application/xml;charset=UTF-8;")
-    public Response getRMapStmtAsHTML(@PathParam("stmtid") String stmtId) {
+    public Response getRMapStmtAsXML(@PathParam("stmtid") String stmtId) {
     	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response rdfXMLStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
 	    return rdfXMLStmt;
@@ -112,6 +112,43 @@ public class StatementApiService {
     public Response getRMapStmtAsRDFXML(@PathParam("stmtid") String stmtId) {
     	Response rdfXmlStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
     	return rdfXmlStmt;
+    }
+
+    
+    @GET
+    @Path("/{stmtid}")
+    public Response getRMapStmtAsXMLDefault(@PathParam("stmtid") String stmtId) {
+    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
+    	Response rdfXMLStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
+	    return rdfXMLStmt;
+    }
+
+
+    @GET
+    @Path("/{subject}/{predicate}/{object}")
+    @Produces("text/plain;charset=UTF-8;")
+    public Response getRMapStmtIdAsTEXT(@PathParam("subject") String subject, 
+    									@PathParam("predicate") String predicate,
+    									@PathParam("object") String object) {
+    	Response stmtIdResponse = responseManager.getRMapStatementID(subject, predicate, object);
+    	return stmtIdResponse;
+    }
+    
+    
+    @GET
+    @Path("/{stmtid}/events")
+	@Produces("application/json;charset=UTF-8;")
+    public Response getRMapStmtEventsAsJSON(@PathParam("stmtid") String stmtId) {
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtId, "JSON");
+    	return eventList;
+    }
+    
+    @GET
+    @Path("/{stmtid}/events")
+    @Produces("text/plain;charset=UTF-8;")
+    public Response getRMapStmtEventsAsText(@PathParam("stmtid") String stmtId) {
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtId, "TEXT");
+    	return eventList;
     }
        
 }

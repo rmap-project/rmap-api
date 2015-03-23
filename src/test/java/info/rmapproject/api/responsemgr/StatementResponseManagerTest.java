@@ -168,8 +168,7 @@ public class StatementResponseManagerTest {
 		//getRMapStatement using s, o, p
 		Response response = null;
 		try {
-			response = responseManager.getRMapStatementID(subject.stringValue(), predicate.stringValue(), 
-															object.stringValue(), "RDFXML");
+			response = responseManager.getRMapStatementID(subject.stringValue(), predicate.stringValue(), object.stringValue());
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
@@ -180,8 +179,7 @@ public class StatementResponseManagerTest {
 		String body = response.getEntity().toString();
 		assertTrue(location.contains("stmt"));
 		assertTrue(body.contains(stmtid.toString()));
-		assertEquals(200, response.getStatus());
-		
+		assertEquals(200, response.getStatus());		
 	}
 
 
@@ -199,7 +197,7 @@ public class StatementResponseManagerTest {
 		//getRMapStatement using s, o, p
 		Response response = null;
 		try {
-			response = responseManager.getRMapStatementID(subject, predicate, object, "RDFXML");
+			response = responseManager.getRMapStatementID(subject, predicate, object);
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			

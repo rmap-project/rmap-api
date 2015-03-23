@@ -125,7 +125,7 @@ public class StatementResponseManager {
     		   		
     		if (rmapStatement!=null){
 			    response = Response.status(Response.Status.OK)
-							.entity(statementOutput)
+							.entity(statementOutput.toString())
 							.location(new URI (BASE_STATEMENT_URL + strStatementId))
 							.build();
 	        }
@@ -157,7 +157,7 @@ public class StatementResponseManager {
 	 * @return
 	 */
 
-	public Response getRMapStatementID(String subject, String predicate, String object, String acceptsType)	{
+	public Response getRMapStatementID(String subject, String predicate, String object)	{
 		
 		if (subject==null || subject.length()==0)	{
 			throw new RMapException();  //change this to a bad request exception
@@ -252,7 +252,11 @@ public class StatementResponseManager {
 	 */
 	public Response getRMapStatementRelatedEvents(String strStatementId, String returnType)	{
 		Response response = null;
+		if (strStatementId==null || strStatementId.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		try {
+			strStatementId = URLDecoder.decode(strStatementId, "UTF-8");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			URI uriStatementUri = new URI(strStatementId);
 			String outputString="";
@@ -268,7 +272,7 @@ public class StatementResponseManager {
     		
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
-							.entity(outputString)
+							.entity(outputString.toString())
 							.location(new URI (BASE_STATEMENT_URL + strStatementId))
 							.build();    			
 	        }
@@ -277,12 +281,15 @@ public class StatementResponseManager {
     		log.fatal("Event could not be found. Error: " + ex.getMessage());
         	response = Response.status(Response.Status.NOT_FOUND).build();
     	}  
+    	catch(RMapException ex) {  //replace this with a bad request
+    		log.fatal("User input not valid. Error: " + ex.getMessage());
+        	response = Response.status(Response.Status.BAD_REQUEST).build();
+    	}  
 		catch(Exception ex)	{
 			log.fatal("Error trying to retrieve event details for: " + strStatementId + "Error: " + ex.getMessage());
         	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 		}
     	return response;
 	}
-	
 	
 }

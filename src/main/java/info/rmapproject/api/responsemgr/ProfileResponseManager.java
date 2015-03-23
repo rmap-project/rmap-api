@@ -127,7 +127,7 @@ public class ProfileResponseManager {
     		}
     		    		
         	response = Response.status(Response.Status.OK)
-        				.entity(profileOutput)
+        				.entity(profileOutput.toString())
         				.location(new URI (BASE_PROFILE_URL + strProfileUri))
         				.header("Link",linkRel)						//switch this to link() or links()?
         				.build();	
@@ -190,7 +190,7 @@ public class ProfileResponseManager {
         if (profileURI.length() > 0){
         	String linkRel = "<" + profileEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
         	response = Response.status(Response.Status.CREATED)
-        				.entity(profileURI)
+        				.entity(profileURI.toString())
         				.location(new URI (BASE_PROFILE_URL + profileURI)) //switch this to location()
         				.header("Link",linkRel)						//switch this to link()
         				.build();		        	
@@ -246,7 +246,7 @@ public class ProfileResponseManager {
 	        	}
 	        	
 	        	response = Response.status(Response.Status.CREATED)
-	        				.entity(profileURI)
+	        				.entity(profileURI.toString())
 	        				.location(new URI (BASE_PROFILE_URL + profileURI)) //switch this to location()
 	        				.header("Link",linkRel)						//switch this to link()
 	        				.build();		        	

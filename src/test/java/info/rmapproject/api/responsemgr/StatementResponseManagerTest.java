@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.core.exception.RMapException;
-import info.rmapproject.core.idservice.IdServiceFactoryIOC;
 import info.rmapproject.core.model.impl.openrdf.ORAdapter;
 import info.rmapproject.core.rmapservice.impl.openrdf.ORMapStatementMgr;
 import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
@@ -20,7 +19,10 @@ import org.openrdf.model.Statement;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.vocabulary.RDF;
-
+/**
+ * @author khanson
+ * Procedures to test StatementResponseManager
+ */
 public class StatementResponseManagerTest {
 	
 	protected StatementResponseManager responseManager = null;
@@ -78,49 +80,140 @@ public class StatementResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 
+	/**
+	 * Tests whether appropriate 200 OK response is generated when you get a statement that 
+	 * exists in the database.  
+	 */
 	@Test
 	public void testGetRMapStatement() {
 		//create RMapStatement
-		java.net.URI id1 =null;
-		try {
-			id1 = IdServiceFactoryIOC.getFactory().createService().createId();
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
-		URI subject = ORAdapter.uri2OpenRdfUri(id1);
+		URI subject = ORAdapter.getValueFactory().createURI("test:test");
 		URI predicate = RDF.TYPE;
 		URI object = RMAP.STATEMENT;
 		ORMapStatementMgr mgr = new ORMapStatementMgr();
-		String contextString = mgr.createContextURIString(subject.stringValue(),
-				predicate.stringValue(), object.stringValue());
+		String contextString = mgr.createContextURIString(subject.stringValue(),predicate.stringValue(), object.stringValue());
 		URI context = ORAdapter.getValueFactory().createURI(contextString);
 		Statement stmt = vf.createStatement(subject, predicate, object,context);	
-		mgr.createTriple(ts, stmt);
+		mgr.createReifiedStatement(stmt,ts);
 		try{
 		ts.commitTransaction();
 		} catch(Exception e){
 			fail("Exception thrown " + e.getMessage());			
 		}
+		//get ID of the statement created
 		URI stmtid = mgr.getStatementID(subject, predicate, object, ts);
+
 		//getRMapStatement
 		Response response = null;
 		try {
 			response = responseManager.getRMapStatement(stmtid.toString(),"RDFXML");
-
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
 		}
 
 		assertNotNull(response);
+		String location = response.getLocation().toString();
+		String body = response.getEntity().toString();
+		assertTrue(location.contains("stmt"));
+		assertTrue(body.contains("<rdf:subject rdf:resource=\"test:test\"/>"));
 		assertEquals(200, response.getStatus());
 	}
-
+	
+	/**
+	 * Tests whether appropriate 404 Not Found response is returned
+	 * when an incorrect statement ID is provided
+	 */
 	@Test
-	public void testGetRMapStatementID() {
-		fail("Not yet implemented");
+	public void testGetRMapStatementWhereNoMatch() {
+		// pass in fake ID to see if not found response is correct.
+		Response response = null;
+		try {
+			response = responseManager.getRMapStatement("test:test","RDFXML");
+		} catch (Exception e) {
+			fail("Exception thrown " + e.getMessage());
+			e.printStackTrace();			
+		}
+
+		assertNotNull(response);
+		assertTrue(response.getLocation()==null);
+		assertTrue(response.getEntity()==null);
+		assertEquals(404, response.getStatus());
 	}
 
+	/**
+	 * Tests whether appropriate 200 OK response is generated when you get a statement that 
+	 * exists in the database using the subject, object, and predicate.  
+	 */
+	@Test
+	public void testGetRMapStatementID() {
+		//create RMapStatement
+		URI subject = ORAdapter.getValueFactory().createURI("test:test");
+		URI predicate = RDF.TYPE;
+		URI object = RMAP.STATEMENT;
+		ORMapStatementMgr mgr = new ORMapStatementMgr();
+		String contextString = mgr.createContextURIString(subject.stringValue(),predicate.stringValue(), object.stringValue());
+		URI context = ORAdapter.getValueFactory().createURI(contextString);
+		Statement stmt = vf.createStatement(subject, predicate, object,context);	
+		mgr.createReifiedStatement(stmt,ts);
+		try{
+		ts.commitTransaction();
+		} catch(Exception e){
+			fail("Exception thrown " + e.getMessage());			
+		}
+
+		//get ID of the statement created
+		URI stmtid = mgr.getStatementID(subject, predicate, object, ts);
+		
+		//getRMapStatement using s, o, p
+		Response response = null;
+		try {
+			response = responseManager.getRMapStatementID(subject.stringValue(), predicate.stringValue(), 
+															object.stringValue(), "RDFXML");
+		} catch (Exception e) {
+			fail("Exception thrown " + e.getMessage());
+			e.printStackTrace();			
+		}
+
+		assertNotNull(response);
+		String location = response.getLocation().toString();
+		String body = response.getEntity().toString();
+		assertTrue(location.contains("stmt"));
+		assertTrue(body.contains(stmtid.toString()));
+		assertEquals(200, response.getStatus());
+		
+	}
+
+
+	/**
+	 * Tests whether appropriate 200 OK response is generated when you get a statement that 
+	 * exists in the database using the subject, object, and predicate.  
+	 */
+	@Test
+	public void testGetRMapStatementIDWhereNoMatch() {
+		//create RMapStatement
+		String subject = ORAdapter.getValueFactory().createURI("testnomatch:testnomatch").stringValue();
+		String predicate = RDF.TYPE.stringValue();
+		String object = RMAP.STATEMENT.stringValue();
+				
+		//getRMapStatement using s, o, p
+		Response response = null;
+		try {
+			response = responseManager.getRMapStatementID(subject, predicate, object, "RDFXML");
+		} catch (Exception e) {
+			fail("Exception thrown " + e.getMessage());
+			e.printStackTrace();			
+		}
+
+		assertNotNull(response);
+		assertTrue(response.getLocation()==null);
+		assertTrue(response.getEntity()==null);
+		assertEquals(404, response.getStatus());
+		
+	}
+	
+	
+	
 	@Test
 	public void testGetRMapStatementRelatedEvents() {
 		fail("Not yet implemented");

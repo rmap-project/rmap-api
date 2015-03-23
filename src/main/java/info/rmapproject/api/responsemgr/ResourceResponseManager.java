@@ -15,7 +15,12 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
-
+/**
+ * 
+ * @author khanson
+ * Creates HTTP responses for Resource REST API requests
+ *
+ */
 public class ResourceResponseManager {
 
 	private static String BASE_RESOURCE_URL = "http://rmapdns.ddns.net:8080/api/resource/";
@@ -74,7 +79,7 @@ public class ResourceResponseManager {
 		Response response = null;
 		try {
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			URI uriResourceUri = new URI(URLDecoder.decode(strResourceId)); //TODO: temporary decoder assuming passed in as URL encoded... check this.
+			URI uriResourceUri = new URI(URLDecoder.decode(strResourceId,"UTF-8")); //TODO: temporary decoder assuming passed in as URL encoded... check this.
 			List <URI> uriList = null;
 			String outputString="";
 			String jsonType="";

@@ -23,6 +23,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 
+/**
+ * 
+ * @author khanson
+ * Creates HTTP responses for Agent REST API requests
+ *
+ */
 public class AgentResponseManager {
 
 	private final Logger log = LogManager.getLogger(this.getClass());

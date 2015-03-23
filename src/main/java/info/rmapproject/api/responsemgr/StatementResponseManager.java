@@ -1,8 +1,9 @@
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.utils.URIListHandler;
+import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
-import info.rmapproject.core.model.RMapResource;
+import info.rmapproject.core.model.RMapLiteral;
 import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.RMapValue;
 import info.rmapproject.core.model.statement.RMapStatement;
@@ -13,6 +14,8 @@ import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -20,7 +23,12 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
-
+/**
+ * 
+ * @author khanson
+ * Creates HTTP responses for Statement REST API requests
+ *
+ */
 public class StatementResponseManager {
 
 	private static String BASE_STATEMENT_URL = "http://rmapdns.ddns.net:8080/api/stmt/";
@@ -77,10 +85,15 @@ public class StatementResponseManager {
 	 * Get RMap Statement formatted according to RDF type passed in
 	 * 
 	 */
-    
+	
 	public Response getRMapStatement(String strStatementId, String acceptsType)	{
 		Response response = null;
+		if (strStatementId==null || strStatementId.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		try {
+			strStatementId = URLDecoder.decode(strStatementId, "UTF-8");
+			
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			URI uriStatementUri = new URI(strStatementId);
     		RMapStatement rmapStatement = rmapService.readStatement(uriStatementUri);
@@ -88,9 +101,8 @@ public class StatementResponseManager {
     		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
     		OutputStream statementOutput = rdfHandler.statement2Rdf(rmapStatement, acceptsType);	
     		
-    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a disco.
     		//TODO: need to fix this after we decide how to do this - hoping for an easier method than what I can get at currently... 
+    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
     		/*String linkRel = "";
     		List <RMapEvent> lstEvents = rmapStatement.getRelatedEvents();
     		for (URI event : lstEvents){
@@ -111,19 +123,23 @@ public class StatementResponseManager {
     			}
     		}*/
     		   		
-    		
     		if (rmapStatement!=null){
-			    			
-				response = Response.status(Response.Status.OK)
+			    response = Response.status(Response.Status.OK)
 							.entity(statementOutput)
 							.location(new URI (BASE_STATEMENT_URL + strStatementId))
 							.build();
-    			
 	        }
+    		else {
+    			throw new Exception();
+    		}
 		}
     	catch(RMapObjectNotFoundException ex) {
     		log.fatal("Statement could not be found. Error: " + ex.getMessage());
         	response = Response.status(Response.Status.NOT_FOUND).build();
+    	}  
+    	catch(RMapException ex) {  //replace this with a bad request
+    		log.fatal("User input not valid. Error: " + ex.getMessage());
+        	response = Response.status(Response.Status.BAD_REQUEST).build();
     	}  
 		catch(Exception ex)	{
 			log.fatal("Error trying to retrieve statement: " + strStatementId + "Error: " + ex.getMessage());
@@ -134,30 +150,56 @@ public class StatementResponseManager {
 
 	/**
 	 * 
-	 * @param s
-	 * @param p
-	 * @param o
+	 * @param subject
+	 * @param predicate
+	 * @param object
 	 * @param acceptsType
 	 * @return
 	 */
 
-	public Response getRMapStatementID(RMapResource s, RMapUri p, RMapValue o, String acceptsType)	{
+	public Response getRMapStatementID(String subject, String predicate, String object, String acceptsType)	{
+		
+		if (subject==null || subject.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
+		if (predicate==null || predicate.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
+		if (object==null || object.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
+		
 		Response response = null;
+		RMapUri rmapSubject = null;
+		RMapUri rmapPredicate = null;
+		RMapValue rmapObject = null;
+		
+		try {
+			subject = URLDecoder.decode(subject, "UTF-8");
+			predicate = URLDecoder.decode(predicate, "UTF-8");
+			object = URLDecoder.decode(object, "UTF-8");
+			rmapSubject = new RMapUri(new URI(subject));
+			rmapPredicate = new RMapUri(new URI(predicate));
+		}
+		catch (Exception e){
+			throw new RMapException(); //replace with bad request
+		}
+		
+		try {
+			rmapObject = new RMapUri(new URI(object));
+		}
+		catch (URISyntaxException e) {
+			rmapObject = new RMapLiteral(object);
+		}
+		
 		try {
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			URI stmtURI = null;
-			
-			//TODO: can't complete this yet... need to think about how to pass in s-p-o as appropriate type.		
-			/*
-			RMapResource subject = s;
-			RMapUri predicate = p;
-			RMapValue object = o;
-    		*/
-			stmtURI = rmapService.getStatementID(s, p, o);
-			
-    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a disco.
+
+			stmtURI = rmapService.getStatementID(rmapSubject, rmapPredicate, rmapObject);
+
     		//TODO: need to fix this after we decide how to do this - hoping for an easier method than what I can get at currently... 
+    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
     		/*String linkRel = "";
     		List <RMapEvent> lstEvents = rmapStatement.getRelatedEvents();
     		for (URI event : lstEvents){
@@ -177,7 +219,6 @@ public class StatementResponseManager {
    	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
     			}
     		}*/
-    		   		
     		
     		if (stmtURI!=null){			    			
 				response = Response.status(Response.Status.OK)
@@ -190,6 +231,10 @@ public class StatementResponseManager {
     	catch(RMapObjectNotFoundException ex) {
     		log.fatal("Statement could not be found. Error: " + ex.getMessage());
         	response = Response.status(Response.Status.NOT_FOUND).build();
+    	}  
+    	catch(RMapException ex) {  //replace this with a bad request
+    		log.fatal("User input not valid. Error: " + ex.getMessage());
+        	response = Response.status(Response.Status.BAD_REQUEST).build();
     	}  
 		catch(Exception ex)	{
 			log.fatal("Error trying to retrieve statement. Error: " + ex.getMessage());

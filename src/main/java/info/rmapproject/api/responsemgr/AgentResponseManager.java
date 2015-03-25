@@ -1,5 +1,6 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
@@ -31,8 +32,6 @@ public class AgentResponseManager {
 
 	//TODO SYSAGENT will eventually come from oauth module, BASE_URLS will be in properties file
 	private static URI SYSAGENT_URI; //defaults to IEEE user for now until authentication in place!
-	private static String BASE_AGENT_URL = "http://rmapdns.ddns.net:8080/api/agent/";
-	private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 
 	static{
 		try {
@@ -94,57 +93,63 @@ public class AgentResponseManager {
 		
 		Response response = null;
 		
-		try {
+		try {			
     		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
     		URI uriAgentUri = new URI(strAgentUri);
     		RMapAgent rmapAgent = rmapService.readAgent(uriAgentUri);
-    		
-    		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-    		OutputStream agentOutput = rdfHandler.agent2Rdf(rmapAgent, acceptsType);	
-    		
-    		//TODO:Not sure what we're doing for API calls yet...
-    		/*
-    		String latestAgentUrl = rmapService.getAgentLatestVersion(uriAgentUri).getId().toString();
-        	String linkRel = "<" + latestAgentUrl + ">" + ";rel=\"latest-version\"";
 
-    		String prevAgentVersUrl = rmapService.getAgentPreviousVersion(uriAgentUri).getId().toString();
-        	if (prevAgentVersUrl != null) {
-        		linkRel.concat(",<" + prevAgentVersUrl + ">" + ";rel=\"predecessor-version\"");
+    		if (rmapAgent!=null){
+    			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+	    		OutputStream agentOutput = rdfHandler.agent2Rdf(rmapAgent, acceptsType);	
+	    		
+	    		//TODO:Not sure what we're doing for API calls yet...
+	    		/*
+	    		String latestAgentUrl = URLUtils.makeAgentUrl(rmapService.getAgentLatestVersion(uriAgentUri).getId().toString());
+	        	String linkRel = "<" + latestAgentUrl + ">" + ";rel=\"latest-version\"";
+	
+	    		String prevAgentVersUrl = URLUtils.makeAgentUrl(rmapService.getAgentPreviousVersion(uriAgentUri).getId().toString());
+	        	if (prevAgentVersUrl != null) {
+	        		linkRel.concat(",<" + prevAgentVersUrl + ">" + ";rel=\"predecessor-version\"");
+	        	}
+	
+	    		String succAgentVersUrl = URLUtils.makeAgentUrl(rmapService.getAgentNextVersion(uriAgentUri).getId().toString());
+	        	if (succAgentVersUrl != null) {
+	        		linkRel.concat(",<" + succAgentVersUrl + ">" + ";rel=\"successor-version\"");
+	        	}
+	        	*/  	
+	        	
+	        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
+	        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a Agent.
+	    		
+	    		/*List <URI> lstEvents = rmapAgent.getRelatedEvents();
+	    		for (URI eventUri : lstEvents){
+	    			String event = URLUtils.makeEventUrl(eventUri.toString());
+	    			if (event.getEventType() == RMapEventType.CREATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.DELETION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.INACTIVATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.UPDATE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
+	    			}
+	    		}*/
+	    		    		
+	        	response = Response.status(Response.Status.OK)
+	        				.entity(agentOutput.toString())
+	        				.location(new URI (URLUtils.makeAgentUrl(strAgentUri)))
+	        				//.header("Link",linkRel)						//switch this to link() or links()?
+	        				.build();	
+    		}
+        	else	{
+    			throw new Exception();
         	}
-
-    		String succAgentVersUrl = rmapService.getAgentNextVersion(uriAgentUri).getId().toString();
-        	if (succAgentVersUrl != null) {
-        		linkRel.concat(",<" + succAgentVersUrl + ">" + ";rel=\"successor-version\"");
-        	}
-        	*/  	
-        	
-        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a Agent.
-    		
-    		/*List <RMapEvent> lstEvents = rmapAgent.getRelatedEvents();
-    		for (RMapEvent event : lstEvents){
-    			if (event.getEventType() == RMapEventType.CREATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.DELETION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.INACTIVATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.UPDATE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
-    			}
-    		}*/
-    		    		
-        	response = Response.status(Response.Status.OK)
-        				.entity(agentOutput.toString())
-        				.location(new URI (BASE_AGENT_URL + strAgentUri))
-        				//.header("Link",linkRel)						//switch this to link() or links()?
-        				.build();	
     		   	
     	}    	
     	//TODO:Add more exceptions as they become available!
@@ -173,7 +178,7 @@ public class AgentResponseManager {
 		/*
 		try {
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(agentRdf, BASE_AGENT_URL, contentType);
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(agentRdf, URLUtils.getAgentBaseUrl(), contentType);
 			String discoURI = "";
 								
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();

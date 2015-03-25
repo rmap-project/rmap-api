@@ -1,6 +1,7 @@
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.utils.URIListHandler;
+import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.RMapLiteral;
@@ -31,8 +32,6 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class StatementResponseManager {
 
-	private static String BASE_STATEMENT_URL = "http://rmapdns.ddns.net:8080/api/stmt/";
-	//private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
 	public StatementResponseManager() {
@@ -91,42 +90,42 @@ public class StatementResponseManager {
 		if (strStatementId==null || strStatementId.length()==0)	{
 			throw new RMapException();  //change this to a bad request exception
 		}
-		try {
+		try {			
 			strStatementId = URLDecoder.decode(strStatementId, "UTF-8");
 			
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			URI uriStatementUri = new URI(strStatementId);
-    		RMapStatement rmapStatement = rmapService.readStatement(uriStatementUri);
-    		
-    		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-    		OutputStream statementOutput = rdfHandler.statement2Rdf(rmapStatement, acceptsType);	
-    		
-    		//TODO: need to fix this after we decide how to do this - hoping for an easier method than what I can get at currently... 
-    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-    		/*String linkRel = "";
-    		List <RMapEvent> lstEvents = rmapStatement.getRelatedEvents();
-    		for (URI event : lstEvents){
-    			if (event.getEventType() == RMapEventType.CREATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.DELETION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.INACTIVATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.UPDATE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
-    			}
-    		}*/
-    		   		
+    		RMapStatement rmapStatement = rmapService.readStatement(new URI(strStatementId));
+
     		if (rmapStatement!=null){
+    			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+	    		OutputStream statementOutput = rdfHandler.statement2Rdf(rmapStatement, acceptsType);	
+	    		
+	    		//TODO: need to fix this after we decide how to do this - hoping for an easier method than what I can get at currently... 
+	    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
+	    		/*String linkRel = "";
+	    		List <RMapEvent> lstEvents = rmapStatement.getRelatedEvents();
+	    		for (URI eventUri : lstEvents){
+    				String event = URLUtils.makeEventUrl(eventUri.toString());
+	    			if (event.getEventType() == RMapEventType.CREATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.DELETION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.INACTIVATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.UPDATE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
+	    			}
+	    		}*/
+    		   		
 			    response = Response.status(Response.Status.OK)
 							.entity(statementOutput.toString())
-							.location(new URI (BASE_STATEMENT_URL + strStatementId))
+							.location(new URI(URLUtils.makeStmtUrl(strStatementId)))
 							.build();
 	        }
     		else {
@@ -195,38 +194,40 @@ public class StatementResponseManager {
 		try {
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			URI stmtURI = null;
-
 			stmtURI = rmapService.getStatementID(rmapSubject, rmapPredicate, rmapObject);
 
-    		//TODO: need to fix this after we decide how to do this - hoping for an easier method than what I can get at currently... 
-    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-    		/*String linkRel = "";
-    		List <RMapEvent> lstEvents = rmapStatement.getRelatedEvents();
-    		for (URI event : lstEvents){
-    			if (event.getEventType() == RMapEventType.CREATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.DELETION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.INACTIVATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.UPDATE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
-    			}
-    		}*/
-    		
-    		if (stmtURI!=null){			    			
+    		if (stmtURI!=null){			
+	    		//TODO: need to fix this after we decide how to do this - hoping for an easier method than what I can get at currently... 
+	    		//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
+	    		/*String linkRel = "";
+	    		List <RMapEvent> lstEvents = rmapStatement.getRelatedEvents();
+	    		for (URI eventUri : lstEvents){
+	    			String event = URLUtils.makeEventUrl(eventUri.toString());
+	    			if (event.getEventType() == RMapEventType.CREATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.DELETION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.INACTIVATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.UPDATE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
+	    			}
+	    		*/
+    		    			
 				response = Response.status(Response.Status.OK)
 							.entity(stmtURI.toString())
-							.location(new URI (BASE_STATEMENT_URL + stmtURI.toString()))
+							.location(new URI (URLUtils.makeStmtUrl(stmtURI.toString())))
 							.build();
-    			
 	        }
+    		else	{
+    			throw new RMapException();
+    		}
 		}
     	catch(RMapObjectNotFoundException ex) {
     		log.fatal("Statement could not be found. Error: " + ex.getMessage());
@@ -273,7 +274,7 @@ public class StatementResponseManager {
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (BASE_STATEMENT_URL + strStatementId))
+							.location(new URI (URLUtils.makeStmtUrl(strStatementId)))
 							.build();    			
 	        }
 		}

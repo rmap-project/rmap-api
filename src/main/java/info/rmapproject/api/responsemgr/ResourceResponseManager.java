@@ -1,6 +1,8 @@
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.utils.URIListHandler;
+import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.rmapservice.RMapService;
@@ -23,7 +25,6 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class ResourceResponseManager {
 
-	private static String BASE_RESOURCE_URL = "http://rmapdns.ddns.net:8080/api/resource/";
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
 	public ResourceResponseManager() {
@@ -77,9 +78,13 @@ public class ResourceResponseManager {
 	 */
 	public Response getRMapResourceRelatedObjs(String strResourceId, String objType, String returnType, String rmapStatus)	{
 		Response response = null;
+		if (strResourceId==null || strResourceId.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		try {
+			strResourceId = URLDecoder.decode(strResourceId, "UTF-8");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			URI uriResourceUri = new URI(URLDecoder.decode(strResourceId,"UTF-8")); //TODO: temporary decoder assuming passed in as URL encoded... check this.
+			URI uriResourceUri = new URI(URLDecoder.decode(strResourceId,"UTF-8")); 
 			List <URI> uriList = null;
 			String outputString="";
 			String jsonType="";
@@ -130,7 +135,7 @@ public class ResourceResponseManager {
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (BASE_RESOURCE_URL + strResourceId))
+							.location(new URI (URLUtils.makeResourceUrl(strResourceId)))
 							.build();    			
 	        }
 		}

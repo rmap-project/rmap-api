@@ -1,6 +1,8 @@
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.utils.URIListHandler;
+import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
@@ -10,6 +12,7 @@ import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -26,7 +29,6 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class EventResponseManager {
 
-	private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 	private final Logger log = LogManager.getLogger(this.getClass());
 	
 	public EventResponseManager() {
@@ -82,19 +84,21 @@ public class EventResponseManager {
     
 	public Response getRMapEvent(String strEventId, String acceptsType)	{
 		Response response = null;
+		if (strEventId==null || strEventId.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		try {
+			strEventId = URLDecoder.decode(strEventId, "UTF-8");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			URI uriEventUri = new URI(strEventId);
-    		RMapEvent rmapEvent = rmapService.readEvent(uriEventUri);
-    		
-    		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, acceptsType);	
-    		
+    		RMapEvent rmapEvent = rmapService.readEvent(new URI(strEventId));
+
     		if (rmapEvent!=null){
-			    			
+    			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+    			OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, acceptsType);	
+    		    			
 				response = Response.status(Response.Status.OK)
 							.entity(eventOutput.toString())
-							.location(new URI (BASE_EVENT_URL + strEventId))
+							.location(new URI (URLUtils.makeEventUrl(strEventId)))
 							.build();
     			
 	        }
@@ -120,7 +124,11 @@ public class EventResponseManager {
 	 */
 	public Response getRMapEventRelatedObjs(String strEventId, String objType, String returnType)	{
 		Response response = null;
+		if (strEventId==null || strEventId.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		try {
+			strEventId = URLDecoder.decode(strEventId, "UTF-8");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			URI uriEventUri = new URI(strEventId);
 			List <URI> uriList = null;
@@ -155,7 +163,7 @@ public class EventResponseManager {
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (BASE_EVENT_URL + strEventId))
+							.location(new URI (URLUtils.makeEventUrl(strEventId)))
 							.build();    			
 	        }
 		}

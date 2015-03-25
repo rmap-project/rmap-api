@@ -1,6 +1,8 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
+import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
 import info.rmapproject.core.model.RMapStatus;
@@ -36,8 +38,6 @@ public class DiscoResponseManager {
 	
 	//TODO SYSAGENT will eventually come from oauth module, BASE_URLS will be in properties file
 	private static URI SYSAGENT_URI; //defaults to IEEE user for now until authentication in place!
-	private static String BASE_DISCO_URL = "http://rmapdns.ddns.net:8080/api/disco/";
-	private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 
 	static{
 		try {
@@ -97,62 +97,69 @@ public class DiscoResponseManager {
 		
 		Response response = null;
 		
-		try {
+		try {			
     		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
     		URI uriDiscoUri = new URI(strDiscoUri);
     		RMapDiSCO rmapDisco = rmapService.readDiSCO(uriDiscoUri);
     		
-    		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-    		OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, acceptsType);	
-    		
-    		String latestDiscoUrl = rmapService.getDiSCOLatestVersion(uriDiscoUri).getId().toString();
-        	String linkRel = "<" + latestDiscoUrl + ">" + ";rel=\"latest-version\"";
-
-    		String prevDiscoVersUrl = rmapService.getDiSCOPreviousVersion(uriDiscoUri).getId().toString();
-        	if (prevDiscoVersUrl != null) {
-        		linkRel.concat(",<" + prevDiscoVersUrl + ">" + ";rel=\"predecessor-version\"");
-        	}
-
-    		String succDiscoVersUrl = rmapService.getDiSCONextVersion(uriDiscoUri).getId().toString();
-        	if (succDiscoVersUrl != null) {
-        		linkRel.concat(",<" + succDiscoVersUrl + ">" + ";rel=\"successor-version\"");
-        	}
-        	       	
-        	
-    		//rmapService.getDiSCOEvents(uriDiscoUri)
-        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-        	//TODO: Need to fix this... awkward to get the effect of an event.
-    		/*
-    		List<URI> lstEvents = rmapService.getDiSCOEvents(uriDiscoUri);
-    		for (URI event : lstEvents){
-    			if (event.getEventType() == RMapEventType.CREATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.DELETION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.INACTIVATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.UPDATE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
-    			}
-    		}*/
-    		
-    		RMapStatus status = rmapService.getDiSCOStatus(uriDiscoUri);
-
-    		//TODO: fix this linkrel, it's wrong!
-    		if (status == RMapStatus.ACTIVE)
-       		linkRel.concat(",<" + status + ">" + ";rel=\"rmap:Status\"");
-    		    		
-        	response = Response.status(Response.Status.OK)
-        				.entity(discoOutput.toString())
-        				.location(new URI (BASE_DISCO_URL + strDiscoUri))
-        				.header("Link",linkRel)						//switch this to link() or links()?
-        				.build();	
+    		if (rmapDisco != null) {
+	    			
+	    		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+	    		OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, acceptsType);	
+	    		
+	    		String latestDiscoUrl = URLUtils.makeDiscoUrl(rmapService.getDiSCOLatestVersion(uriDiscoUri).getId().toString());
+	    		String linkRel = "<" + latestDiscoUrl + ">" + ";rel=\"latest-version\"";
+	
+	    		String prevDiscoVersUrl = URLUtils.makeDiscoUrl(rmapService.getDiSCOPreviousVersion(uriDiscoUri).getId().toString());
+	        	if (prevDiscoVersUrl != null) {
+	        		linkRel.concat(",<" + prevDiscoVersUrl + ">" + ";rel=\"predecessor-version\"");
+	        	}
+	
+	    		String succDiscoVersUrl = URLUtils.makeDiscoUrl(rmapService.getDiSCONextVersion(uriDiscoUri).getId().toString());
+	        	if (succDiscoVersUrl != null) {
+	        		linkRel.concat(",<" + succDiscoVersUrl + ">" + ";rel=\"successor-version\"");
+	        	}
+	        	
+	    		//rmapService.getDiSCOEvents(uriDiscoUri)
+	        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
+	        	//TODO: Need to fix this... awkward to get the effect of an event.
+	    		/*
+	    		List<URI> lstEvents = rmapService.getDiSCOEvents(uriDiscoUri);
+	    		for (URI eventUri : lstEvents){
+	    			String eventUrl = URLUtils.makeEventUrl(eventUri.toString());
+	    			if (event.getEventType() == RMapEventType.CREATION){
+	    				linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.DELETION){
+	   	        		linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.INACTIVATION){
+	   	        		linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
+	   	        		linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.UPDATE){
+	   	        		linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
+	    			}
+	    		}*/
+	    		
+	    		RMapStatus status = rmapService.getDiSCOStatus(uriDiscoUri);
+	
+	    		//TODO: fix this linkrel, it's wrong!
+	    		if (status == RMapStatus.ACTIVE) {
+	    			linkRel.concat(",<" + status + ">" + ";rel=\"rmap:Status\"");
+	    		}
+	    		    		
+	        	response = Response.status(Response.Status.OK)
+	        				.entity(discoOutput.toString())
+	        				.location(new URI (URLUtils.makeDiscoUrl(strDiscoUri)))
+	        				.header("Link",linkRel)						//switch this to link() or links()?
+	        				.build();	
+    		}
+    		else	{
+    			throw new RMapException();
+    		}
     		   	
     	}    	
     	//TODO:Add more exceptions as they become available!
@@ -184,9 +191,9 @@ public class DiscoResponseManager {
 	 */
 	public Response createRMapDiSCO(InputStream discoRdf, String contentType) {
 	Response response = null;
-	try	{
+	try	{		
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, BASE_DISCO_URL, contentType);
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, URLUtils.getDiscoBaseUrl(), contentType);
 		String discoURI = "";
 				
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
@@ -196,10 +203,13 @@ public class DiscoResponseManager {
 		discoURI = rmapDisco.getId().toString();		
 		
         if (discoURI.length() > 0){
-        	String linkRel = "<" + discoEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
+        	String newEventURL = URLUtils.makeEventUrl(discoEvent.getId().toString());
+        	String newDiscoUrl = URLUtils.makeDiscoUrl(discoURI);
+        	String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
+        	
         	response = Response.status(Response.Status.CREATED)
         				.entity(discoURI)
-        				.location(new URI (BASE_DISCO_URL + discoURI)) //switch this to location()
+        				.location(new URI(newDiscoUrl)) //switch this to location()
         				.header("Link",linkRel)						//switch this to link()
         				.build();		        	
         }
@@ -225,7 +235,7 @@ public class DiscoResponseManager {
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			String discoURI = null;		
 						
-			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, BASE_DISCO_URL, contentType);
+			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, URLUtils.getDiscoBaseUrl(), contentType);
 			
 			//TODO: This is a fudge for system agent, need to correct this code when proper agent handling available.
 			
@@ -237,15 +247,19 @@ public class DiscoResponseManager {
 			discoURI = newRmapDisco.getId().toString();
 			    
 	        if (discoURI.length() > 0){
-	        	String linkRel = "<" + BASE_EVENT_URL + discoEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
+	        	String newEventURL = URLUtils.makeEventUrl(discoEvent.getId().toString());
+	        	String prevDiscoUrl = URLUtils.makeDiscoUrl(origDiscoUri);
+	        	String newDiscoUrl = URLUtils.makeDiscoUrl(discoURI);
+	        	
+	        	String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
 	        	//TODO:is predecessor version appropriate?
-	        	linkRel.concat(",<" + origDiscoUri + ">" + ";rel=\"predecessor-version\"");
+	        	linkRel.concat(",<" + prevDiscoUrl + ">" + ";rel=\"predecessor-version\"");
 	        	
 	        	response = Response.status(Response.Status.CREATED)
 	        				.entity(discoURI)
-	        				.location(new URI (BASE_DISCO_URL + discoURI)) //switch this to location()
+	        				.location(new URI(newDiscoUrl)) //switch this to location()
 	        				.header("Link",linkRel)						//switch this to link()
-	        				.build();		        	
+	        				.build();
 	        }
 	        else	{
 	    		throw new Exception();

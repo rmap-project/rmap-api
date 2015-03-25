@@ -85,7 +85,6 @@ public class StatementApiService {
     @Path("/{stmtid}")
     @Produces("application/xml;charset=UTF-8;")
     public Response getRMapStmtAsXML(@PathParam("stmtid") String stmtId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response rdfXMLStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
 	    return rdfXMLStmt;
     }
@@ -113,16 +112,6 @@ public class StatementApiService {
     	Response rdfXmlStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
     	return rdfXmlStmt;
     }
-
-    
-    @GET
-    @Path("/{stmtid}")
-    public Response getRMapStmtAsXMLDefault(@PathParam("stmtid") String stmtId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
-    	Response rdfXMLStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
-	    return rdfXMLStmt;
-    }
-
 
     @GET
     @Path("/{subject}/{predicate}/{object}")

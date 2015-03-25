@@ -1,5 +1,10 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.core.exception.RMapDeletedObjectException;
+import info.rmapproject.core.exception.RMapException;
+import info.rmapproject.core.exception.RMapObjectNotFoundException;
+import info.rmapproject.core.exception.RMapTombstonedObjectException;
+
 import java.io.InputStream;
 import java.net.URI;
 
@@ -21,8 +26,6 @@ public class ProfileResponseManager {
 	
 	//TODO SYSAGENT will eventually come from oauth module, BASE_URLS will be in properties file
 	private static URI SYSAGENT_URI; //defaults to IEEE user for now until authentication in place!
-	private static String BASE_PROFILE_URL = "http://rmapdns.ddns.net:8080/api/profile/";
-	private static String BASE_EVENT_URL = "http://rmapdns.ddns.net:8080/api/event/";
 
 	static{
 		try {
@@ -79,59 +82,69 @@ public class ProfileResponseManager {
 	 */
 	
 	public Response getRMapProfile(String strProfileUri, String acceptsType)	{
-		
 		Response response = null;
-		/*
+		if (strProfileUri==null || strProfileUri.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		try {
+			/*
+			strProfileUri = URLDecoder.decode(strProfileUri, "UTF-8");
     		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
     		URI uriProfileUri = new URI(strProfileUri);
     		RMapProfile rmapProfile = rmapService.readProfile(uriProfileUri);
     		
-    		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-    		OutputStream profileOutput = rdfHandler.profile2Rdf(rmapProfile, acceptsType);	
-    		
-    		String latestProfileUrl = rmapService.getProfileLatestVersion(uriProfileUri).getId().toString();
-        	String linkRel = "<" + latestProfileUrl + ">" + ";rel=\"latest-version\"";
-
-    		String prevProfileVersUrl = rmapService.getProfilePreviousVersion(uriProfileUri).getId().toString();
-        	if (prevProfileVersUrl != null) {
-        		linkRel.concat(",<" + prevProfileVersUrl + ">" + ";rel=\"predecessor-version\"");
-        	}
-
-    		String succProfileVersUrl = rmapService.getProfileNextVersion(uriProfileUri).getId().toString();
-        	if (succProfileVersUrl != null) {
-        		linkRel.concat(",<" + succProfileVersUrl + ">" + ";rel=\"successor-version\"");
-        	}
-        	       	
-        	
-    		//rmapService.getProfileEvents(uriProfileUri)
-        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a Profile.
-    		List <RMapEvent> lstEvents = rmapProfile.getRelatedEvents();
-    		for (RMapEvent event : lstEvents){
-    			if (event.getEventType() == RMapEventType.CREATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.DELETION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.INACTIVATION){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
-    			}
-    			else if (event.getEventType() == RMapEventType.UPDATE){
-   	        		linkRel.concat(",<" + BASE_EVENT_URL + event.getId() + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
-    			}
-    		}
-    		    		
-        	response = Response.status(Response.Status.OK)
-        				.entity(profileOutput.toString())
-        				.location(new URI (BASE_PROFILE_URL + strProfileUri))
-        				.header("Link",linkRel)						//switch this to link() or links()?
-        				.build();	
-    		   	
+    		if (rmapProfile != null)	{
+    			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+	    		OutputStream profileOutput = rdfHandler.profile2Rdf(rmapProfile, acceptsType);	
+	    		
+	    		String latestProfileUrl = URLUtils.makeProfileUrl(rmapService.getProfileLatestVersion(uriProfileUri).getId().toString());
+	        	String linkRel = "<" + latestProfileUrl + ">" + ";rel=\"latest-version\"";
+	
+	    		String prevProfileVersUrl = URLUtils.makeProfileUrl(rmapService.getProfilePreviousVersion(uriProfileUri).getId().toString());
+	        	if (prevProfileVersUrl != null) {
+	        		linkRel.concat(",<" + prevProfileVersUrl + ">" + ";rel=\"predecessor-version\"");
+	        	}
+	
+	    		String succProfileVersUrl = URLUtils.makeProfileUrl(rmapService.getProfileNextVersion(uriProfileUri).getId().toString());
+	        	if (succProfileVersUrl != null) {
+	        		linkRel.concat(",<" + succProfileVersUrl + ">" + ";rel=\"successor-version\"");
+	        	}
+	        	       	
+	        	
+	    		//rmapService.getProfileEvents(uriProfileUri)
+	        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
+	        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a Profile.
+	    		List <RMapEvent> lstEvents = rmapProfile.getRelatedEvents();
+	    		for (URI eventUri : lstEvents){
+    				String event = URLUtils.makeEventUrl(eventUri.toString());
+	    			if (event.getEventType() == RMapEventType.CREATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.DELETION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.INACTIVATION){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
+	    			}
+	    			else if (event.getEventType() == RMapEventType.UPDATE){
+	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
+	    			}
+	    		}
+	    		    		
+	        	response = Response.status(Response.Status.OK)
+	        				.entity(profileOutput.toString())
+	        				.location(new URI (URLUtils.makeProfileUrl(strProfileUri)))
+	        				.header("Link",linkRel)						//switch this to link() or links()?
+	        				.build();		
+	        	}
+	        else {
+	        	throw new RMapException();
+	        }
+	        
+    		  */ 	
     	}    	
     	//TODO:Add more exceptions as they become available!
     	catch(RMapObjectNotFoundException ex) {
@@ -149,7 +162,7 @@ public class ProfileResponseManager {
     	catch(Exception ex)	{ //catch the rest
     		log.fatal("Error trying to retrieve Profile: " + strProfileUri + "Error: " + ex.getMessage());
         	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    	}*/
+    	}
     	return response;
     }
 		
@@ -165,7 +178,7 @@ public class ProfileResponseManager {
 	/*
 	try	{
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-		RMapProfile rmapProfile = rdfHandler.rdf2RMapProfile(profileRdf, BASE_PROFILE_URL, contentType);
+		RMapProfile rmapProfile = rdfHandler.rdf2RMapProfile(profileRdf, URLUtils.getProfileBaseUrl(), contentType);
 		String profileURI = "";
 				
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
@@ -191,7 +204,7 @@ public class ProfileResponseManager {
         	String linkRel = "<" + profileEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
         	response = Response.status(Response.Status.CREATED)
         				.entity(profileURI.toString())
-        				.location(new URI (BASE_PROFILE_URL + profileURI)) //switch this to location()
+        				.location(new URI (URLUtils.makeProfileUrl(profileURI))) //switch this to location()
         				.header("Link",linkRel)						//switch this to link()
         				.build();		        	
         }
@@ -211,14 +224,18 @@ public class ProfileResponseManager {
 	
 	public Response updateRMapProfile(String origProfileUri, InputStream profileRdf, String contentType) {
 		Response response = null;
+		if (origProfileUri==null || origProfileUri.length()==0)	{
+			throw new RMapException();  //change this to a bad request exception
+		}
 		/*
-		try	{
+		try {
+			origProfileUri = URLDecoder.decode(origProfileUri, "UTF-8");
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			SesameTriplestore ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore(); 
 			RMapUri profileURI = null;		
 						
-			RMapProfile newRmapProfile = rdfHandler.rdf2RMapProfile(profileRdf, BASE_PROFILE_URL, contentType);
+			RMapProfile newRmapProfile = rdfHandler.rdf2RMapProfile(profileRdf, URLUtils.getProfileBaseUrl(), contentType);
 			
 			//TODO: This is a fudge for system agent, need to correct this code when proper agent handling available.
 			
@@ -238,7 +255,7 @@ public class ProfileResponseManager {
 			}
 			    
 	        if (profileURI != null){
-	        	String linkRel = "<" + BASE_EVENT_URL + profileEvent.getId().toString() + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
+	        	String linkRel = "<" + URLUtils.makeProfileUrl(profileEvent.getId().toString()) + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
 
 	    		String prevProfileVersUrl = rmapService.getProfilePreviousVersion(new URI(profileURI.toString())).getId().toString();
 	        	if (prevProfileVersUrl != null) {
@@ -247,7 +264,7 @@ public class ProfileResponseManager {
 	        	
 	        	response = Response.status(Response.Status.CREATED)
 	        				.entity(profileURI.toString())
-	        				.location(new URI (BASE_PROFILE_URL + profileURI)) //switch this to location()
+	        				.location(new URI (URLUtils.makeProfileUrl(profileURI))) //switch this to location()
 	        				.header("Link",linkRel)						//switch this to link()
 	        				.build();		        	
 	        }

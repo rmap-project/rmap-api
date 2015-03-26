@@ -1,5 +1,6 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
@@ -29,7 +30,7 @@ public class ProfileResponseManager {
 
 	static{
 		try {
-			SYSAGENT_URI = new URI("http://orcid.org/00000-00000-00000-00000");
+			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 		}
 		catch (Exception e){}
 	}

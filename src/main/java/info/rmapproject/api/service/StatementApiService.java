@@ -2,6 +2,8 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.responsemgr.StatementResponseManager;
 
+import java.net.URLDecoder;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;

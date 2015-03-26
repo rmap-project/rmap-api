@@ -19,6 +19,7 @@ import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 
 import javax.ws.rs.core.Response;
 
@@ -41,7 +42,7 @@ public class DiscoResponseManager {
 
 	static{
 		try {
-			SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
+			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 		}
 		catch (Exception e){}
 	}
@@ -98,6 +99,8 @@ public class DiscoResponseManager {
 		Response response = null;
 		
 		try {			
+			strDiscoUri = URLDecoder.decode(strDiscoUri, "UTF-8");
+			
     		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
     		URI uriDiscoUri = new URI(strDiscoUri);
     		RMapDiSCO rmapDisco = rmapService.readDiSCO(uriDiscoUri);
@@ -231,6 +234,7 @@ public class DiscoResponseManager {
 		Response response = null;
 		
 		try	{
+			origDiscoUri = URLDecoder.decode(origDiscoUri, "UTF-8");
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			String discoURI = null;		

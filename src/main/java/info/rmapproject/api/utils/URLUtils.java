@@ -5,12 +5,14 @@ import info.rmapproject.core.exception.RMapException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Properties;
 
 public class URLUtils {
 	
 	private static final String BASE_URL_KEY = "baseURL";
+	private static final String DEFAULT_SYSAGENT_KEY = "defaultSysAgent";
 
     private static Properties props = new Properties();
     private static boolean isInitialized = false;
@@ -127,6 +129,29 @@ public class URLUtils {
 		}
 		return url;
 	}
+	/*
+	 * TODO: this is here as a temporary measure to make it easy to share a system agent ID between all classes...
+	 * just until we have proper authentication.
+	 * 
+	 * REMOVE THIS!
+	 */
+	public static URI getDefaultSystemAgentURI() throws RMapException, Exception{
+		if (!isInitialized){
+			init();
+		}
+		
+		String defaultSysAgentURI = props.getProperty(DEFAULT_SYSAGENT_KEY);
+		if (defaultSysAgentURI == null || defaultSysAgentURI.length()==0)	{
+			throw new RMapException("Default System Agent property not set");
+		}		
+		defaultSysAgentURI = defaultSysAgentURI.trim();
+		while (defaultSysAgentURI.endsWith("/"))	{
+			defaultSysAgentURI = defaultSysAgentURI.substring(0, defaultSysAgentURI.length()-1);	
+		}
+		
+		return new URI(defaultSysAgentURI);
+	}
+	
 
 	
 }

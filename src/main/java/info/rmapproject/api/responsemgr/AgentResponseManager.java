@@ -35,7 +35,7 @@ public class AgentResponseManager {
 
 	static{
 		try {
-			SYSAGENT_URI = new URI("http://orcid.org/0000-0003-2069-1219");
+			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 		}
 		catch (Exception e){}
 	}

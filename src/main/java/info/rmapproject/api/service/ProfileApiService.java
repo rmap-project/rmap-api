@@ -88,36 +88,32 @@ public class ProfileApiService {
     
     @GET
     @Path("/{profileid}")
-    @Produces("application/xml;charset=UTF-8;")
-    public Response getRMapProfileAsHTML(@PathParam("profileid") String profileId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.profile+rdf+xml;charset=UTF-8;"})
+    public Response getRMapProfileAsRdfXml(@PathParam("profileid") String profileId) {
     	Response rdfXMLStmt = responseManager.getRMapProfile(profileId, "RDFXML");
 	    return rdfXMLStmt;
     }
     
     @GET
     @Path("/{profileid}")
-    @Produces("application/ld+json;charset=UTF-8;")
-    public Response getRMapProfileAsRDFJSON(@PathParam("profileid") String profileId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
+    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.profile+ld+json;charset=UTF-8;"})
+    public Response getRMapProfileAsJsonLD(@PathParam("profileid") String profileId) {
     	Response rdfJsonStmt = responseManager.getRMapProfile(profileId, "JSONLD");
     	return rdfJsonStmt;
     }
 
     @GET
     @Path("/{profileid}")
-    @Produces("application/n-quads;charset=UTF-8;")
-    public Response getRMapProfileAsRDFNQUADS(@PathParam("profileid") String profileId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
+    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.profile+n-quads;charset=UTF-8;"})
+    public Response getRMapProfileAsRdfNQuads(@PathParam("profileid") String profileId) {
     	Response rdfNquadsStmt = responseManager.getRMapProfile(profileId, "RDFNQUADS");
     	return rdfNquadsStmt;
     }    
     
     @GET
     @Path("/{profileid}")
-    @Produces("application/rdf+xml;charset=UTF-8;")
-    public Response getRMapProfileAsRDFXML(@PathParam("profileid") String profileId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
+    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.profile+turtle;charset=UTF-8;"})
+    public Response getRMapProfileAsTurtle(@PathParam("profileid") String profileId) {
     	Response rdfXmlStmt = responseManager.getRMapProfile(profileId, "RDFXML");
     	return rdfXmlStmt;
     }
@@ -134,15 +130,15 @@ public class ProfileApiService {
     
     @POST
     @Path("/")
-    @Consumes("application/xml;charset=UTF-8;")
-    public Response createRMapProfileFromXML(InputStream profileRdf) {
+    @Consumes({"application/rdf+xml;charset=UTF-8;","vnd.rmap-project.profile+rdf+xml;charset=UTF-8;"})
+    public Response createRMapProfileFromRdfXml(InputStream profileRdf) {
     	Response createResponse = responseManager.createRMapProfile(profileRdf, "RDFXML");
 		return createResponse;
     }	
     
 	@POST
 	@Path("/")
-	@Consumes("application/ld+json;charset=UTF-8;")
+	@Consumes({"application/ld+json;charset=UTF-8;","vnd.rmap-project.profile+ld+json;charset=UTF-8;"})
 	public Response createRMapProfileFromJsonLD(InputStream profileRdf) {
 		Response createResponse = responseManager.createRMapProfile(profileRdf, "JSONLD");
 		return createResponse;
@@ -150,7 +146,7 @@ public class ProfileApiService {
     
 	@POST
 	@Path("/")
-	@Consumes("application/n-quads;charset=UTF-8;")
+	@Consumes({"application/n-quads;charset=UTF-8;","vnd.rmap-project.profile+n-quads;charset=UTF-8;"})
 	public Response createRMapProfileFromNquads(InputStream profileRdf) {
 		Response createResponse = responseManager.createRMapProfile(profileRdf, "RDFNQUADS");
 		return createResponse;
@@ -158,9 +154,9 @@ public class ProfileApiService {
 
 	@POST
 	@Path("/")
-	@Consumes("application/rdf+xml;charset=UTF-8;")
-	public Response createRMapProfileFromRdfXml(InputStream profileRdf) {
-		Response createResponse = responseManager.createRMapProfile(profileRdf, "RDFXML");
+	@Consumes({"text/turtle;charset=UTF-8;","vnd.rmap-project.profile+turtle;charset=UTF-8;"})
+	public Response createRMapProfileFromTurtle(InputStream profileRdf) {
+		Response createResponse = responseManager.createRMapProfile(profileRdf, "TURTLE");
 		return createResponse;
 	}
 	

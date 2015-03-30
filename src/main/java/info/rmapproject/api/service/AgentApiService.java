@@ -44,7 +44,7 @@ public class AgentApiService {
     /**
      * 
      * @return HTTP Response
-     * Returns link to DiSCO API information, and lists HTTP options
+     * Returns link to Agent API information, and lists HTTP options
      * 
      */
     @HEAD
@@ -63,8 +63,8 @@ public class AgentApiService {
     
     @GET
     @Path("/{agentId}")
-    @Produces("application/xml;charset=UTF-8;")
-    public Response getRMapAgentAsHTML(@PathParam("agentId") String agentId) throws RepositoryException, RDFHandlerException, Exception {
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.agent+rdf+xml;charset=UTF-8;"})
+    public Response getRMapAgentAsRdfXml(@PathParam("agentId") String agentId) throws RepositoryException, RDFHandlerException, Exception {
     	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response rdfAgent = responseManager.getRMapAgent(agentId, "RDFXML");
 	    return rdfAgent;
@@ -72,7 +72,7 @@ public class AgentApiService {
     
     @GET
     @Path("/{agentId}")
-    @Produces("application/ld+json;charset=UTF-8;")
+    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.agent+ld+json;charset=UTF-8;"})
     public Response getRMapAgentAsRDFJSON(@PathParam("agentId") String agentId) throws RepositoryException, RDFHandlerException, Exception {
     	Response rdfAgent = responseManager.getRMapAgent(agentId, "JSONLD");
 	    return rdfAgent;
@@ -80,7 +80,7 @@ public class AgentApiService {
 
     @GET
     @Path("/{agentId}")
-    @Produces("application/n-quads;charset=UTF-8;")
+    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.agent+n-quads;charset=UTF-8;"})
     public Response getRMapAgentAsRDFNQUADS(@PathParam("agentId") String agentId) throws RepositoryException, RDFHandlerException, Exception {
     	Response rdfAgent = responseManager.getRMapAgent(agentId, "RDFNQUADS");
 	    return rdfAgent;
@@ -88,9 +88,9 @@ public class AgentApiService {
     
     @GET
     @Path("/{agentId}")
-    @Produces("application/rdf+xml;charset=UTF-8;")
-    public Response getRMapAgentAsRDFXML(@PathParam("agentId") String agentId) throws RepositoryException, RDFHandlerException, Exception {
-    	Response rdfAgent = responseManager.getRMapAgent(agentId, "RDFXML");
+    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.agent+turtle;charset=UTF-8;"})
+    public Response getRMapAgentAsTurtle(@PathParam("agentId") String agentId) throws RepositoryException, RDFHandlerException, Exception {
+    	Response rdfAgent = responseManager.getRMapAgent(agentId, "TURTLE");
 	    return rdfAgent;
     }
     

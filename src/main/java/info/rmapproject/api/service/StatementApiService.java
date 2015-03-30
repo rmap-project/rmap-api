@@ -2,8 +2,6 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.responsemgr.StatementResponseManager;
 
-import java.net.URLDecoder;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
@@ -85,33 +83,33 @@ public class StatementApiService {
 
     @GET
     @Path("/{stmtid}")
-    @Produces("application/xml;charset=UTF-8;")
-    public Response getRMapStmtAsXML(@PathParam("stmtid") String stmtId) {
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.statement+rdf+xml;charset=UTF-8;"})
+    public Response getRMapStmtAsRdfXml(@PathParam("stmtid") String stmtId) {
     	Response rdfXMLStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
 	    return rdfXMLStmt;
     }
     
     @GET
     @Path("/{stmtid}")
-    @Produces("application/ld+json;charset=UTF-8;")
-    public Response getRMapStmtAsRDFJSON(@PathParam("stmtid") String stmtId){
+    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.statement+ld+json;charset=UTF-8;"})
+    public Response getRMapStmtAsJsonLD(@PathParam("stmtid") String stmtId){
     	Response rdfJsonStmt = responseManager.getRMapStatement(stmtId, "JSONLD");
     	return rdfJsonStmt;
     }
 
     @GET
     @Path("/{stmtid}")
-    @Produces("application/n-quads;charset=UTF-8;")
-    public Response getRMapStmtAsRDFNQUADS(@PathParam("stmtid") String stmtId) {
+    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.statement+n-quads;charset=UTF-8;"})
+    public Response getRMapStmtAsRdfNQuads(@PathParam("stmtid") String stmtId) {
     	Response rdfNquadsStmt = responseManager.getRMapStatement(stmtId, "RDFNQUADS");
     	return rdfNquadsStmt;
     }    
     
     @GET
     @Path("/{stmtid}")
-    @Produces("application/rdf+xml;charset=UTF-8;")
-    public Response getRMapStmtAsRDFXML(@PathParam("stmtid") String stmtId) {
-    	Response rdfXmlStmt = responseManager.getRMapStatement(stmtId, "RDFXML");
+    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.statement+turtle;charset=UTF-8;"})
+    public Response getRMapStmtAsTurtle(@PathParam("stmtid") String stmtId) {
+    	Response rdfXmlStmt = responseManager.getRMapStatement(stmtId, "TURTLE");
     	return rdfXmlStmt;
     }
 

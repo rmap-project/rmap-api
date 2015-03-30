@@ -88,8 +88,8 @@ public class DiSCOApiService {
     
     @GET
     @Path("/{discoid}")
-    @Produces("application/xml;charset=UTF-8;")
-    public Response getRMapDiSCOAsHTML(@PathParam("discoid") String discoId) {
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
+    public Response getRMapDiSCOAsRdfXml(@PathParam("discoid") String discoId) {
     	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response rdfXMLStmt = responseManager.getRMapDiSCO(discoId, "RDFXML");
 	    return rdfXMLStmt;
@@ -97,8 +97,8 @@ public class DiSCOApiService {
     
     @GET
     @Path("/{discoid}")
-    @Produces("application/ld+json;charset=UTF-8;")
-    public Response getRMapDiSCOAsRDFJSON(@PathParam("discoid") String discoId) {
+    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
+    public Response getRMapDiSCOAsJsonLD(@PathParam("discoid") String discoId) {
     	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response rdfJsonStmt = responseManager.getRMapDiSCO(discoId, "JSONLD");
     	return rdfJsonStmt;
@@ -106,22 +106,21 @@ public class DiSCOApiService {
 
     @GET
     @Path("/{discoid}")
-    @Produces("application/n-quads;charset=UTF-8;")
-    public Response getRMapDiSCOAsRDFNQUADS(@PathParam("discoid") String discoId) {
+    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
+    public Response getRMapDiSCOAsNQuads(@PathParam("discoid") String discoId) {
     	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response rdfNquadsStmt = responseManager.getRMapDiSCO(discoId, "RDFNQUADS");
     	return rdfNquadsStmt;
     }    
-    
+
     @GET
     @Path("/{discoid}")
-    @Produces("application/rdf+xml;charset=UTF-8;")
-    public Response getRMapDiSCOAsRDFXML(@PathParam("discoid") String discoId) {
+    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
+    public Response getRMapDiSCOAsTurtle(@PathParam("discoid") String discoId) {
     	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
-    	Response rdfXmlStmt = responseManager.getRMapDiSCO(discoId, "RDFXML");
-    	return rdfXmlStmt;
-    }
-    	
+    	Response rdfNquadsStmt = responseManager.getRMapDiSCO(discoId, "TURTLE");
+    	return rdfNquadsStmt;
+    }    
     
     /**
      * 
@@ -134,15 +133,15 @@ public class DiSCOApiService {
     
     @POST
     @Path("/")
-    @Consumes("application/xml;charset=UTF-8;")
-    public Response createRMapDiSCOFromXML(InputStream discoRdf) {
+    @Consumes({"application/rdf+xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
+    public Response createRMapDiSCOFromRdfXml(InputStream discoRdf) {
     	Response createResponse = responseManager.createRMapDiSCO(discoRdf, "RDFXML");
 		return createResponse;
     }	
     
 	@POST
 	@Path("/")
-	@Consumes("application/ld+json;charset=UTF-8;")
+	@Consumes({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
 	public Response createRMapDiSCOFromJsonLD(InputStream discoRdf) {
 		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "JSONLD");
 		return createResponse;
@@ -150,7 +149,7 @@ public class DiSCOApiService {
     
 	@POST
 	@Path("/")
-	@Consumes("application/n-quads;charset=UTF-8;")
+    @Consumes({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
 	public Response createRMapDiSCOFromNquads(InputStream discoRdf) {
 		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "RDFNQUADS");
 		return createResponse;
@@ -158,9 +157,9 @@ public class DiSCOApiService {
 
 	@POST
 	@Path("/")
-	@Consumes("application/rdf+xml;charset=UTF-8;")
-	public Response createRMapDiSCOFromRdfXml(InputStream discoRdf) {
-		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "RDFXML");
+    @Consumes({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
+	public Response createRMapDiSCOFromTurtle(InputStream discoRdf) {
+		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "TURTLE");
 		return createResponse;
 	}
 	
@@ -173,7 +172,7 @@ public class DiSCOApiService {
      */
     @POST
     @Path("/{discoid}")
-    @Consumes("application/xml;charset=UTF-8;")
+    @Consumes({"application/rdf+xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
     public Response updateRMapDiSCOFromXML(@PathParam("discoid") String origDiscoId, InputStream discoRdf) {
     	Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "RDFXML");
 		return updateResponse;
@@ -181,7 +180,7 @@ public class DiSCOApiService {
     
 	@POST
 	@Path("/{discoid}")
-	@Consumes("application/ld+json;charset=UTF-8;")
+	@Consumes({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
 	public Response updateRMapDiSCOFromJsonLD(@PathParam("discoid") String origDiscoId, InputStream discoRdf) {
 		Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "JSONLD");
 		return updateResponse;
@@ -189,7 +188,7 @@ public class DiSCOApiService {
     
 	@POST
 	@Path("/{discoid}")
-	@Consumes("application/n-quads;charset=UTF-8;")
+	@Consumes({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
 	public Response updateRMapDiSCOFromNquads(@PathParam("discoid") String origDiscoId, InputStream discoRdf) {
 		Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "RDFNQUADS");
 		return updateResponse;
@@ -197,7 +196,7 @@ public class DiSCOApiService {
     
 	@POST
 	@Path("/{discoid}")
-	@Consumes("application/rdf+xml;charset=UTF-8;")
+	@Consumes({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
 	public Response updateRMapDiSCOFromRdfXml(@PathParam("discoid") String origDiscoId, InputStream discoRdf) {
 		Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "RDFXML");
 		return updateResponse;

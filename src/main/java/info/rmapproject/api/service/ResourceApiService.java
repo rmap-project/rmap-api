@@ -27,30 +27,44 @@ public class ResourceApiService {
 	@Context
 	UriInfo uriInfo;
 	//    	String path = uri.getPath();
-	
-    @GET
+
+	@GET
     @Path("/")
-    @Produces("text/html")
+    @Produces("application/json;charset=UTF-8;")
     public Response getServiceInfo() {
     	//TODO: for now returns same as options, but might want html response to describe API?
     	Response response = responseManager.getResourceServiceOptions();
 	    return response;
     }
-	
+        
+    /**
+     * 
+     * @return HTTP Response
+     * Returns link to Resource API information, and lists HTTP options
+     * 
+     */
     @HEAD
-	@Path("/")
-	public Response getResourceApiDetails()	{
-		Response response = responseManager.getResourceServiceOptions();
+    @Path("/")
+    public Response getResourceApiDetails()	{
+    	Response response = responseManager.getResourceServiceHead();
 	    return response;
-	}
-	
-	@OPTIONS
-	@Path("/")
-	@Produces("application/json;charset=UTF-8;")
-	public Response getResourceApiDetailedOptions()	{
-		Response response = responseManager.getResourceServiceOptions();
-	    return response;	
-	}
+    }
+    
+    /**
+     * 
+     * @return HTTP Response
+     * Returns Resource API information/link, and lists HTTP options
+     * 
+     */
+    
+    @OPTIONS
+    @Path("/")
+    @Produces("application/json;charset=UTF-8;")
+    public Response getResourceApiDetailedOptions()	{
+    	Response response = responseManager.getResourceServiceOptions();
+	    return response;
+
+    }   
 	
 	/**
 	 * 

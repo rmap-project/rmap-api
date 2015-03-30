@@ -83,34 +83,33 @@ public class EventApiService {
 
     @GET
     @Path("/{eventid}")
-    @Produces("application/xml;charset=UTF-8;")
-    public Response getRMapEventAsHTML(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.event+rdf+xml;charset=UTF-8;"})
+    public Response getRMapEventAsRdfXml(@PathParam("eventid") String eventId) {
     	Response rdfXMLStmt = responseManager.getRMapEvent(eventId, "RDFXML");
 	    return rdfXMLStmt;
     }
     
     @GET
     @Path("/{eventid}")
-    @Produces("application/ld+json;charset=UTF-8;")
-    public Response getRMapEventAsRDFJSON(@PathParam("eventid") String eventId){
+    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.event+ld+json;charset=UTF-8;"})
+    public Response getRMapEventAsJsonLD(@PathParam("eventid") String eventId){
     	Response rdfJsonEvent = responseManager.getRMapEvent(eventId, "JSONLD");
     	return rdfJsonEvent;
     }
 
     @GET
     @Path("/{eventid}")
-    @Produces("application/n-quads;charset=UTF-8;")
-    public Response getRMapEventAsRDFNQUADS(@PathParam("eventid") String eventId) {
+    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.event+n-quads;charset=UTF-8;"})
+    public Response getRMapEventAsRdfNQuads(@PathParam("eventid") String eventId) {
     	Response rdfNquadsEvent = responseManager.getRMapEvent(eventId, "RDFNQUADS");
     	return rdfNquadsEvent;
     }    
     
     @GET
     @Path("/{eventid}")
-    @Produces("application/rdf+xml;charset=UTF-8;")
-    public Response getRMapEventAsRDFXML(@PathParam("eventid") String eventId) {
-    	Response rdfXmlEvent = responseManager.getRMapEvent(eventId, "RDFXML");
+    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.event+turtle;charset=UTF-8;"})
+    public Response getRMapEventAsTurtle(@PathParam("eventid") String eventId) {
+    	Response rdfXmlEvent = responseManager.getRMapEvent(eventId, "TURTLE");
     	return rdfXmlEvent;
     }
     
@@ -127,7 +126,6 @@ public class EventApiService {
     @Path("/{eventid}/stmts")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapEventStmtsAsTXT(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedStmts = responseManager.getRMapEventRelatedObjs(eventId, "STATEMENTS","TEXT");
 	    return relatedStmts;
     }  
@@ -136,7 +134,6 @@ public class EventApiService {
     @Path("/{eventid}/stmts")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapEventStmtsAsJSON(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedStmts = responseManager.getRMapEventRelatedObjs(eventId, "STATEMENTS","JSON");
 	    return relatedStmts;
     }
@@ -145,7 +142,6 @@ public class EventApiService {
     @Path("/{eventid}/discos")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapEventDiSCOsAsTXT(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedDiscos = responseManager.getRMapEventRelatedObjs(eventId, "DISCOS","TEXT");
 	    return relatedDiscos;
     }
@@ -154,7 +150,6 @@ public class EventApiService {
     @Path("/{eventid}/discos")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapEventDiSCOsAsJSON(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedDiscos = responseManager.getRMapEventRelatedObjs(eventId, "DISCOS","JSON");
 	    return relatedDiscos;
     }
@@ -163,7 +158,6 @@ public class EventApiService {
     @Path("/{eventid}/agents")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapEventAgentsAsTXT(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedAgents = responseManager.getRMapEventRelatedObjs(eventId, "AGENTS","TEXT");
 	    return relatedAgents;
     }
@@ -172,7 +166,6 @@ public class EventApiService {
     @Path("/{eventid}/agents")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapEventAgentsAsJSON(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedAgents = responseManager.getRMapEventRelatedObjs(eventId, "AGENTS","JSON");
 	    return relatedAgents;
     }
@@ -181,7 +174,6 @@ public class EventApiService {
     @Path("/{eventid}/resources")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapEventResourcesAsTXT(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedResources = responseManager.getRMapEventRelatedObjs(eventId, "RESOURCES","TEXT");
 	    return relatedResources;
     }
@@ -190,7 +182,6 @@ public class EventApiService {
     @Path("/{eventid}/resources")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapEventResourcesAsJSON(@PathParam("eventid") String eventId) {
-    	//TODO: need to add magic here to use uri.getPath and determine how many forward-slashes are in the URI used.
     	Response relatedResources = responseManager.getRMapEventRelatedObjs(eventId, "RESOURCES","JSON");
 	    return relatedResources;
     }

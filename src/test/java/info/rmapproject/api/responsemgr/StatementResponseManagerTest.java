@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import info.rmapproject.api.exception.ErrorCode;
+import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.model.RMapResource;
@@ -170,8 +172,8 @@ public class StatementResponseManagerTest {
 		try {
 			response = responseManager.getRMapStatement(URLEncoder.encode(stmtUri, "UTF-8"),"RDFXML");
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
 		}
 
 		assertNotNull(response);
@@ -189,18 +191,21 @@ public class StatementResponseManagerTest {
 	@Test
 	public void testGetRMapStatementWhereNoMatch() {
 		// pass in fake ID to see if not found response is correct.
+		@SuppressWarnings("unused")
 		Response response = null;
+		boolean correctExceptionThrown = false;
 		try {
-			response = responseManager.getRMapStatement("test:test","RDFXML");
+			response = responseManager.getRMapStatement(URLEncoder.encode("ark:/29292/nomatchhere", "UTF-8"),"RDFXML");
+		} catch (RMapApiException e) {
+			assertEquals(e.getErrorCode(),ErrorCode.ER_STMT_OBJECT_NOT_FOUND);
+			System.out.print(e.getMessage());
+			correctExceptionThrown=true;
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
 		}
-
-		assertNotNull(response);
-		assertTrue(response.getLocation()==null);
-		assertTrue(response.getEntity()==null);
-		assertEquals(404, response.getStatus());
+		if (!correctExceptionThrown){
+			fail("Did not throw object not found exception!");
+		}
 	}
 
 	/**
@@ -246,35 +251,33 @@ public class StatementResponseManagerTest {
 		assertEquals(200, response.getStatus());		
 	}
 
-
 	/**
 	 * Tests whether appropriate 200 OK response is generated when you get a statement that 
 	 * exists in the database using the subject, object, and predicate.  
 	 */
 	@Test
 	public void testGetRMapStatementIDWhereNoMatch() {
-		//create RMapStatement
-		String subject = ORAdapter.getValueFactory().createURI("testnomatch:testnomatch").stringValue();
-		String predicate = RDF.TYPE.stringValue();
-		String object = RMAP.STATEMENT.stringValue();
-				
-		//getRMapStatement using s, o, p
 		Response response = null;
+		
+		String subject = null;
+		String predicate = null;
+		String object = null;
 		try {
+			subject = URLEncoder.encode("testnomatch:testnomatch","UTF-8");
+			predicate = URLEncoder.encode(RDF.TYPE.stringValue(),"UTF-8");
+			object = URLEncoder.encode(RMAP.STATEMENT.stringValue(),"UTF-8");
+			//getRMapStatement using s, o, p
 			response = responseManager.getRMapStatementID(subject, predicate, object);
-		} catch (Exception e) {
+		}	
+		catch(Exception e){
 			fail("Exception thrown " + e.getMessage());
-			e.printStackTrace();			
+			e.printStackTrace();				
 		}
-
 		assertNotNull(response);
 		assertTrue(response.getLocation()==null);
 		assertTrue(response.getEntity()==null);
 		assertEquals(404, response.getStatus());
-		
 	}
-	
-	
 	
 	@Test
 	public void testGetRMapStatementRelatedEvents() {

@@ -1,5 +1,7 @@
 package info.rmapproject.api.utils;
 
+import info.rmapproject.api.exception.ErrorCode;
+import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.core.exception.RMapException;
 
 import java.io.IOException;
@@ -17,29 +19,29 @@ public class URLUtils {
     private static Properties props = new Properties();
     private static boolean isInitialized = false;
 	
-	public static void init() throws RMapException {
+	public static void init() throws RMapApiException {
 		InputStream input = null;
 		String propertiesFile = "/rmap_api.properties";
 		try {	
 			input = URLUtils.class.getResourceAsStream(propertiesFile);
 			if (input==null)	{
-				throw new RMapException("RMap API configuration file " + propertiesFile + " cannot be found.");
+				throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_FILENOTFOUND);
 			}
 			props.load(input);
 			input.close();
 			isInitialized = true;
 		} catch (IOException e) {
-				throw new RMapException("Properties file " + propertiesFile + " cannot be read. Error: " + e.getMessage());
+				throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_FORMATERROR);
 		} 
 	}
 	
-	public static String getBaseUrl() throws RMapException {
+	public static String getBaseUrl() throws RMapApiException {
 		if (!isInitialized){
 			init();
 		}
 		String baseUrl = props.getProperty(BASE_URL_KEY);
 		if (baseUrl == null || baseUrl.length()==0)	{
-			throw new RMapException("Base URL property not set");
+			throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_BASEURL_MISSING);
 		}		
 		baseUrl = baseUrl.trim();
 		while (baseUrl.endsWith("/"))	{
@@ -49,32 +51,32 @@ public class URLUtils {
 		return baseUrl;
 	}
 	
-	public static String getStmtBaseUrl() throws RMapException {
+	public static String getStmtBaseUrl() throws RMapApiException {
 		String stmtBaseUrl = getBaseUrl() + "/stmt/";
 		return stmtBaseUrl;
 	}
 	
-	public static String getDiscoBaseUrl() throws RMapException {
+	public static String getDiscoBaseUrl() throws RMapApiException {
 		String discoBaseUrl = getBaseUrl() + "/disco/";
 		return discoBaseUrl;
 	}
 
-	public static String getEventBaseUrl() throws RMapException {
+	public static String getEventBaseUrl() throws RMapApiException {
 		String eventBaseUrl = getBaseUrl() + "/event/";
 		return eventBaseUrl;
 	}
 	
-	public static String getAgentBaseUrl() throws RMapException {
+	public static String getAgentBaseUrl() throws RMapApiException {
 		String agentBaseUrl = getBaseUrl() + "/agent/";
 		return agentBaseUrl;
 	}	
 	
-	public static String getProfileBaseUrl() throws RMapException {
+	public static String getProfileBaseUrl() throws RMapApiException {
 		String profileBaseUrl = getBaseUrl() + "/profile/";
 		return profileBaseUrl;
 	}	
 	
-	public static String getResourceBaseUrl() throws RMapException {
+	public static String getResourceBaseUrl() throws RMapApiException {
 		String resourceBaseUrl = getBaseUrl() + "/resource/";
 		return resourceBaseUrl;
 	}
@@ -86,27 +88,27 @@ public class URLUtils {
 	 * @return
 	 * @throws RMapException
 	 */
-	public static String makeStmtUrl(String uri) throws RMapException {
+	public static String makeStmtUrl(String uri) throws RMapApiException {
 		String stmtUrl = appendEncodedUriToURL(getStmtBaseUrl(),uri);
 		return stmtUrl;
 	}
 
-	public static String makeDiscoUrl(String uri) throws RMapException {
+	public static String makeDiscoUrl(String uri) throws RMapApiException {
 		String stmtUrl = appendEncodedUriToURL(getDiscoBaseUrl(),uri);
 		return stmtUrl;
 	}
 
-	public static String makeEventUrl(String uri) throws RMapException {
+	public static String makeEventUrl(String uri) throws RMapApiException {
 		String stmtUrl = appendEncodedUriToURL(getEventBaseUrl(),uri);
 		return stmtUrl;
 	}
 	
-	public static String makeAgentUrl(String uri) throws RMapException {
+	public static String makeAgentUrl(String uri) throws RMapApiException {
 		String stmtUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
 		return stmtUrl;
 	}
 
-	public static String makeProfileUrl(String uri) throws RMapException {
+	public static String makeProfileUrl(String uri) throws RMapApiException {
 		String stmtUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
 		return stmtUrl;
 	}
@@ -115,7 +117,7 @@ public class URLUtils {
 		String stmtUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
 		return stmtUrl;
 	}
-
+	
 	public static String appendEncodedUriToURL(String baseURL, String objUri) {
 		String url = null;
 		try {

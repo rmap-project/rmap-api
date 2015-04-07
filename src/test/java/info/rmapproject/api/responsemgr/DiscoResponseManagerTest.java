@@ -131,7 +131,7 @@ public class DiscoResponseManagerTest {
 		InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
 		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, URLUtils.getDiscoBaseUrl(), "RDFXML");
 		String discoURI = "";
-				
+		
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.

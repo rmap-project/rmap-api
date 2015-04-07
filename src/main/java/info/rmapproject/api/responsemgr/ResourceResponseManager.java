@@ -1,5 +1,7 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.api.exception.ErrorCode;
+import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapException;
@@ -35,16 +37,19 @@ public class ResourceResponseManager {
 	 * 
 	 */
 	
-	public Response getResourceServiceOptions()	{
+	public Response getResourceServiceOptions()	throws RMapApiException {
 		Response response = null;
-	
-		String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-	
-		response = Response.status(Response.Status.OK)
-				.header("Allow", "HEAD,OPTIONS,GET")
-					.header("Link",linkRel)
-					.build();
-	
+		try {			
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/resource>" + ";rel=\"" + DC.DESCRIPTION + "\"";
+		
+			response = Response.status(Response.Status.OK)
+					.header("Allow", "HEAD,OPTIONS,GET")
+						.header("Link",linkRel)
+						.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
 		return response;
 	}
 	

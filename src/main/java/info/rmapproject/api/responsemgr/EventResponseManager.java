@@ -1,5 +1,7 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.api.exception.ErrorCode;
+import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapException;
@@ -42,14 +44,17 @@ public class EventResponseManager {
 	
 	public Response getEventServiceOptions()	{
 		Response response = null;
-	
-		String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-
-		response = Response.status(Response.Status.OK)
-				.header("Allow", "HEAD,OPTIONS,GET")
-					.header("Link",linkRel)
-					.build();
-	
+		try {			
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
+		
+			response = Response.status(Response.Status.OK)
+						.header("Allow", "HEAD,OPTIONS,GET")
+						.header("Link",linkRel)
+						.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
 		return response;
 	}
 	
@@ -58,18 +63,21 @@ public class EventResponseManager {
 	 * @return HTTP Response
 	 * 
 	 */
-	public Response getEventServiceHead()	{
+	public Response getEventServiceHead() throws RMapApiException {
 		Response response = null;
+		try {			
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
 	
-		String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-
-		response = Response.status(Response.Status.OK)
-					.entity("{\"description\":\"will show copy of swagger content\"}")
-					.header("Allow", "HEAD,OPTIONS,GET")
-					.header("Link",linkRel)
-					.build();
-	
-		return response;    
+			response = Response.status(Response.Status.OK)
+						.entity("{\"description\":\"will show copy of swagger content\"}")
+						.header("Allow", "HEAD,OPTIONS,GET")
+						.header("Link",linkRel)
+						.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		return response;
 	}
 	
 	

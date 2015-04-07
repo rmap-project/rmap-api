@@ -1,13 +1,25 @@
 package info.rmapproject.api.responsemgr;
 
+import info.rmapproject.api.exception.ErrorCode;
+import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
+import info.rmapproject.core.model.RMapStatus;
+import info.rmapproject.core.model.agent.RMapProfile;
+import info.rmapproject.core.rdfhandler.RDFHandler;
+import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
+import info.rmapproject.core.rmapservice.RMapService;
+import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
+import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.RMAP;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 
 import javax.ws.rs.core.Response;
 
@@ -40,37 +52,43 @@ public class ProfileResponseManager {
 	
 	/**
 	 * @return HTTP Response
+	 * Displays Agent Service Options 
 	 * 
 	 */
 	
-	public Response getProfileServiceOptions()	{
+	public Response getProfileServiceOptions() throws RMapApiException	{
 		Response response = null;
-		String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/profile>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-
-		response = Response.status(Response.Status.OK)
-					.entity("{\"description\":\"will show copy of swagger content\"}")
-					.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
-					.header("Link",linkRel)
-					.build();
-	
+		try {				
+			response = Response.status(Response.Status.OK)
+						.entity("{\"description\":\"will show copy of swagger content\"}")
+						.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
+						.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/agent"),DC.DESCRIPTION.toString())
+						.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		
 		return response;    
 	}
 	
 	
 	/**
 	 * @return HTTP Response
-	 * 
+	 * Displays Profile Service Options	Header 
 	 */
-	public Response getProfileServiceHead()	{
-    	Response response = null;
-    	String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/profile>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-
-		response = Response.status(Response.Status.OK)
-					.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
-					.header("Link",linkRel)
-					.build();
-    
-    	return response;
+	public Response getProfileServiceHead() throws RMapApiException	{
+		Response response = null;
+		try {				
+			response = Response.status(Response.Status.OK)
+						.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
+						.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/agent"),DC.DESCRIPTION.toString())
+						.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		return response;    
 	}
 	
 	
@@ -87,8 +105,9 @@ public class ProfileResponseManager {
 		if (strProfileUri==null || strProfileUri.length()==0)	{
 			throw new RMapException();  //change this to a bad request exception
 		}
+		/*
 		try {
-			/*
+			
 			strProfileUri = URLDecoder.decode(strProfileUri, "UTF-8");
     		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
     		URI uriProfileUri = new URI(strProfileUri);
@@ -96,56 +115,27 @@ public class ProfileResponseManager {
     		
     		if (rmapProfile != null)	{
     			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-	    		OutputStream profileOutput = rdfHandler.profile2Rdf(rmapProfile, acceptsType);	
-	    		
-	    		String latestProfileUrl = URLUtils.makeProfileUrl(rmapService.getProfileLatestVersion(uriProfileUri).getId().toString());
-	        	String linkRel = "<" + latestProfileUrl + ">" + ";rel=\"latest-version\"";
-	
-	    		String prevProfileVersUrl = URLUtils.makeProfileUrl(rmapService.getProfilePreviousVersion(uriProfileUri).getId().toString());
-	        	if (prevProfileVersUrl != null) {
-	        		linkRel.concat(",<" + prevProfileVersUrl + ">" + ";rel=\"predecessor-version\"");
-	        	}
-	
-	    		String succProfileVersUrl = URLUtils.makeProfileUrl(rmapService.getProfileNextVersion(uriProfileUri).getId().toString());
-	        	if (succProfileVersUrl != null) {
-	        		linkRel.concat(",<" + succProfileVersUrl + ">" + ";rel=\"successor-version\"");
-	        	}
+	    		OutputStream profileOutput = rdfHandler.profile2Rdf(rmapProfile, acceptsType);
 	        	       	
-	        	
-	    		//rmapService.getProfileEvents(uriProfileUri)
-	        	//TODO: missing some relationship terms here... need to add them in. Hardcoded for now.
-	        	//TODO: actually - need to read this in from the triple... an update will either inactivate or create a Profile.
-	    		List <RMapEvent> lstEvents = rmapProfile.getRelatedEvents();
-	    		for (URI eventUri : lstEvents){
-    				String event = URLUtils.makeEventUrl(eventUri.toString());
-	    			if (event.getEventType() == RMapEventType.CREATION){
-	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"");
-	    			}
-	    			else if (event.getEventType() == RMapEventType.DELETION){
-	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasDeletedBy" + "\"");
-	    			}
-	    			else if (event.getEventType() == RMapEventType.INACTIVATION){
-	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasInactivatedBy" + "\"");
-	    			}
-	    			else if (event.getEventType() == RMapEventType.TOMBSTONE){
-	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasTombstonedBy" + "\"");
-	    			}
-	    			else if (event.getEventType() == RMapEventType.UPDATE){
-	   	        		linkRel.concat(",<" + event + ">" + ";rel=\"" + "wasUpdatedBy" + "\"");
-	    			}
+	        	RMapStatus status = rmapService.getProfileStatus(uriProfileUri);
+	    		if (status==null){
+					throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
 	    		}
+	    		String linkRel = "<" + status.toString() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+	    		String eventUrl = URLUtils.getProfileBaseUrl() + "/events";
+	        	linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
 	    		    		
 	        	response = Response.status(Response.Status.OK)
 	        				.entity(profileOutput.toString())
 	        				.location(new URI (URLUtils.makeProfileUrl(strProfileUri)))
-	        				.header("Link",linkRel)						//switch this to link() or links()?
+	        				.link(new URI (eventUrl), PROV.HAS_PROVENANCE.toString())
 	        				.build();		
 	        	}
 	        else {
 	        	throw new RMapException();
 	        }
 	        
-    		  */ 	
+    		  
     	}    	
     	//TODO:Add more exceptions as they become available!
     	catch(RMapObjectNotFoundException ex) {
@@ -163,7 +153,7 @@ public class ProfileResponseManager {
     	catch(Exception ex)	{ //catch the rest
     		log.fatal("Error trying to retrieve Profile: " + strProfileUri + "Error: " + ex.getMessage());
         	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    	}
+    	}*/
     	return response;
     }
 		

@@ -1,5 +1,7 @@
 package info.rmapproject.api.service;
 
+import info.rmapproject.api.exception.ErrorCode;
+import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.ResourceResponseManager;
 
 import javax.ws.rs.GET;
@@ -21,7 +23,9 @@ public class ResourceApiService {
 		try {
 			responseManager = new ResourceResponseManager();
 		}
-		catch (Exception e){}
+		catch (Exception e){
+			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);
+		}
 	}
 	
 	@Context

@@ -3,6 +3,8 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.ResourceResponseManager;
+import info.rmapproject.api.utils.FilterObjType;
+import info.rmapproject.api.utils.ListType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -10,9 +12,12 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+
+/**
+ * API service for rdfs:Resources in RMap
+ * @author khanson
+ */
 
 @Path("/resource")
 public class ResourceApiService {
@@ -27,134 +32,189 @@ public class ResourceApiService {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);
 		}
 	}
-	
-	@Context
-	UriInfo uriInfo;
-	//    	String path = uri.getPath();
 
+
+/*
+ * ------------------------------
+ * 
+ * 	 GET INFO ABOUT API SERVICE
+ *  
+ *-------------------------------
+ */	
+	/**
+	 * GET /resource
+     * Returns link to Resource API information, and lists HTTP options
+	 * @return Response
+	 * @throws RMapApiException
+	 */
 	@GET
     @Path("/")
     @Produces("application/json;charset=UTF-8;")
-    public Response getServiceInfo() {
+    public Response getServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
     	Response response = responseManager.getResourceServiceOptions();
 	    return response;
     }
         
-    /**
-     * 
-     * @return HTTP Response
-     * Returns link to Resource API information, and lists HTTP options
-     * 
-     */
+
+	/**
+	 * HEAD /resource
+     * Returns Resource API information/link, and lists HTTP options
+	 * @return Response
+	 * @throws RMapApiException
+	 */
     @HEAD
     @Path("/")
-    public Response getResourceApiDetails()	{
+    public Response getResourceApiDetails()	throws RMapApiException {
     	Response response = responseManager.getResourceServiceHead();
 	    return response;
     }
     
-    /**
-     * 
-     * @return HTTP Response
+
+	/**
+	 * OPTIONS /resource
      * Returns Resource API information/link, and lists HTTP options
-     * 
-     */
-    
+	 * @return Response
+	 * @throws RMapApiException
+	 */
     @OPTIONS
     @Path("/")
     @Produces("application/json;charset=UTF-8;")
-    public Response getResourceApiDetailedOptions()	{
+    public Response getResourceApiDetailedOptions()	throws RMapApiException {
     	Response response = responseManager.getResourceServiceOptions();
 	    return response;
 
     }   
-	
+
+/*
+ * ------------------------------
+ * 
+ *	  GET RELATED OBJECTS LIST
+ *  
+ *-------------------------------
+ */
+    
 	/**
-	 * 
+	 * GET /resource/{resourceUri}
+	 * Returns list of all URIs related to the rdfs:Resource URI as JSON
 	 * @param resourceUri
-	 * @return
-	 * Gets all related objects
-	 */
-	
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceAllAsJson(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "ALL", "JSON", null);
+    public Response getRMapResourceAllAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, ListType.JSON, null);
 	    return response;	
     }
 
+	/**
+	 * GET /resource/{resourceUri}
+	 * Returns list of URIs related to the rdfs:Resource URI as PLAIN TEXT
+	 * @param resourceUri
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceAllAsText(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "ALL", "TEXT", null);
+    public Response getRMapResourceAllAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, ListType.PLAIN_TEXT, null);
 	    return response;	
     }
 	
+
 	/**
-	 * 
+	 * GET /resource/{resourceUri}/stmts
+	 * Returns list of all RMap:Statement URIs related to the rdfs:Resource URI as JSON
 	 * @param resourceUri
-	 * @return
-	 * Gets related statements
-	 */
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}/stmts")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceStmtsAsJson(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "STATEMENTS", "JSON", null);
+    public Response getRMapResourceStmtsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, ListType.JSON, null);
 	    return response;	
     }
 
+	/**
+	 * GET /resource/{resourceUri}/stmts
+	 * Returns list of all RMap:Statement URIs related to the rdfs:Resource URI as PLAIN TEXT
+	 * @param resourceUri
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}/stmts")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceStmtsAsText(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "STATEMENTS", "TEXT", null);
+    public Response getRMapResourceStmtsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, ListType.PLAIN_TEXT, null);
 	    return response;	
     }
 	
+
 	/**
-	 * 
+	 * GET /resource/{resourceUri}/events
+	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as JSON
 	 * @param resourceUri
-	 * @return
-	 * Gets related events
-	 */
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}/events")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceEventsAsJson(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "EVENTS", "JSON", null);
+    public Response getRMapResourceEventsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, ListType.JSON, null);
 	    return response;	
     }
 
+	/**
+	 * GET /resource/{resourceUri}/events
+	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as PLAIN TEXT
+	 * @param resourceUri
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}/events")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceEventsAsText(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "EVENTS", "TEXT", null);
+    public Response getRMapResourceEventsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, ListType.PLAIN_TEXT, null);
 	    return response;	
     }
 	
+
 	/**
-	 * 
+	 * GET /resource/{resourceUri}/agents
+	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as JSON
 	 * @param resourceUri
-	 * @return
-	 * Gets related events
-	 */
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}/agents")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceAgentsAsJson(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "AGENTS", "JSON", null);
+    public Response getRMapResourceAgentsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, ListType.JSON, null);
 	    return response;	
     }
+    
+
+	/**
+	 * GET /resource/{resourceUri}/agents
+	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as PLAIN TEXT
+	 * @param resourceUri
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
     @GET
-    @Path("/{resourceuri}")
+    @Path("/{resourceUri}/agents")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceAgentsAsText(@PathParam("resourceuri") String resourceUri) {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, "AGENTS", "TEXT", null);
+    public Response getRMapResourceAgentsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, ListType.PLAIN_TEXT, null);
 	    return response;	
     }
    

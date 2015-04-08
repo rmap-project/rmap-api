@@ -2,8 +2,11 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.utils.ListType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.core.exception.RMapDefectiveArgumentException;
+import info.rmapproject.core.exception.RMapEventNotFoundException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.event.RMapEvent;
@@ -19,169 +22,231 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 
 /**
  * 
- * @author khanson
  * Creates HTTP responses for Event REST API requests
+ * @author khanson
  *
  */
 public class EventResponseManager {
 
-	private final Logger log = LogManager.getLogger(this.getClass());
+	private static RMapService rmapService = null;
 	
 	public EventResponseManager() {
 	}		
-	
-	
-	/**
-	 * @return HTTP Response
-	 * 
-	 */
-	
-	public Response getEventServiceOptions()	{
-		Response response = null;
-		try {			
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-		
-			response = Response.status(Response.Status.OK)
-						.header("Allow", "HEAD,OPTIONS,GET")
-						.header("Link",linkRel)
-						.build();
-		}
-		catch (Exception ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
-		}
-		return response;
-	}
-	
 
 	/**
-	 * @return HTTP Response
-	 * 
-	 */
-	public Response getEventServiceHead() throws RMapApiException {
-		Response response = null;
-		try {			
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-	
-			response = Response.status(Response.Status.OK)
-						.entity("{\"description\":\"will show copy of swagger content\"}")
-						.header("Allow", "HEAD,OPTIONS,GET")
-						.header("Link",linkRel)
-						.build();
-		}
-		catch (Exception ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
-		}
-		return response;
-	}
-	
-	
-	/**
-	 * 
-	 * @param eventId
-	 * @param acceptsType
-	 * @return HTTP Response
-	 * Get RMap Event formatted according to RDF type passed in
-	 * 
-	 */
-    
-	public Response getRMapEvent(String strEventId, String acceptsType)	{
-		Response response = null;
-		if (strEventId==null || strEventId.length()==0)	{
-			throw new RMapException();  //change this to a bad request exception
-		}
-		try {
-			strEventId = URLDecoder.decode(strEventId, "UTF-8");
+	 * Creates new RMapService object if not already initiated.
+	 * @throws RMapApiException
+	 * @throws RMapException
+	 */	
+	private static void initRMapService() throws RMapApiException, RMapException {
+		if (rmapService == null){
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-    		RMapEvent rmapEvent = rmapService.readEvent(new URI(strEventId));
-
-    		if (rmapEvent!=null){
-    			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-    			OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, acceptsType);	
-    		    			
-				response = Response.status(Response.Status.OK)
-							.entity(eventOutput.toString())
-							.location(new URI (URLUtils.makeEventUrl(strEventId)))
-							.build();
-    			
-	        }
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 		}
-    	catch(RMapObjectNotFoundException ex) {
-    		log.fatal("Event could not be found. Error: " + ex.getMessage());
-        	response = Response.status(Response.Status.NOT_FOUND).build();
+	}
+
+
+	/**
+	 * Displays Event Service Options
+	 * @return Response
+	 * @throws RMapApiException
+	 */
+	public Response getEventServiceOptions() throws RMapApiException {
+		Response response = null;
+		try {				
+			response = Response.status(Response.Status.OK)
+					.entity("{\"description\":\"will show copy of swagger content\"}")
+					.header("Allow", "HEAD,OPTIONS,GET")
+					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/event"),DC.DESCRIPTION.toString())
+					.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		return response;  
+	}
+
+
+	/**
+	 * Displays Event Service Options Header
+	 * @return Response
+	 * @throws RMapApiException
+	 */
+	public Response getEventServiceHead() throws RMapApiException	{
+		Response response = null;
+		try {				
+			response = Response.status(Response.Status.OK)
+					.header("Allow", "HEAD,OPTIONS,GET")
+					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/event"),DC.DESCRIPTION.toString())
+					.build();
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		return response; 
+	}
+	
+	
+
+	/**
+	 * Retrieves RMap Event in requested RDF format and forms an HTTP response.
+	 * @param strEventUri
+	 * @param acceptType
+	 * @return Response
+	 * @throws RMapApiException
+	 */	
+	public Response getRMapEvent(String strEventUri, String acceptsType)	{
+		Response response = null;
+		try {
+			if (strEventUri==null || strEventUri.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
+			}		
+			if (acceptsType==null || acceptsType.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
+			}
+			
+			URI uriEventUri = null;
+			try {
+				strEventUri = URLDecoder.decode(strEventUri, "UTF-8");
+				uriEventUri = new URI(strEventUri);
+			}
+			catch (Exception ex)  {
+				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+			}
+			
+			initRMapService();
+			
+    		RMapEvent rmapEvent = rmapService.readEvent(uriEventUri);
+			if (rmapEvent ==null){
+				throw new RMapApiException(ErrorCode.ER_CORE_READ_EVENT_RETURNED_NULL);
+			}
+			
+			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+			if (rdfHandler ==null){
+				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
+			}
+			
+    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, acceptsType);
+			if (eventOutput ==null){
+				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
+			}	
+
+			response = Response.status(Response.Status.OK)
+						.entity(eventOutput.toString())
+						.location(new URI(URLUtils.makeEventUrl(strEventUri)))
+        				.type("application/vnd.rmap-project.event; version=1.0-beta") //TODO move version number to a property?
+						.build();
+
+		}
+		catch(RMapApiException ex)	{
+        	throw RMapApiException.wrap(ex);
+		}
+		catch(RMapEventNotFoundException ex) {
+			throw RMapApiException.wrap(ex,ErrorCode.ER_EVENT_OBJECT_NOT_FOUND);			
+		}
+		catch(RMapDefectiveArgumentException ex){
+			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_STMT_BAD_ARGUMENT);			
+		}
+    	catch(RMapException ex) {  
+        	throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
     	}  
 		catch(Exception ex)	{
-			log.fatal("Error trying to retrieve event: " + strEventId + "Error: " + ex.getMessage());
-        	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
-    	return response;
+		return response;
 	}
 
 	/**
-	 * 
-	 * @param eventId
-	 * @param acceptsType
-	 * @return HTTP Response
 	 * Get RMap Event related objects, output in format requested (currently JSON or PLAIN TEXT)
-	 * 
+	 * @param eventId
+	 * @param objType
+	 * @param returnType
+	 * @return Response
 	 */
-	public Response getRMapEventRelatedObjs(String strEventId, String objType, String returnType)	{
+	public Response getRMapEventRelatedObjs(String strEventUri, String objType, ListType returnType)	{
 		Response response = null;
-		if (strEventId==null || strEventId.length()==0)	{
-			throw new RMapException();  //change this to a bad request exception
-		}
 		try {
-			strEventId = URLDecoder.decode(strEventId, "UTF-8");
-			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			URI uriEventUri = new URI(strEventId);
-			List <URI> uriList = null;
+			if (strEventUri==null || strEventUri.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
+			}
+			if (objType==null || objType.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_RELATED_OBJECT_TYPE_PROVIDED); 
+			}
+
+			URI uriEventUri = null;
+			try {
+				strEventUri = URLDecoder.decode(strEventUri, "UTF-8");
+				uriEventUri = new URI(strEventUri);
+			}
+			catch (Exception ex)  {
+				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+			}
+			
+			initRMapService();
+			
 			String outputString="";
 			String jsonType="";
 
+			List <URI> uriList = null;
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
 			if (objType == "STATEMENTS") {
 				uriList = rmapService.getEventRelatedStatements(uriEventUri);
-				jsonType = "rmap:Statements";
+				jsonType = "rmap:Statement";
 			}
-			else if (objType == "RESOURCES") {
+			if (objType == "RESOURCES") {
 				uriList = rmapService.getEventRelatedResources(uriEventUri);
-				jsonType = "rmap:Resources";
+				jsonType = "rdfs:Resource";
 			}
-			else if (objType == "DISCOS") {
+			if (objType == "DISCOS") {
 				uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
-				jsonType = "rmap:Discos";
+				jsonType = "rmap:Disco";
 			}
-			else if (objType == "AGENTS") {
+			if (objType == "AGENTS") {
 				uriList = rmapService.getEventRelatedAgents(uriEventUri);
-				jsonType = "rmap:Agents";
+				jsonType = "rmap:Agent";
 			}
-    		
-			if (returnType.equals("JSON"))	{
+			
+			if (uriList==null)	{ 
+				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTRELATEDLIST_EMPTY); 
+			}	
+									
+			if (returnType==ListType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
 			}
 			else	{
-				outputString = URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToPlainText(uriList);
 			}
     		
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (URLUtils.makeEventUrl(strEventId)))
+							.location(new URI (URLUtils.makeEventUrl(strEventUri)))
 							.build();    			
 	        }
 		}
-    	catch(RMapObjectNotFoundException ex) {
-    		log.fatal("Event could not be found. Error: " + ex.getMessage());
-        	response = Response.status(Response.Status.NOT_FOUND).build();
+    	catch(RMapApiException ex) { 
+    		throw RMapApiException.wrap(ex);
     	}  
+    	catch(RMapEventNotFoundException ex) {
+    		throw RMapApiException.wrap(ex, ErrorCode.ER_EVENT_OBJECT_NOT_FOUND);
+    	}
+    	catch(RMapObjectNotFoundException ex) {
+    		throw RMapApiException.wrap(ex, ErrorCode.ER_OBJECT_NOT_FOUND);
+    	}
+		catch(RMapDefectiveArgumentException ex){
+			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_EVENT_BAD_ARGUMENT);
+		}
+    	catch(RMapException ex) { 
+    		throw RMapApiException.wrap(ex, ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
+    	}
 		catch(Exception ex)	{
-			log.fatal("Error trying to retrieve event details: " + strEventId + "Error: " + ex.getMessage());
-        	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
     	return response;
 	}

@@ -3,7 +3,7 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.DiscoResponseManager;
-import info.rmapproject.api.utils.ListReturnType;
+import info.rmapproject.api.utils.ListType;
 
 import java.io.InputStream;
 import java.util.List;
@@ -470,7 +470,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/events")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapDiSCOEventListAsJSon(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, ListReturnType.JSON);
+    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, ListType.JSON);
 	    return eventList;
     }
     
@@ -486,7 +486,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/events")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapDiSCOEventListAsText(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, ListReturnType.PLAIN_TEXT);
+    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, ListType.PLAIN_TEXT);
 	    return eventList;
     }
 	
@@ -548,7 +548,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/allversions")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapDiSCOVersionListAsJSon(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListReturnType.JSON, false);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.JSON, false);
 	    return versionList;
     }
     
@@ -564,7 +564,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/allversions")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapDiSCOVersionListAsText(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListReturnType.PLAIN_TEXT, false);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.PLAIN_TEXT, false);
 	    return versionList;
     }
 
@@ -580,7 +580,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/agentversions")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapDiSCOAgentVersionListAsJSon(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListReturnType.JSON, true);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.JSON, true);
 	    return versionList;
     }
     
@@ -596,7 +596,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/agentversions")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapDiSCOAgentVersionListAsText(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListReturnType.PLAIN_TEXT, true);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.PLAIN_TEXT, true);
 	    return versionList;
     }
 }

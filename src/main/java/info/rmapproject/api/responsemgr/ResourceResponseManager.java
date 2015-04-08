@@ -2,8 +2,11 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.utils.FilterObjType;
+import info.rmapproject.api.utils.ListType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.RMapStatus;
@@ -16,8 +19,6 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
 /**
  * 
@@ -27,137 +28,154 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class ResourceResponseManager {
 
-	private final Logger log = LogManager.getLogger(this.getClass());
+	private static RMapService rmapService = null;
 	
 	public ResourceResponseManager() {
 	}		
 
 	/**
-	 * @return HTTP Response
-	 * 
+	 * Creates new RMapService object if not already initiated.
+	 * @throws RMapApiException
+	 * @throws RMapException
+	 */	
+	private static void initRMapService() throws RMapApiException, RMapException {
+		if (rmapService == null){
+			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
+		}
+	}
+
+	/**
+	 * Displays Resource Service Options
+	 * @return Response
+	 * @throws RMapApiException
 	 */
-	
-	public Response getResourceServiceOptions()	throws RMapApiException {
+	public Response getResourceServiceOptions() throws RMapApiException {
 		Response response = null;
-		try {			
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/resource>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-		
+		try {				
 			response = Response.status(Response.Status.OK)
+					.entity("{\"description\":\"will show copy of swagger content\"}")
 					.header("Allow", "HEAD,OPTIONS,GET")
-						.header("Link",linkRel)
-						.build();
+					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/resource"),DC.DESCRIPTION.toString())
+					.build();
+
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
 		}
-		return response;
+		return response;  
 	}
-	
+
 
 	/**
-	 * @return HTTP Response
-	 * 
+	 * Displays Resource Service Options Header
+	 * @return Response
+	 * @throws RMapApiException
 	 */
-	public Response getResourceServiceHead()	{
+	public Response getResourceServiceHead() throws RMapApiException	{
 		Response response = null;
-	
-		String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>" + ";rel=\"" + DC.DESCRIPTION + "\"";
-	
-		response = Response.status(Response.Status.OK)
-					.entity("{\"description\":\"will show copy of swagger content\"}")
+		try {				
+			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET")
-					.header("Link",linkRel)
+					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/resource"),DC.DESCRIPTION.toString())
 					.build();
-	
-		return response;    
+		}
+		catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		return response; 
 	}
-	
 
 	/**
-	 * 
-	 * @param eventId
-	 * @param acceptsType
-	 * @return HTTP Response
-	 * Get RMap Event related objects, output in format requested (currently JSON or PLAIN TEXT)
-	 * 
+	 * Get RMap Resource related objects, output in format requested (currently JSON or PLAIN TEXT)
+	 * @param strResourceUri
+	 * @param objType
+	 * @param returnType
+	 * @param status
+	 * @return Response
+	 * @throws RMapApiException
 	 */
-	public Response getRMapResourceRelatedObjs(String strResourceId, String objType, String returnType, String rmapStatus)	{
+	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, ListType returnType, RMapStatus status) throws RMapApiException {
 		Response response = null;
-		if (strResourceId==null || strResourceId.length()==0)	{
-			throw new RMapException();  //change this to a bad request exception
-		}
 		try {
-			strResourceId = URLDecoder.decode(strResourceId, "UTF-8");
-			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			URI uriResourceUri = new URI(URLDecoder.decode(strResourceId,"UTF-8")); 
+			if (strResourceUri==null || strResourceUri.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
+			}
+			if (status == null)	{status = RMapStatus.ACTIVE;}
+			if (objType == null)	{objType = FilterObjType.ALL;}
+			
+			URI uriResourceUri = null;
+			try {
+				strResourceUri = URLDecoder.decode(strResourceUri, "UTF-8");
+				uriResourceUri = new URI(strResourceUri);
+			}
+			catch (Exception ex)  {
+				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+			}
+			
+			initRMapService();
+			
 			List <URI> uriList = null;
 			String outputString="";
 			String jsonType="";
-			RMapStatus status = null;	
-			
-			//TODO:need to map better... procedurize etc.
-			if (rmapStatus == "active"){
-				status = RMapStatus.ACTIVE;
-			}
-			else if (rmapStatus == "inactive") {
-				status = RMapStatus.INACTIVE;
-			}
-			else if (rmapStatus == "deleted") {
-				status = RMapStatus.DELETED;
-			}
-			else if (rmapStatus == "tombstoned") {
-				status = RMapStatus.TOMBSTONED;
-			}
-			else {
-				status = RMapStatus.ACTIVE;
-			}
 
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
-			if (objType == "STATEMENTS") {
-				uriList = rmapService.getResourceRelatedStmts(uriResourceUri, status);
-				jsonType = "rmap:Stmts";
+			 switch (objType) {
+	            case STATEMENTS:
+					uriList = rmapService.getResourceRelatedStmts(uriResourceUri, status);
+					jsonType = "rmap:Stmts";
+	                break;
+	            case DISCOS:
+					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, status);
+					jsonType = "rmap:Discos";
+	                break;
+	            case AGENTS:
+					uriList = rmapService.getResourceRelatedAgents(uriResourceUri, status);
+					jsonType = "rmap:Agents";
+	                break;
+	            default:
+					uriList = rmapService.getResourceRelatedAll(uriResourceUri, status);
+					jsonType = "rmap:Objects";
+	                break;
 			}
-			else if (objType == "DISCOS") {
-				uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, status);
-				jsonType = "rmap:Discos";
-			}
-			else if (objType == "AGENTS") {
-				uriList = rmapService.getResourceRelatedAgents(uriResourceUri, status);
-				jsonType = "rmap:Agents";
-			}
-			else if (objType == "ALL") {
-				uriList = rmapService.getResourceRelatedAll(uriResourceUri, status);
-				jsonType = "rmap:Objects";
-			}
-    		
-			if (returnType.equals("JSON"))	{
+			 
+			if (uriList==null)	{ 
+				//if the object is found, should always have at least one event
+				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
+			}	
+			 
+			if (returnType == ListType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
 			}
 			else	{
 				outputString = URIListHandler.uriListToPlainText(uriList);
 			}
     		
-    		if (outputString.length()>0){			    			
-				response = Response.status(Response.Status.OK)
-							.entity(outputString.toString())
-							.location(new URI (URLUtils.makeResourceUrl(strResourceId)))
-							.build();    			
-	        }
+			response = Response.status(Response.Status.OK)
+						.entity(outputString.toString())
+						.location(new URI (URLUtils.makeResourceUrl(strResourceUri)))
+						.build();    			
+	        
 		}
-    	catch(RMapObjectNotFoundException ex) {
-    		log.fatal("Event could not be found. Error: " + ex.getMessage());
-        	response = Response.status(Response.Status.NOT_FOUND).build();
+		catch(RMapApiException ex)	{
+        	throw RMapApiException.wrap(ex);
+		}
+		catch(RMapObjectNotFoundException ex) {
+			throw RMapApiException.wrap(ex,ErrorCode.ER_OBJECT_NOT_FOUND);			
+		}
+		catch(RMapDefectiveArgumentException ex){
+			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_RESOURCE_BAD_ARGUMENT);			
+		}
+    	catch(RMapException ex) {  
+        	throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
     	}  
 		catch(Exception ex)	{
-			log.fatal("Error trying to retrieve event details: " + strResourceId + "Error: " + ex.getMessage());
-        	response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
     	return response;
-	}
-	
-	
-	
-	
+	}	
 	
 	
 }

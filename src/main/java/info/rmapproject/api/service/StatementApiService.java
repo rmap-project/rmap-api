@@ -3,7 +3,7 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.StatementResponseManager;
-import info.rmapproject.api.utils.ListReturnType;
+import info.rmapproject.api.utils.ListType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -58,9 +58,8 @@ public class StatementApiService {
     @Path("/")
     @Produces("application/json;charset=UTF-8;")
     public Response getServiceInfo() throws RMapApiException {
-    	Response response = null;
    		//TODO: for now returns same as options, but might want html response to describe API?
-   		response = responseManager.getStatementServiceOptions();
+    	Response response = responseManager.getStatementServiceOptions();
    		return response;
     }
     
@@ -103,7 +102,7 @@ public class StatementApiService {
 	/**
 	 * GET /stmt/{stmtUri}
 	 * Returns requested RMap:Statement as RDF/XML
-	 * @param discoUri
+	 * @param stmtUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
@@ -118,7 +117,7 @@ public class StatementApiService {
 	/**
 	 * GET /stmt/{stmtUri}
 	 * Returns requested RMap:Statement as JSON-LD
-	 * @param discoUri
+	 * @param stmtUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
@@ -133,7 +132,7 @@ public class StatementApiService {
 	/**
 	 * GET /stmt/{stmtUri}
 	 * Returns requested RMap:Statement as NQUADS
-	 * @param discoUri
+	 * @param stmtUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
@@ -148,7 +147,7 @@ public class StatementApiService {
 	/**
 	 * GET /stmt/{stmtUri}
 	 * Returns requested RMap:Statement as TURTLE
-	 * @param discoUri
+	 * @param stmtUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
@@ -228,7 +227,7 @@ public class StatementApiService {
     @Path("/{stmtUri}/events")
 	@Produces("application/json;charset=UTF-8;")
     public Response getRMapStmtEventsAsJSON(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, ListReturnType.JSON);
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, ListType.JSON);
     	return eventList;
     }
 
@@ -243,7 +242,7 @@ public class StatementApiService {
     @Path("/{stmtUri}/events")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapStmtEventsAsText(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, ListReturnType.PLAIN_TEXT);
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, ListType.PLAIN_TEXT);
     	return eventList;
     }
 

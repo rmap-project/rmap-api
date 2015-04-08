@@ -3,7 +3,7 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.AgentResponseManager;
-import info.rmapproject.api.utils.ListReturnType;
+import info.rmapproject.api.utils.ListType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -174,7 +174,7 @@ public class AgentApiService {
     @Path("/{agentUri}/profiles")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapAgentProfilesAsJSon(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response rdfAgent = responseManager.getRMapAgentRelatedProfiles(agentUri, ListReturnType.JSON);
+    	Response rdfAgent = responseManager.getRMapAgentRelatedProfiles(agentUri, ListType.JSON);
 	    return rdfAgent;
     }
     
@@ -190,7 +190,7 @@ public class AgentApiService {
     @Path("/{agentUri}/profiles")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapAgentAsText(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response rdfAgent = responseManager.getRMapAgentRelatedProfiles(agentUri, ListReturnType.PLAIN_TEXT);
+    	Response rdfAgent = responseManager.getRMapAgentRelatedProfiles(agentUri, ListType.PLAIN_TEXT);
 	    return rdfAgent;
     }
     

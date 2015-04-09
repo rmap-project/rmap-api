@@ -46,7 +46,7 @@ public class AgentResponseManager {
 	 */	
 	private static void initRMapService() throws RMapApiException, RMapException {
 		if (rmapService == null){
-			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}

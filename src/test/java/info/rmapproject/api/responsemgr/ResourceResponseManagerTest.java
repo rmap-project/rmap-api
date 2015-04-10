@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.utils.FilterObjType;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
 
 import javax.ws.rs.core.Response;
 
@@ -64,7 +64,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.ALL, ListType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.ALL, BasicReturnType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -83,7 +83,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedStmts() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.STATEMENTS, ListType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.STATEMENTS, BasicReturnType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

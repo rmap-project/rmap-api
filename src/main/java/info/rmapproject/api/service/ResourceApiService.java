@@ -4,7 +4,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.ResourceResponseManager;
 import info.rmapproject.api.utils.FilterObjType;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -105,7 +105,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapResourceAllAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, ListType.JSON, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, BasicReturnType.JSON, null);
 	    return response;	
     }
 
@@ -120,7 +120,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapResourceAllAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, ListType.PLAIN_TEXT, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, BasicReturnType.PLAIN_TEXT, null);
 	    return response;	
     }
 	
@@ -136,7 +136,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}/stmts")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapResourceStmtsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, ListType.JSON, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, BasicReturnType.JSON, null);
 	    return response;	
     }
 
@@ -151,7 +151,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}/stmts")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapResourceStmtsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, ListType.PLAIN_TEXT, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, BasicReturnType.PLAIN_TEXT, null);
 	    return response;	
     }
 	
@@ -167,7 +167,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}/events")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapResourceEventsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, ListType.JSON, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, BasicReturnType.JSON, null);
 	    return response;	
     }
 
@@ -182,7 +182,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}/events")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapResourceEventsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, ListType.PLAIN_TEXT, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, BasicReturnType.PLAIN_TEXT, null);
 	    return response;	
     }
 	
@@ -198,7 +198,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}/agents")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapResourceAgentsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, ListType.JSON, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, BasicReturnType.JSON, null);
 	    return response;	
     }
     
@@ -214,7 +214,7 @@ public class ResourceApiService {
     @Path("/{resourceUri}/agents")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapResourceAgentsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, ListType.PLAIN_TEXT, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, BasicReturnType.PLAIN_TEXT, null);
 	    return response;	
     }
    

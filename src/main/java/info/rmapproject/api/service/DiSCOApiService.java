@@ -3,10 +3,11 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.DiscoResponseManager;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
+import info.rmapproject.api.utils.RdfMediaType;
+import info.rmapproject.api.utils.RdfReturnType;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -120,110 +121,28 @@ public class DiSCOApiService {
 				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
-    public Response test(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response=null;
+    public Response getRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
 
-    	List<String> lstStringAccepts= new ArrayList<String>();
+    	RdfReturnType returnType = null;
+    	
     	List<MediaType> acceptTypes=headers.getAcceptableMediaTypes();
     	for (MediaType acceptType : acceptTypes)	{
-    		lstStringAccepts.add(acceptType.toString());
+    		RdfMediaType matchingType = RdfMediaType.get(acceptType.toString());
+    		if (matchingType!=null){
+    			returnType=matchingType.getReturnType();
+    			break;
+    		}    		
     	}
     	
-    	//List <String> acceptList = headers.getRequestHeader(HttpHeaders.ACCEPT);
-    
-    	if (lstStringAccepts.contains("application/ld+json")
-    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+ld+json")) {
-    		response = responseManager.getRMapDiSCO(discoUri, "JSONLD");    		
-    	}
-    	else if (lstStringAccepts.contains("application/n-quads")
-    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+n-quads")) {
-    		response = responseManager.getRMapDiSCO(discoUri, "RDFNQUADS");    		
-    	}
-    	else if (lstStringAccepts.contains("text/turtle")
-    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+turtle")) {
-    		response = responseManager.getRMapDiSCO(discoUri, "TURTLE");    		
-    	}
-    	else if (lstStringAccepts.contains("application/rdf+xml")
-    			|| lstStringAccepts.contains(MediaType.APPLICATION_XML)
-    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+rdf+xml"))	{
-    		response = responseManager.getRMapDiSCO(discoUri, "RDFXML");
-    	}
-    	else { //use RDF/XML as default
-    		response = responseManager.getRMapDiSCO(discoUri, "RDFXML");
+    	if (returnType==null){
+    		returnType=RdfReturnType.RDFXML;
     	}
     	
+    	Response response=responseManager.getRMapDiSCO(discoUri, returnType);
     	return response;
     }
     
     
-	/**
-	 * GET /disco/{discoUri}
-	 * Returns requested RMap:DiSCO as RDF/XML
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
-    /*
-    @GET
-    @Path("/{discoUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
-    public Response getRMapDiSCOAsRdfXml(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "RDFXML");
-	    return rdfDiSCO;
-    }
-    */
-    
-	/**
-	 * GET /disco/{discoUri}
-	 * Returns requested RMap:DiSCO as JSON-LD
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */ 
-    /*
-    @GET
-    @Path("/{discoUri}")
-    @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
-    public Response getRMapDiSCOAsRDFJSON(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "JSONLD");
-	    return rdfDiSCO;
-    }
-    */
-    
-	/**
-	 * GET /disco/{discoUri}
-	 * Returns requested RMap:DiSCO as NQUADS
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */
-    /*
-    @GET
-    @Path("/{discoUri}")
-    @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
-    public Response getRMapDiSCOAsRDFNQUADS(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "RDFNQUADS");
-	    return rdfDiSCO;
-    } 
-    */   
-    
-	/**
-	 * GET /disco/{discoUri}
-	 * Returns requested RMap:DiSCO as TURTLE
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */
-    /*
-    @GET
-    @Path("/{discoUri}")
-    @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.disco+turtle;charset=UTF-8;"})
-    public Response getRMapDiSCOAsTurtle(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "TURTLE");
-	    return rdfDiSCO;
-    }
-    */
-
 /*
  *-------------------------------
  *
@@ -243,7 +162,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/latest")
     @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
     public Response getLatestRMapDiSCOAsRdfXml(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "RDFXML");
+    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, RdfReturnType.RDFXML);
 	    return rdfDiSCO;
     }
     
@@ -257,8 +176,8 @@ public class DiSCOApiService {
     @GET
     @Path("/{discoUri}/latest")
     @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
-    public Response getLatestRMapDiSCOAsRDFJSON(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "JSONLD");
+    public Response getLatestRMapDiSCOAsJsonLD(@PathParam("discoUri") String discoUri) throws RMapApiException {
+    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, RdfReturnType.JSONLD);
 	    return rdfDiSCO;
     }
     
@@ -273,7 +192,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/latest")
     @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
     public Response getRMapLatestDiSCOAsRDFNQUADS(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "RDFNQUADS");
+    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, RdfReturnType.RDFNQUADS);
 	    return rdfDiSCO;
     }    
     
@@ -288,7 +207,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/latest")
     @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.disco+turtle;charset=UTF-8;"})
     public Response getRMapLatestDiSCOAsTurtle(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "TURTLE");
+    	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, RdfReturnType.TURTLE);
 	    return rdfDiSCO;
     }
     
@@ -475,7 +394,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/events")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapDiSCOEventListAsJSon(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, ListType.JSON);
+    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, BasicReturnType.JSON);
 	    return eventList;
     }
     
@@ -491,7 +410,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/events")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapDiSCOEventListAsText(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, ListType.PLAIN_TEXT);
+    	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, BasicReturnType.PLAIN_TEXT);
 	    return eventList;
     }
 	
@@ -553,7 +472,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/allversions")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapDiSCOVersionListAsJSon(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.JSON, false);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, BasicReturnType.JSON, false);
 	    return versionList;
     }
     
@@ -569,7 +488,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/allversions")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapDiSCOVersionListAsText(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.PLAIN_TEXT, false);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, BasicReturnType.PLAIN_TEXT, false);
 	    return versionList;
     }
 
@@ -585,7 +504,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/agentversions")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapDiSCOAgentVersionListAsJSon(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.JSON, true);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, BasicReturnType.JSON, true);
 	    return versionList;
     }
     
@@ -601,7 +520,7 @@ public class DiSCOApiService {
     @Path("/{discoUri}/agentversions")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapDiSCOAgentVersionListAsText(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, ListType.PLAIN_TEXT, true);
+    	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, BasicReturnType.PLAIN_TEXT, true);
 	    return versionList;
     }
 }

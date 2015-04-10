@@ -2,7 +2,8 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
+import info.rmapproject.api.utils.RdfReturnType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -113,8 +114,8 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapDiSCO(String strDiscoUri, String acceptsType) throws RMapApiException	{
-		Response response = getRMapDiSCO(strDiscoUri, acceptsType, false);
+	public Response getRMapDiSCO(String strDiscoUri, RdfReturnType returnType) throws RMapApiException	{
+		Response response = getRMapDiSCO(strDiscoUri, returnType, false);
 		return response;
 	}
 	
@@ -122,12 +123,12 @@ public class DiscoResponseManager {
 	/**
 	 * Retrieves latest version of RMap DiSCO in requested RDF format and forms an HTTP response.
 	 * @param strDiscoUri
-	 * @param acceptsType
+	 * @param returnType
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getLatestRMapDiSCOVersion(String strDiscoUri, String acceptsType) throws RMapApiException	{
-		Response response = getRMapDiSCO(strDiscoUri, acceptsType, true);
+	public Response getLatestRMapDiSCOVersion(String strDiscoUri, RdfReturnType returnType) throws RMapApiException	{
+		Response response = getRMapDiSCO(strDiscoUri, returnType, true);
 		return response;
 	}
 
@@ -140,13 +141,13 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	private Response getRMapDiSCO(String strDiscoUri, String acceptsType, Boolean viewLatestVersion) throws RMapApiException	{
+	private Response getRMapDiSCO(String strDiscoUri, RdfReturnType returnType, Boolean viewLatestVersion) throws RMapApiException	{
 		Response response = null;
 		try {			
 			if (strDiscoUri==null || strDiscoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}		
-			if (acceptsType==null || acceptsType.length()==0)	{
+			if (returnType==null)	{
 				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
 			}
 			if (viewLatestVersion==null){viewLatestVersion=false;}
@@ -180,7 +181,7 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
 
-			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, acceptsType);
+			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, returnType.getRdfType());
 			if (discoOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}		
@@ -608,12 +609,12 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapDiSCOVersions(String discoUri, ListType returnType, Boolean retAgentVersionsOnly) throws RMapApiException {
+	public Response getRMapDiSCOVersions(String discoUri, BasicReturnType returnType, Boolean retAgentVersionsOnly) throws RMapApiException {
 
 		Response response = null;
 		try {
 			//assign default values when null
-			if (returnType==null)	{returnType=ListType.PLAIN_TEXT;}
+			if (returnType==null)	{returnType=BasicReturnType.PLAIN_TEXT;}
 			if (retAgentVersionsOnly==null)	{retAgentVersionsOnly=false;}
 			
 			//check discoUri param for null
@@ -647,7 +648,7 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_DISCO_VERSIONLIST_EMPTY); 
 			}	
 									
-			if (returnType == ListType.JSON)	{
+			if (returnType == BasicReturnType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, "rmap:DiSCOs");				
 			}
 			else	{
@@ -691,12 +692,12 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapDiSCOEvents(String discoUri, ListType returnType) throws RMapApiException {
+	public Response getRMapDiSCOEvents(String discoUri, BasicReturnType returnType) throws RMapApiException {
 
 		Response response = null;
 		try {
 			//assign default value when null
-			if (returnType==null)	{returnType=ListType.PLAIN_TEXT;}
+			if (returnType==null)	{returnType=BasicReturnType.PLAIN_TEXT;}
 			
 			if (discoUri==null || discoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -720,7 +721,7 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 									
-			if (returnType==ListType.JSON)	{
+			if (returnType==BasicReturnType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, "rmap:Events");				
 			}
 			else	{

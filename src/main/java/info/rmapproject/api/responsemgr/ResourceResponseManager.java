@@ -3,7 +3,7 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.utils.FilterObjType;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -97,7 +97,7 @@ public class ResourceResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, ListType returnType, RMapStatus status) throws RMapApiException {
+	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, BasicReturnType returnType, RMapStatus status) throws RMapApiException {
 		Response response = null;
 		try {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
@@ -146,7 +146,7 @@ public class ResourceResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 			 
-			if (returnType == ListType.JSON)	{
+			if (returnType == BasicReturnType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
 			}
 			else	{

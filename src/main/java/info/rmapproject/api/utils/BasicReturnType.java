@@ -1,5 +1,5 @@
 package info.rmapproject.api.utils;
 
-public enum ListType {
+public enum BasicReturnType {
 	JSON, PLAIN_TEXT;
 }

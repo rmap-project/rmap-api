@@ -2,7 +2,7 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -169,7 +169,7 @@ public class EventResponseManager {
 	 * @param returnType
 	 * @return Response
 	 */
-	public Response getRMapEventRelatedObjs(String strEventUri, String objType, ListType returnType)	{
+	public Response getRMapEventRelatedObjs(String strEventUri, String objType, BasicReturnType returnType)	{
 		Response response = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
@@ -216,7 +216,7 @@ public class EventResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTRELATEDLIST_EMPTY); 
 			}	
 									
-			if (returnType==ListType.JSON)	{
+			if (returnType==BasicReturnType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
 			}
 			else	{

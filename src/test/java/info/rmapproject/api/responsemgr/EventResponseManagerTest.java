@@ -146,6 +146,7 @@ public class EventResponseManagerTest {
 		Response response = null;
 		try {
 			response = responseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),"RDFXML");
+			//response = responseManager.getRMapEvent("ark%3A%2F27927%2Ftf9yhn14ef","RDFXML");
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

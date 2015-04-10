@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.utils.RdfMediaType;
+import info.rmapproject.api.utils.RdfReturnType;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
@@ -163,6 +165,15 @@ public class DiscoResponseManagerTest {
 	@Test
 	public void testGetRMapDisco() throws Exception{
 
+    	Response response=null;
+    	RdfReturnType returnType = null;
+    	
+   		RdfMediaType matchingType = RdfMediaType.get("application/xml");
+   		if (matchingType!=null){
+    		returnType=matchingType.getReturnType();
+    	}
+
+		
 		//createDisco
 		
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
@@ -177,9 +188,8 @@ public class DiscoResponseManagerTest {
 		discoURI = rmapDisco.getId().toString();		
         assertNotNull(discoURI);
 		
-		Response response = null;
 		try {
-			response = responseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),"RDFXML");
+			response = responseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -192,7 +202,6 @@ public class DiscoResponseManagerTest {
 		assertTrue(body.contains("DiSCO"));
 		assertEquals(200, response.getStatus());
 	}
-	
 	
 	
 	

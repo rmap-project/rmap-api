@@ -3,7 +3,7 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.responsemgr.ProfileResponseManager;
-import info.rmapproject.api.utils.ListType;
+import info.rmapproject.api.utils.BasicReturnType;
 
 import java.io.InputStream;
 
@@ -249,7 +249,7 @@ public class ProfileApiService {
     @Path("/{profileUri}/events")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapProfileEventListAsJSon(@PathParam("profileUri") String profileUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapProfileEvents(profileUri, ListType.JSON);
+    	Response eventList = responseManager.getRMapProfileEvents(profileUri, BasicReturnType.JSON);
 	    return eventList;
     }
     
@@ -265,7 +265,7 @@ public class ProfileApiService {
     @Path("/{profileUri}/events")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapProfileEventListAsText(@PathParam("profileUri") String profileUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapProfileEvents(profileUri, ListType.PLAIN_TEXT);
+    	Response eventList = responseManager.getRMapProfileEvents(profileUri, BasicReturnType.PLAIN_TEXT);
 	    return eventList;
     }
 	
@@ -327,7 +327,7 @@ public class ProfileApiService {
     @Path("/{profileUri}/identities")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapProfileIdentitiesListAsJSon(@PathParam("profileUri") String profileUri) throws RMapApiException {
-    	Response response = responseManager.getRMapProfileRelatedIdentities(profileUri, ListType.JSON);
+    	Response response = responseManager.getRMapProfileRelatedIdentities(profileUri, BasicReturnType.JSON);
 	    return response;
     }
 
@@ -342,7 +342,7 @@ public class ProfileApiService {
     @Path("/{profileUri}/identities")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapProfileIdentitiesListAsText(@PathParam("profileUri") String profileUri) throws RMapApiException {
-    	Response response = responseManager.getRMapProfileRelatedIdentities(profileUri, ListType.PLAIN_TEXT);
+    	Response response = responseManager.getRMapProfileRelatedIdentities(profileUri, BasicReturnType.PLAIN_TEXT);
 	    return response;
     }
     

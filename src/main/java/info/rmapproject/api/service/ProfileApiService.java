@@ -109,7 +109,7 @@ public class ProfileApiService {
 	 */  
     @GET
     @Path("/{profileUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.profile+rdf+xml;charset=UTF-8;"})
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.profile+rdf+xml;charset=UTF-8;"})
     public Response getRMapProfileAsRdfXml(@PathParam("profileUri") String profileUri) {
     	Response rdfXMLStmt = responseManager.getRMapProfile(profileUri, "RDFXML");
 	    return rdfXMLStmt;
@@ -124,7 +124,7 @@ public class ProfileApiService {
 	 */ 
     @GET
     @Path("/{profileUri}")
-    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.profile+ld+json;charset=UTF-8;"})
+    @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.profile+ld+json;charset=UTF-8;"})
     public Response getRMapProfileAsJsonLD(@PathParam("profileUri") String profileUri) {
     	Response rdfJsonStmt = responseManager.getRMapProfile(profileUri, "JSONLD");
     	return rdfJsonStmt;
@@ -139,7 +139,7 @@ public class ProfileApiService {
 	 */ 
     @GET
     @Path("/{profileUri}")
-    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.profile+n-quads;charset=UTF-8;"})
+    @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.profile+n-quads;charset=UTF-8;"})
     public Response getRMapProfileAsRdfNQuads(@PathParam("profileUri") String profileUri) {
     	Response rdfNquadsStmt = responseManager.getRMapProfile(profileUri, "RDFNQUADS");
     	return rdfNquadsStmt;
@@ -154,7 +154,7 @@ public class ProfileApiService {
 	 */ 
     @GET
     @Path("/{profileUri}")
-    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.profile+turtle;charset=UTF-8;"})
+    @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.profile+turtle;charset=UTF-8;"})
     public Response getRMapProfileAsTurtle(@PathParam("profileUri") String profileUri) {
     	Response rdfXmlStmt = responseManager.getRMapProfile(profileUri, "TURTLE");
     	return rdfXmlStmt;
@@ -178,7 +178,7 @@ public class ProfileApiService {
 	 */
     @POST
     @Path("/")
-    @Consumes({"application/rdf+xml;charset=UTF-8;","vnd.rmap-project.profile+rdf+xml;charset=UTF-8;"})
+    @Consumes({"application/rdf+xml;charset=UTF-8;","application/vnd.rmap-project.profile+rdf+xml;charset=UTF-8;"})
     public Response createRMapProfileFromRdfXml(InputStream profileRdf) {
     	Response createResponse = responseManager.createRMapProfile(profileRdf, "RDFXML");
 		return createResponse;
@@ -193,7 +193,7 @@ public class ProfileApiService {
 	 */
 	@POST
 	@Path("/")
-	@Consumes({"application/ld+json;charset=UTF-8;","vnd.rmap-project.profile+ld+json;charset=UTF-8;"})
+	@Consumes({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.profile+ld+json;charset=UTF-8;"})
 	public Response createRMapProfileFromJsonLD(InputStream profileRdf) {
 		Response createResponse = responseManager.createRMapProfile(profileRdf, "JSONLD");
 		return createResponse;
@@ -208,7 +208,7 @@ public class ProfileApiService {
 	 */
 	@POST
 	@Path("/")
-	@Consumes({"application/n-quads;charset=UTF-8;","vnd.rmap-project.profile+n-quads;charset=UTF-8;"})
+	@Consumes({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.profile+n-quads;charset=UTF-8;"})
 	public Response createRMapProfileFromNquads(InputStream profileRdf) {
 		Response createResponse = responseManager.createRMapProfile(profileRdf, "RDFNQUADS");
 		return createResponse;
@@ -223,7 +223,7 @@ public class ProfileApiService {
 	 */
 	@POST
 	@Path("/")
-	@Consumes({"text/turtle;charset=UTF-8;","vnd.rmap-project.profile+turtle;charset=UTF-8;"})
+	@Consumes({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.profile+turtle;charset=UTF-8;"})
 	public Response createRMapProfileFromTurtle(InputStream profileRdf) {
 		Response createResponse = responseManager.createRMapProfile(profileRdf, "TURTLE");
 		return createResponse;

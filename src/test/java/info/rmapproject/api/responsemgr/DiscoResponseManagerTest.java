@@ -115,8 +115,8 @@ public class DiscoResponseManagerTest {
 		try {
 			responseManager = new DiscoResponseManager();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();
+			fail("Exception thrown " + e.getMessage());
 		}
 	}
 		
@@ -133,8 +133,8 @@ public class DiscoResponseManagerTest {
 		try {
 			response = responseManager.getDiSCOServiceHead();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
 		}
 
 		assertNotNull(response);

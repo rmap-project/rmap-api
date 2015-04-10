@@ -149,9 +149,9 @@ public class StatementResponseManager {
     		if (status==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
     		}
-    		
-    		String linkRel = "<" + status.toString() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = URLUtils.getStmtBaseUrl() + "/events";
+
+    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+    		String eventUrl = URLUtils.getStmtBaseUrl() + strStatementUri + "/events";
         	linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     				   	
 		    response = Response.status(Response.Status.OK)

@@ -34,8 +34,8 @@ public class AgentResponseManagerTest {
 		try {
 			response = responseManager.getAgentServiceOptions();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
 		}
 
 		assertNotNull(response);
@@ -48,8 +48,8 @@ public class AgentResponseManagerTest {
 		try {
 			response = responseManager.getAgentServiceHead();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
 		}
 
 		assertNotNull(response);

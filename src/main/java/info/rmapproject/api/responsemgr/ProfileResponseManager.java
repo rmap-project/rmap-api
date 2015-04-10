@@ -142,8 +142,8 @@ public class ProfileResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
     		}
     		
-    		String linkRel = "<" + status.toString() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = URLUtils.getProfileBaseUrl() + "/events";
+    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+    		String eventUrl = URLUtils.getProfileBaseUrl() + strProfileUri + "/events";
         	linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     		    		
         	response = Response.status(Response.Status.OK)

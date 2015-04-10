@@ -16,7 +16,6 @@ import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.event.RMapEventCreation;
-import info.rmapproject.core.model.event.RMapEventDerivation;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
@@ -366,7 +365,6 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-
 	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, String contentType) throws RMapApiException {
 		Response response = null;
 
@@ -405,7 +403,7 @@ public class DiscoResponseManager {
 			URI SYSAGENT_URI;
 			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 			
-			RMapEventDerivation discoEvent = (RMapEventDerivation)rmapService.updateDiSCO(new RMapUri(SYSAGENT_URI), 
+			RMapEvent discoEvent = rmapService.updateDiSCO(new RMapUri(SYSAGENT_URI), 
 					uriOrigDiscoUri, 
 					newRmapDisco);
 			
@@ -436,7 +434,7 @@ public class DiscoResponseManager {
 			String newDiscoUrl = URLUtils.makeDiscoUrl(sDiscoURI); 
 
 			String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
-			linkRel.concat(",<" + prevDiscoUrl + ">" + ";rel=\"predecessor-version\"");
+			linkRel = linkRel.concat(",<" + prevDiscoUrl + ">" + ";rel=\"predecessor-version\"");
 			
 			response = Response.status(Response.Status.CREATED)
 						.entity(sDiscoURI)
@@ -777,7 +775,7 @@ public class DiscoResponseManager {
 		if (status==null){
 			throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
 		}
-		links.append("<" + status.toString() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"");
+		links.append("<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"");
 
 		//get DiSCO version links
 		RMapDiSCO latestDisco = rmapService.getDiSCOLatestVersion(uriDiscoUri);
@@ -806,7 +804,7 @@ public class DiscoResponseManager {
 		}
 
 		//get DiSCO event link
-		String eventUrl = URLUtils.getDiscoBaseUrl() + "/events";
+		String eventUrl = URLUtils.getDiscoBaseUrl() + uriDiscoUri.toString() + "/events";
 		links.append(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
 
 		return links.toString();	

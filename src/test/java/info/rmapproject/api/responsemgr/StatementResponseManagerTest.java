@@ -14,10 +14,12 @@ import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.RMapValue;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.impl.openrdf.ORAdapter;
+import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.rmapservice.impl.openrdf.ORMapAgentMgr;
 import info.rmapproject.core.rmapservice.impl.openrdf.ORMapStatementMgr;
 import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
 import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
@@ -90,8 +92,8 @@ public class StatementResponseManagerTest {
 		try {
 			responseManager = new StatementResponseManager();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();
+			fail("Exception thrown " + e.getMessage());
 		}
 		try {
 			ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();
@@ -113,8 +115,8 @@ public class StatementResponseManagerTest {
 		try {
 			response = responseManager.getStatementServiceOptions();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
 		}
 
 		assertNotNull(response);
@@ -127,8 +129,8 @@ public class StatementResponseManagerTest {
 		try {
 			response = responseManager.getStatementServiceHead();
 		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
 		}
 
 		assertNotNull(response);
@@ -144,12 +146,14 @@ public class StatementResponseManagerTest {
 		String stmtUri = null;
 		//create RMapStatement
 		try {
+			createAgentforTest();
+			
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
 			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, URLUtils.getDiscoBaseUrl(), "RDFXML");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			
-			//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
+			//TODO: System agent param is a default setting until we have proper auth handling.
 			rmapService.createDiSCO(new RMapUri(URLUtils.getDefaultSystemAgentURI()), rmapDisco);
 			
 			RMapTriple stmt = rmapDisco.getRelatedStatements().get(1);
@@ -159,8 +163,8 @@ public class StatementResponseManagerTest {
 			stmtUri = rmapService.getStatementID(subject, predicate, object).toString();			
 		}
 		catch (Exception ex){
-			fail("Failed to create DiSCO. Exception thrown " + ex.getMessage());
 			ex.printStackTrace();	
+			fail("Failed to create DiSCO. Exception thrown " + ex.getMessage());
 		}
 			
 		assertNotNull(stmtUri);
@@ -180,7 +184,7 @@ public class StatementResponseManagerTest {
 		String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
 		assertTrue(location.contains("stmt"));
-		assertTrue(body.contains("<rdf:subject rdf:resource=\"test:test\"/>"));
+		assertTrue(body.contains("<rdf:predicate rdf:resource=\"http://purl.org/dc/elements/1.1/title\"/>"));
 		assertEquals(200, response.getStatus());
 	}
 	
@@ -257,8 +261,9 @@ public class StatementResponseManagerTest {
 	 */
 	@Test
 	public void testGetRMapStatementIDWhereNoMatch() {
+		@SuppressWarnings("unused")
 		Response response = null;
-		
+		boolean correctErrorThrown = false;
 		String subject = null;
 		String predicate = null;
 		String object = null;
@@ -268,20 +273,66 @@ public class StatementResponseManagerTest {
 			object = URLEncoder.encode(RMAP.STATEMENT.stringValue(),"UTF-8");
 			//getRMapStatement using s, o, p
 			response = responseManager.getRMapStatementID(subject, predicate, object);
-		}	
-		catch(Exception e){
+
+		} catch (RMapApiException e) {
+			e.printStackTrace();		
+			assertEquals(e.getErrorCode(), ErrorCode.ER_STMT_OBJECT_NOT_FOUND);	
+			correctErrorThrown=true;
+		}  catch (Exception e) {
+			System.out.print(e.getMessage());
+			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
-			e.printStackTrace();				
+		} 
+		
+		if (!correctErrorThrown)	{
+			fail("An exception should have been thrown!"); 
 		}
-		assertNotNull(response);
-		assertTrue(response.getLocation()==null);
-		assertTrue(response.getEntity()==null);
-		assertEquals(404, response.getStatus());
 	}
 	
 	@Test
 	public void testGetRMapStatementRelatedEvents() {
 		fail("Not yet implemented");
 	}
+	
+
+	public void createAgentforTest() {
+		//create new ORMapAgent
+		java.net.URI SYSAGENT_URI = null;
+		try {
+			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("cant retrieve default system agent URI");
+		}
+
+		SesameTriplestore ts = null;
+		try {
+			ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("cant create triplestore");
+		}
+
+		//yep, agent creates itself… just for now.
+		org.openrdf.model.URI agentURI = ORAdapter.uri2OpenRdfUri(SYSAGENT_URI);
+		
+		ORMapAgentMgr agentMgr = new ORMapAgentMgr();
+		if (!agentMgr.isAgentId(agentURI, ts))	{
+			ORMapAgent agent = new ORMapAgent(agentURI, agentURI);
+			//create through ORMapAgentMgr
+
+			agentMgr.createAgentTriples (agent, ts);
+			try {
+				ts.commitTransaction();
+			} catch (Exception e) {
+				e.printStackTrace();
+				fail("cant commit");
+			}
+		}
+		assertTrue(agentMgr.isAgentId(agentURI, ts));
+	}
+	
+	
+	
 
 }

@@ -103,7 +103,7 @@ public class AgentApiService {
 	 */    
     @GET
     @Path("/{agentUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.agent+rdf+xml;charset=UTF-8;"})
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.agent+rdf+xml;charset=UTF-8;"})
     public Response getRMapAgentAsRdfXml(@PathParam("agentUri") String agentUri) throws RMapApiException {
     	Response rdfAgent = responseManager.getRMapAgent(agentUri, "RDFXML");
 	    return rdfAgent;
@@ -118,7 +118,7 @@ public class AgentApiService {
 	 */
     @GET
     @Path("/{agentUri}")
-    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.agent+ld+json;charset=UTF-8;"})
+    @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.agent+ld+json;charset=UTF-8;"})
     public Response getRMapAgentAsRDFJSON(@PathParam("agentUri") String agentUri) throws RMapApiException {
     	Response rdfAgent = responseManager.getRMapAgent(agentUri, "JSONLD");
 	    return rdfAgent;
@@ -133,7 +133,7 @@ public class AgentApiService {
 	 */
     @GET
     @Path("/{agentUri}")
-    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.agent+n-quads;charset=UTF-8;"})
+    @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.agent+n-quads;charset=UTF-8;"})
     public Response getRMapAgentAsRDFNQUADS(@PathParam("agentUri") String agentUri) throws RMapApiException {
     	Response rdfAgent = responseManager.getRMapAgent(agentUri, "RDFNQUADS");
 	    return rdfAgent;
@@ -148,7 +148,7 @@ public class AgentApiService {
 	 */
     @GET
     @Path("/{agentUri}")
-    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.agent+turtle;charset=UTF-8;"})
+    @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.agent+turtle;charset=UTF-8;"})
     public Response getRMapAgentAsTurtle(@PathParam("agentUri") String agentUri) throws RMapApiException {
     	Response rdfAgent = responseManager.getRMapAgent(agentUri, "TURTLE");
 	    return rdfAgent;

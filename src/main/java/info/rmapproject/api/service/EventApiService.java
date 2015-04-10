@@ -101,7 +101,7 @@ public class EventApiService {
 	 */  
     @GET
     @Path("/{eventUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.event+rdf+xml;charset=UTF-8;"})
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.event+rdf+xml;charset=UTF-8;"})
     public Response getRMapEventAsRdfXml(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfXMLStmt = responseManager.getRMapEvent(eventUri, "RDFXML");
 	    return rdfXMLStmt;
@@ -116,7 +116,7 @@ public class EventApiService {
 	 */  
     @GET
     @Path("/{eventUri}")
-    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.event+ld+json;charset=UTF-8;"})
+    @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.event+ld+json;charset=UTF-8;"})
     public Response getRMapEventAsJsonLD(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfJsonEvent = responseManager.getRMapEvent(eventUri, "JSONLD");
     	return rdfJsonEvent;
@@ -131,7 +131,7 @@ public class EventApiService {
 	 */  
     @GET
     @Path("/{eventUri}")
-    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.event+n-quads;charset=UTF-8;"})
+    @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.event+n-quads;charset=UTF-8;"})
     public Response getRMapEventAsRdfNQuads(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfNquadsEvent = responseManager.getRMapEvent(eventUri, "RDFNQUADS");
     	return rdfNquadsEvent;
@@ -146,7 +146,7 @@ public class EventApiService {
 	 */  
     @GET
     @Path("/{eventUri}")
-    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.event+turtle;charset=UTF-8;"})
+    @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.event+turtle;charset=UTF-8;"})
     public Response getRMapEventAsTurtle(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfXmlEvent = responseManager.getRMapEvent(eventUri, "TURTLE");
     	return rdfXmlEvent;

@@ -6,6 +6,7 @@ import info.rmapproject.api.responsemgr.DiscoResponseManager;
 import info.rmapproject.api.utils.ListType;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -114,33 +115,37 @@ public class DiSCOApiService {
 	 */  
     @GET
     @Path("/{discoUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
-				"application/ld+json;charset=UTF-8;", "vnd.rmap-project.disco+ld+json;charset=UTF-8;",
-				"application/n-quads;charset=UTF-8;", "vnd.rmap-project.disco+n-quads;charset=UTF-8;",
-				"text/turtle;charset=UTF-8;", "vnd.rmap-project.disco+turtle;charset=UTF-8;"
+    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
+				"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.disco+ld+json;charset=UTF-8;",
+				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
+				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
     public Response test(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response response=null;
-    	
+
+    	List<String> lstStringAccepts= new ArrayList<String>();
     	List<MediaType> acceptTypes=headers.getAcceptableMediaTypes();
+    	for (MediaType acceptType : acceptTypes)	{
+    		lstStringAccepts.add(acceptType.toString());
+    	}
     	
     	//List <String> acceptList = headers.getRequestHeader(HttpHeaders.ACCEPT);
     
-    	if (acceptTypes.contains("application/ld+json")
-    			|| acceptTypes.contains("vnd.rmap-project.disco+ld+json")) {
+    	if (lstStringAccepts.contains("application/ld+json")
+    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+ld+json")) {
     		response = responseManager.getRMapDiSCO(discoUri, "JSONLD");    		
     	}
-    	else if (acceptTypes.contains("application/n-quads")
-    			|| acceptTypes.contains("vnd.rmap-project.disco+n-quads")) {
+    	else if (lstStringAccepts.contains("application/n-quads")
+    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+n-quads")) {
     		response = responseManager.getRMapDiSCO(discoUri, "RDFNQUADS");    		
     	}
-    	else if (acceptTypes.contains("text/turtle")
-    			|| acceptTypes.contains("vnd.rmap-project.disco+turtle")) {
+    	else if (lstStringAccepts.contains("text/turtle")
+    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+turtle")) {
     		response = responseManager.getRMapDiSCO(discoUri, "TURTLE");    		
     	}
-    	else if (acceptTypes.contains("application/rdf+xml")
-    			|| acceptTypes.contains(MediaType.APPLICATION_XML)
-    			|| acceptTypes.contains("vnd.rmap-project.disco+rdf+xml"))	{
+    	else if (lstStringAccepts.contains("application/rdf+xml")
+    			|| lstStringAccepts.contains(MediaType.APPLICATION_XML)
+    			|| lstStringAccepts.contains("application/vnd.rmap-project.disco+rdf+xml"))	{
     		response = responseManager.getRMapDiSCO(discoUri, "RDFXML");
     	}
     	else { //use RDF/XML as default
@@ -161,7 +166,7 @@ public class DiSCOApiService {
     /*
     @GET
     @Path("/{discoUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
     public Response getRMapDiSCOAsRdfXml(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "RDFXML");
 	    return rdfDiSCO;
@@ -178,7 +183,7 @@ public class DiSCOApiService {
     /*
     @GET
     @Path("/{discoUri}")
-    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
+    @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
     public Response getRMapDiSCOAsRDFJSON(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "JSONLD");
 	    return rdfDiSCO;
@@ -195,7 +200,7 @@ public class DiSCOApiService {
     /*
     @GET
     @Path("/{discoUri}")
-    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
+    @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
     public Response getRMapDiSCOAsRDFNQUADS(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "RDFNQUADS");
 	    return rdfDiSCO;
@@ -212,7 +217,7 @@ public class DiSCOApiService {
     /*
     @GET
     @Path("/{discoUri}")
-    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
+    @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.disco+turtle;charset=UTF-8;"})
     public Response getRMapDiSCOAsTurtle(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getRMapDiSCO(discoUri, "TURTLE");
 	    return rdfDiSCO;
@@ -236,7 +241,7 @@ public class DiSCOApiService {
 	 */    
     @GET
     @Path("/{discoUri}/latest")
-    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
+    @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
     public Response getLatestRMapDiSCOAsRdfXml(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "RDFXML");
 	    return rdfDiSCO;
@@ -251,7 +256,7 @@ public class DiSCOApiService {
 	 */
     @GET
     @Path("/{discoUri}/latest")
-    @Produces({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
+    @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
     public Response getLatestRMapDiSCOAsRDFJSON(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "JSONLD");
 	    return rdfDiSCO;
@@ -266,7 +271,7 @@ public class DiSCOApiService {
 	 */
     @GET
     @Path("/{discoUri}/latest")
-    @Produces({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
+    @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
     public Response getRMapLatestDiSCOAsRDFNQUADS(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "RDFNQUADS");
 	    return rdfDiSCO;
@@ -281,7 +286,7 @@ public class DiSCOApiService {
 	 */
     @GET
     @Path("/{discoUri}/latest")
-    @Produces({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
+    @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.disco+turtle;charset=UTF-8;"})
     public Response getRMapLatestDiSCOAsTurtle(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response rdfDiSCO = responseManager.getLatestRMapDiSCOVersion(discoUri, "TURTLE");
 	    return rdfDiSCO;
@@ -329,7 +334,7 @@ public class DiSCOApiService {
 	 */
     @POST
     @Path("/")
-    @Consumes({"application/rdf+xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
+    @Consumes({"application/rdf+xml;charset=UTF-8;","application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
     public Response createRMapDiSCOFromRdfXml(InputStream discoRdf) throws RMapApiException {
     	Response createResponse = responseManager.createRMapDiSCO(discoRdf, "RDFXML");
 		return createResponse;
@@ -344,7 +349,7 @@ public class DiSCOApiService {
 	 */
 	@POST
 	@Path("/")
-	@Consumes({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
+	@Consumes({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
 	public Response createRMapDiSCOFromJsonLD(InputStream discoRdf) throws RMapApiException {
 		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "JSONLD");
 		return createResponse;
@@ -359,7 +364,7 @@ public class DiSCOApiService {
 	 */
 	@POST
 	@Path("/")
-    @Consumes({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
+    @Consumes({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
 	public Response createRMapDiSCOFromNquads(InputStream discoRdf) throws RMapApiException {
 		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "RDFNQUADS");
 		return createResponse;
@@ -374,7 +379,7 @@ public class DiSCOApiService {
 	 */
 	@POST
 	@Path("/")
-    @Consumes({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
+    @Consumes({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.disco+turtle;charset=UTF-8;"})
 	public Response createRMapDiSCOFromTurtle(InputStream discoRdf) throws RMapApiException {
 		Response createResponse = responseManager.createRMapDiSCO(discoRdf, "TURTLE");
 		return createResponse;
@@ -400,7 +405,7 @@ public class DiSCOApiService {
 	 */
     @POST
     @Path("/{discoid}")
-    @Consumes({"application/rdf+xml;charset=UTF-8;","vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
+    @Consumes({"application/rdf+xml;charset=UTF-8;","application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;"})
     public Response updateRMapDiSCOFromXML(@PathParam("discoid") String origDiscoId, InputStream discoRdf) throws RMapApiException {
     	Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "RDFXML");
 		return updateResponse;
@@ -415,7 +420,7 @@ public class DiSCOApiService {
 	 */
 	@POST
 	@Path("/{discoid}")
-	@Consumes({"application/ld+json;charset=UTF-8;","vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
+	@Consumes({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.disco+ld+json;charset=UTF-8;"})
 	public Response updateRMapDiSCOFromJsonLD(@PathParam("discoid") String origDiscoId, InputStream discoRdf) throws RMapApiException {
 		Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "JSONLD");
 		return updateResponse;
@@ -430,7 +435,7 @@ public class DiSCOApiService {
 	 */
 	@POST
 	@Path("/{discoid}")
-	@Consumes({"application/n-quads;charset=UTF-8;","vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
+	@Consumes({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.disco+n-quads;charset=UTF-8;"})
 	public Response updateRMapDiSCOFromNquads(@PathParam("discoid") String origDiscoId, InputStream discoRdf) throws RMapApiException {
 		Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "RDFNQUADS");
 		return updateResponse;
@@ -445,7 +450,7 @@ public class DiSCOApiService {
 	 */
 	@POST
 	@Path("/{discoid}")
-	@Consumes({"text/turtle;charset=UTF-8;","vnd.rmap-project.disco+turtle;charset=UTF-8;"})
+	@Consumes({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.disco+turtle;charset=UTF-8;"})
 	public Response updateRMapDiSCOFromRdfXml(@PathParam("discoid") String origDiscoId, InputStream discoRdf) throws RMapApiException {
 		Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, "RDFXML");
 		return updateResponse;

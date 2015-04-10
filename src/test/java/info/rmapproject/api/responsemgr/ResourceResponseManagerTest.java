@@ -75,9 +75,30 @@ public class ResourceResponseManagerTest {
 		String body = response.getEntity().toString();
 		assertTrue(location.contains("resource"));
 		assertTrue(body.contains("rmap:Objects"));
+		assertEquals(200, response.getStatus());		
+	}
+	
+
+	@Test
+	public void testGetRMapResourceRelatedStmts() {
+		Response response = null;
+		try {
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.STATEMENTS, ListType.JSON, null);
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+
+		assertNotNull(response);
+		String location = response.getLocation().toString();
+		String body = response.getEntity().toString();
+		assertTrue(location.contains("resource"));
+		assertTrue(body.contains("rmap:Objects"));
 		assertEquals(200, response.getStatus());
 		
 		
 	}
+	
+	
 
 }

@@ -120,9 +120,10 @@ public class StatementResponseManager {
 			}
 			
 			URI uriStatementUri = null;
+			String strStatementUriDecoded = null;
 			try {
-				strStatementUri = URLDecoder.decode(strStatementUri, "UTF-8");
-				uriStatementUri = new URI(strStatementUri);
+				strStatementUriDecoded = URLDecoder.decode(strStatementUri, "UTF-8");
+				uriStatementUri = new URI(strStatementUriDecoded);
 			}
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
@@ -152,11 +153,11 @@ public class StatementResponseManager {
 
     		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
     		String eventUrl = URLUtils.getStmtBaseUrl() + strStatementUri + "/events";
-        	linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
+        	linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     				   	
 		    response = Response.status(Response.Status.OK)
 						.entity(statementOutput.toString())
-						.location(new URI(URLUtils.makeStmtUrl(strStatementUri)))
+						.location(new URI(URLUtils.makeStmtUrl(strStatementUriDecoded)))
         				.header("Link",linkRel)						//switch this to link() or links()?
         				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
 						.build();
@@ -195,8 +196,9 @@ public class StatementResponseManager {
 			}		
 			
 			URI uriStatementUri = null;
+			String strDecodedStatementUri = null;
 			try {
-				strStatementUri = URLDecoder.decode(strStatementUri, "UTF-8");
+				strDecodedStatementUri = URLDecoder.decode(strStatementUri, "UTF-8");
 				uriStatementUri = new URI(strStatementUri);
 			}
 			catch (Exception ex)  {
@@ -210,12 +212,12 @@ public class StatementResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
     		}
     		
-    		String linkRel = "<" + status.toString() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = URLUtils.getStmtBaseUrl() + "/events";
-        	linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
+    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+    		String eventUrl = URLUtils.getStmtBaseUrl() + strStatementUri + "/events";
+    		linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     				   	
 		    response = Response.status(Response.Status.OK)
-						.location(new URI(URLUtils.makeStmtUrl(strStatementUri)))
+						.location(new URI(URLUtils.makeStmtUrl(strDecodedStatementUri)))
         				.header("Link",linkRel)						//switch this to link() or links()?
         				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
 						.build();

@@ -111,8 +111,9 @@ public class ProfileResponseManager {
 			}
 			
 			URI uriProfileUri = null;
+			String strDecodedProfileUri = null;
 			try {
-				strProfileUri = URLDecoder.decode(strProfileUri, "UTF-8");
+				strDecodedProfileUri = URLDecoder.decode(strProfileUri, "UTF-8");
 				uriProfileUri = new URI(strProfileUri);
 			}
 			catch (Exception ex)  {
@@ -142,14 +143,16 @@ public class ProfileResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
     		}
     		
-    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = URLUtils.getProfileBaseUrl() + strProfileUri + "/events";
-        	linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
+    		//String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+    		//String eventUrl = URLUtils.getProfileBaseUrl() + strProfileUri + "/events";
+    		
+        	//linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     		    		
         	response = Response.status(Response.Status.OK)
         				.entity(profileOutput.toString())
-        				.location(new URI (URLUtils.makeProfileUrl(strProfileUri)))
+        				.location(new URI (URLUtils.makeProfileUrl(strDecodedProfileUri)))
         				.link(new URI (eventUrl), PROV.HAS_PROVENANCE.toString())
+        				.link(new URI (RMAP.NAMESPACE + status.toString().toLowerCase()), RMAP.HAS_STATUS.toString())
         				.build();		
 
 		}

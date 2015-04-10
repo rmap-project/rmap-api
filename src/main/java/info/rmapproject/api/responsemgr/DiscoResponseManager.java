@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -768,6 +769,8 @@ public class DiscoResponseManager {
 		StringBuilder links = new StringBuilder("");
 		//TODO: refactor this - too much repetition... but version code may be changing, so leave for now.
 
+		String strDiscoUri = uriDiscoUri.toString();
+		
 		initRMapService();
 
 		//get the DiSCO status link
@@ -802,9 +805,17 @@ public class DiscoResponseManager {
 			}
 			links.append(",<" + URLUtils.makeDiscoUrl(nextUri.toString()) + ">" + ";rel=\"successor-version\"");
 		}
-
+		
+		try {
+			strDiscoUri = URLEncoder.encode(strDiscoUri, "UTF-8");
+		}
+		catch (Exception ex)  {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_CANNOT_ENCODE_URL);
+		}		
+		
 		//get DiSCO event link
-		String eventUrl = URLUtils.getDiscoBaseUrl() + uriDiscoUri.toString() + "/events";
+		String eventUrl = URLUtils.getDiscoBaseUrl() + strDiscoUri + "/events";
+
 		links.append(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
 
 		return links.toString();	

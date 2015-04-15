@@ -2,8 +2,8 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.lists.BasicOutputType;
 import info.rmapproject.api.responsemgr.AgentResponseManager;
-import info.rmapproject.api.utils.BasicReturnType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -174,7 +174,7 @@ public class AgentApiService {
     @Path("/{agentUri}/profiles")
     @Produces("application/json;charset=UTF-8;")
     public Response getRMapAgentProfilesAsJSon(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response rdfAgent = responseManager.getRMapAgentRelatedProfiles(agentUri, BasicReturnType.JSON);
+    	Response rdfAgent = responseManager.getRMapAgentRepresentations(agentUri, BasicOutputType.JSON);
 	    return rdfAgent;
     }
     
@@ -190,7 +190,7 @@ public class AgentApiService {
     @Path("/{agentUri}/profiles")
     @Produces("text/plain;charset=UTF-8;")
     public Response getRMapAgentAsText(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response rdfAgent = responseManager.getRMapAgentRelatedProfiles(agentUri, BasicReturnType.PLAIN_TEXT);
+    	Response rdfAgent = responseManager.getRMapAgentRepresentations(agentUri, BasicOutputType.PLAIN_TEXT);
 	    return rdfAgent;
     }
     

@@ -2,20 +2,13 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.utils.BasicReturnType;
-import info.rmapproject.api.utils.URIListHandler;
-import info.rmapproject.api.utils.URLUtils;
-import info.rmapproject.core.exception.RMapDefectiveArgumentException;
+import info.rmapproject.api.lists.BasicOutputType;
 import info.rmapproject.core.exception.RMapException;
-import info.rmapproject.core.exception.RMapObjectNotFoundException;
-import info.rmapproject.core.exception.RMapProfileNotFoundException;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URLDecoder;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -404,7 +397,7 @@ public class ProfileResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapProfileEvents(String profileUri, BasicReturnType returnType) throws RMapApiException {
+	public Response getRMapProfileEvents(String profileUri, BasicOutputType returnType) throws RMapApiException {
 
 		Response response = null;
 		/*
@@ -477,12 +470,13 @@ public class ProfileResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapProfileRelatedIdentities(String profileUri, BasicReturnType returnType) throws RMapApiException {
+	public Response getRMapProfileRelatedIdentities(String profileUri, BasicOutputType returnType) throws RMapApiException {
 
 		Response response = null;
+		/*
 		try {
 			//assign default value when null
-			if (returnType==null)	{returnType=BasicReturnType.PLAIN_TEXT;}
+			if (returnType==null)	{returnType=BasicOutputType.PLAIN_TEXT;}
 			
 			if (profileUri==null || profileUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -506,7 +500,7 @@ public class ProfileResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_IDENTITYLIST_EMPTY); 
 			}	
 									
-			if (returnType==BasicReturnType.JSON)	{
+			if (returnType==BasicOutputType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, "rmap:Identities");				
 			}
 			else	{
@@ -536,6 +530,7 @@ public class ProfileResponseManager {
 		catch(Exception ex)	{
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
+		*/
     	return response;
 	}
 
@@ -549,6 +544,7 @@ public class ProfileResponseManager {
 	public Response getRMapProfilePreferredIdentity(String profileUri) throws RMapApiException {
 
 		Response response = null;
+		/*
 		try {			
 			if (profileUri==null || profileUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -594,6 +590,7 @@ public class ProfileResponseManager {
 		catch(Exception ex)	{
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
+		*/
     	return response;
 	}
 	

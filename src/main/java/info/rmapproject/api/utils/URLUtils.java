@@ -6,7 +6,6 @@ import info.rmapproject.core.exception.RMapException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Properties;
@@ -36,18 +35,26 @@ public class URLUtils {
 	}
 	
 	public static String getBaseUrl() throws RMapApiException {
-		if (!isInitialized){
-			init();
+		String baseUrl = null;
+		try {
+			if (!isInitialized){
+				init();
+			}
+			baseUrl = props.getProperty(BASE_URL_KEY);
+			if (baseUrl == null || baseUrl.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_BASEURL_MISSING);
+			}		
+			baseUrl = baseUrl.trim();
+			while (baseUrl.endsWith("/"))	{
+				baseUrl = baseUrl.substring(0, baseUrl.length()-1);	
+			}
+		}catch(RMapApiException ex) {
+			throw RMapApiException.wrap(ex);
 		}
-		String baseUrl = props.getProperty(BASE_URL_KEY);
-		if (baseUrl == null || baseUrl.length()==0)	{
-			throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_BASEURL_MISSING);
-		}		
-		baseUrl = baseUrl.trim();
-		while (baseUrl.endsWith("/"))	{
-			baseUrl = baseUrl.substring(0, baseUrl.length()-1);	
+		catch(Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
-		
+					
 		return baseUrl;
 	}
 	
@@ -113,21 +120,18 @@ public class URLUtils {
 		return stmtUrl;
 	}
 	
-	public static String makeResourceUrl(String uri) throws RMapException {
-		String stmtUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
+	public static String makeResourceUrl(String uri) throws RMapApiException {
+		String stmtUrl = appendEncodedUriToURL(getResourceBaseUrl(),uri);
 		return stmtUrl;
 	}
 	
-	public static String appendEncodedUriToURL(String baseURL, String objUri) {
+	public static String appendEncodedUriToURL(String baseURL, String objUri) throws RMapApiException {
 		String url = null;
 		try {
 			url = baseURL + URLEncoder.encode(objUri,"UTF-8");
 		}
-		catch (UnsupportedEncodingException ee){
-			throw new RMapException("Cannot encode URI");			
-		}
 		catch (Exception e)	{
-			throw new RMapException("Error building URL");
+			throw new RMapApiException(ErrorCode.ER_CANNOT_ENCODE_URL);
 		}
 		return url;
 	}
@@ -137,21 +141,31 @@ public class URLUtils {
 	 * 
 	 * REMOVE THIS!
 	 */
-	public static URI getDefaultSystemAgentURI() throws RMapException, Exception{
-		if (!isInitialized){
-			init();
+	public static URI getDefaultSystemAgentURI() throws RMapApiException {
+		URI uriDefaultSysAgentURI = null;
+		try {
+			if (!isInitialized){
+				init();
+			}
+			
+			String defaultSysAgentURI = props.getProperty(DEFAULT_SYSAGENT_KEY);
+			if (defaultSysAgentURI == null || defaultSysAgentURI.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_DEFAULT_SYSTEM_AGENT_SET);
+			}		
+			defaultSysAgentURI = defaultSysAgentURI.trim();
+			while (defaultSysAgentURI.endsWith("/"))	{
+				defaultSysAgentURI = defaultSysAgentURI.substring(0, defaultSysAgentURI.length()-1);	
+			}
+			uriDefaultSysAgentURI = new URI(defaultSysAgentURI);
+		}
+		catch(RMapApiException ex){
+			throw RMapApiException.wrap(ex);			
+		}
+		catch(Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		
-		String defaultSysAgentURI = props.getProperty(DEFAULT_SYSAGENT_KEY);
-		if (defaultSysAgentURI == null || defaultSysAgentURI.length()==0)	{
-			throw new RMapException("Default System Agent property not set");
-		}		
-		defaultSysAgentURI = defaultSysAgentURI.trim();
-		while (defaultSysAgentURI.endsWith("/"))	{
-			defaultSysAgentURI = defaultSysAgentURI.substring(0, defaultSysAgentURI.length()-1);	
-		}
-		
-		return new URI(defaultSysAgentURI);
+		return uriDefaultSysAgentURI;
 	}
 	
 

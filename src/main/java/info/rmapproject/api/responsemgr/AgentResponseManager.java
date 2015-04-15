@@ -1,8 +1,9 @@
 package info.rmapproject.api.responsemgr;
 
+
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.utils.BasicReturnType;
+import info.rmapproject.api.lists.BasicOutputType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapAgentNotFoundException;
@@ -174,7 +175,7 @@ public class AgentResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapAgentRelatedProfiles(String strAgentUri, BasicReturnType returnType) throws RMapApiException	{
+	public Response getRMapAgentRepresentations(String strAgentUri, BasicOutputType returnType) throws RMapApiException	{
 
 		Response response = null;
 		
@@ -196,7 +197,7 @@ public class AgentResponseManager {
 			
 			String outputString="";
 			
-			List <URI> uriList = rmapService.getAgentRelatedProfiles(uriAgentUri);
+			List <URI> uriList = rmapService.getAgentRepresentations(uriAgentUri);
 			if (uriList == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_PROFILELIST_RETURNED_NULL);
 			}
@@ -204,7 +205,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_AGENT_RELATED_PROFILES_FOUND);				
 			}
 			
-			if (returnType == BasicReturnType.JSON)	{
+			if (returnType == BasicOutputType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, "rmap:Profiles");				
 			}
 			else	{

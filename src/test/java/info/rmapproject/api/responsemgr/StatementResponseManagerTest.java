@@ -54,7 +54,7 @@ public class StatementResponseManagerTest {
 			+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
 			+ " xmlns:fabio=\"http://purl.org/spar/fabio/\">"  
 			+ "<rmap:DiSCO>"  
-			+ "<dcterms:creator rdf:resource=\"http://orcid.org/00000-00000-00000-00000\"/>"
+			+ "<dcterms:creator rdf:resource=\"http://orcid.org/0000-0000-0000-0000\"/>"
 			+ "<dc:description>"  
 			+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
 			+ "</dc:description>"  

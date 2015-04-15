@@ -6,8 +6,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.utils.RdfMediaType;
-import info.rmapproject.api.utils.RdfReturnType;
+import info.rmapproject.api.lists.RdfMediaType;
+import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
@@ -43,7 +43,7 @@ public class DiscoResponseManagerTest {
 			+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
 			+ " xmlns:fabio=\"http://purl.org/spar/fabio/\">"  
 			+ "<rmap:DiSCO>"  
-			+ "<dcterms:creator rdf:resource=\"http://orcid.org/00000-00000-00000-00000\"/>"
+			+ "<dcterms:creator rdf:resource=\"http://orcid.org/0000-0000-0000-0000\"/>"
 			+ "<dc:description>"  
 			+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
 			+ "</dc:description>"  
@@ -166,7 +166,7 @@ public class DiscoResponseManagerTest {
 	public void testGetRMapDisco() throws Exception{
 
     	Response response=null;
-    	RdfReturnType returnType = null;
+    	RdfType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
    		if (matchingType!=null){
@@ -203,6 +203,78 @@ public class DiscoResponseManagerTest {
 		assertEquals(200, response.getStatus());
 	}
 	
+
+	/**
+	 * Tests whether can retrieve response for updated DiSCO 
+	 */
+	@Test
+	public void testGetRMapDiscoThatHasBeenUpdated() throws Exception{
+
+    	Response response=null;
+    	RdfType returnType = null;
+    	
+   		RdfMediaType matchingType = RdfMediaType.get("application/xml");
+   		if (matchingType!=null){
+    		returnType=matchingType.getReturnType();
+    	}
+   		
+   		String discoURI = "ark:/27927/r8rqxpynv0";
+		
+		try {
+			String encodedUri = URLEncoder.encode(discoURI, "UTF-8");
+			response = responseManager.getRMapDiSCO(encodedUri,returnType);
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+
+		assertNotNull(response);
+		String location = response.getLocation().toString();
+		String body = response.getEntity().toString();
+		assertTrue(location.contains("disco"));
+		assertTrue(body.contains("DiSCO"));
+		assertEquals(200, response.getStatus());
+	}
+	
+
+
+	/**
+	 * Tests whether appropriate not found error is generated when you get a disco that 
+	 * doesn't exist in the database.  
+	 */
+	@Test
+	public void testGetRMapDiscoThatDoesntExist() throws Exception{
+
+    	Response response=null;
+    	RdfType returnType = null;
+    	
+   		RdfMediaType matchingType = RdfMediaType.get("application/xml");
+   		if (matchingType!=null){
+    		returnType=matchingType.getReturnType();
+    	}
+   		
+   		String discoURI = "ark:/27927/doesnotexist";
+		boolean correctErrorThrown = false;
+   		
+		try {
+			String encodedUri = URLEncoder.encode(discoURI, "UTF-8");
+			response = responseManager.getRMapDiSCO(encodedUri,returnType);
+		} catch (RMapApiException e) {
+			assertEquals(e.getErrorCode(), ErrorCode.ER_DISCO_OBJECT_NOT_FOUND);
+			e.printStackTrace();			
+			correctErrorThrown=true;
+		}  catch (Exception e) {
+			System.out.print(e.getMessage());
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		} 
+		
+		if (!correctErrorThrown)	{
+			fail("An exception should have been thrown!"); 
+		}
+
+	}
+	
 	
 	
 
@@ -214,7 +286,7 @@ public class DiscoResponseManagerTest {
 			createAgentforTest();
 			
 			InputStream stream = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, "RDFXML");
+			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML);
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -237,7 +309,7 @@ public class DiscoResponseManagerTest {
 			createAgentforTest();
 
 			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, "RDFXML");
+			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML);
 			
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);

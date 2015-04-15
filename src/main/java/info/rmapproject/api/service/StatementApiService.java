@@ -2,8 +2,8 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.lists.BasicOutputType;
 import info.rmapproject.api.responsemgr.StatementResponseManager;
-import info.rmapproject.api.utils.BasicReturnType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -227,7 +227,7 @@ public class StatementApiService {
     @Path("/{stmtUri}/events")
 	@Produces("application/json")
     public Response getRMapStmtEventsAsJSON(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, BasicReturnType.JSON);
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, BasicOutputType.JSON);
     	return eventList;
     }
 
@@ -242,7 +242,7 @@ public class StatementApiService {
     @Path("/{stmtUri}/events")
     @Produces("text/plain")
     public Response getRMapStmtEventsAsText(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, BasicReturnType.PLAIN_TEXT);
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, BasicOutputType.PLAIN_TEXT);
     	return eventList;
     }
 

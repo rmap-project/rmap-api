@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import info.rmapproject.api.utils.FilterObjType;
-import info.rmapproject.api.utils.BasicReturnType;
+import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.FilterObjType;
 
 import javax.ws.rs.core.Response;
 
@@ -64,7 +64,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.ALL, BasicReturnType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Forcid.org%2F0000-0000-0000-0000", FilterObjType.ALL, BasicOutputType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -83,7 +83,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedStmts() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.STATEMENTS, BasicReturnType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.STATEMENTS, BasicOutputType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -93,7 +93,7 @@ public class ResourceResponseManagerTest {
 		String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
 		assertTrue(location.contains("resource"));
-		assertTrue(body.contains("rmap:Objects"));
+		assertTrue(body.contains("rmap:Stmts"));
 		assertEquals(200, response.getStatus());
 		
 		

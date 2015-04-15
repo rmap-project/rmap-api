@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Provider
-public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException>
+public class RMapApiExceptionMapper implements ExceptionMapper<RMapApiException>
 {
 	private final Logger log = LogManager.getLogger(this.getClass());
 	

@@ -71,14 +71,13 @@ public class ResourceResponseManagerTest {
 		}
 
 		assertNotNull(response);
-		String location = response.getLocation().toString();
+		//String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
-		assertTrue(location.contains("resource"));
+		//assertTrue(location.contains("resource"));
 		assertTrue(body.contains("rmap:Objects"));
 		assertEquals(200, response.getStatus());		
 	}
 	
-
 	@Test
 	public void testGetRMapResourceRelatedStmts() {
 		Response response = null;
@@ -90,9 +89,9 @@ public class ResourceResponseManagerTest {
 		}
 
 		assertNotNull(response);
-		String location = response.getLocation().toString();
+		//String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
-		assertTrue(location.contains("resource"));
+		//assertTrue(location.contains("resource"));
 		assertTrue(body.contains("rmap:Stmts"));
 		assertEquals(200, response.getStatus());
 		

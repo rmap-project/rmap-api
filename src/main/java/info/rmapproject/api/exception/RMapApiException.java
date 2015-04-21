@@ -11,7 +11,7 @@ import java.util.TreeMap;
  * Note: Code derived from: https://northconcepts.com/downloads/file/blog/exceptions/NorthConcepts-Exceptions.zip 
  * Therefore it should be stated that: The source code is licensed under the terms of the Apache License, Version 2.0.
  */
-public class RMapApiException extends RuntimeException {
+public class RMapApiException extends Exception {
 
     private static final long serialVersionUID = 1L;
 

@@ -73,10 +73,11 @@ public class DiscoResponseManager {
 	public Response getDiSCOServiceOptions() throws RMapApiException {
 		Response response = null;
 		try {				
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.entity("{\"description\":\"will show copy of swagger content\"}")
 					.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
-					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/disco"),DC.DESCRIPTION.toString())
+					.header("Link",linkRel)	
 					.build();
 
 		}
@@ -95,9 +96,10 @@ public class DiscoResponseManager {
 	public Response getDiSCOServiceHead() throws RMapApiException	{
 		Response response = null;
 		try {				
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
-					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/disco"),DC.DESCRIPTION.toString())
+					.header("Link",linkRel)	
 					.build();
 		}
 		catch (Exception ex){
@@ -533,7 +535,7 @@ public class DiscoResponseManager {
 			}
 			else if (newStatus == "INACTIVE")	{
 				//TODO:this is incorrect - currently no inactivate disco method, so this is a placeholder!
-				discoEvent = (RMapEvent)rmapService.updateDiSCO(new RMapUri(SYSAGENT_URI), uriDiscoUri, null);						
+				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(new RMapUri(SYSAGENT_URI), uriDiscoUri);						
 			}
 				
 			if (discoEvent == null) {
@@ -782,29 +784,21 @@ public class DiscoResponseManager {
 		links.append("<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"");
 
 		//get DiSCO version links
-		RMapDiSCO latestDisco = rmapService.getDiSCOLatestVersion(uriDiscoUri);
-		if (latestDisco!=null) {
-			URI latestUri = latestDisco.getId();
-			if (latestUri==null || latestUri.toString().length()==0){
-				throw new RMapApiException(ErrorCode.ER_CORE_DISCO_VERSION_ID_MALFORMED);  				
+		try {
+			URI latestUri = rmapService.getDiSCOIdLatestVersion(uriDiscoUri);
+			if (latestUri!=null && latestUri.toString().length()>0) {
+				links.append(",<" + URLUtils.makeDiscoUrl(latestUri.toString()) + ">" + ";rel=\"latest-version\"");  			
 			}
-			links.append(",<" + URLUtils.makeDiscoUrl(latestUri.toString()) + ">" + ";rel=\"latest-version\"");  			
-		}
-		RMapDiSCO previousDisco = rmapService.getDiSCOPreviousVersion(uriDiscoUri);
-		if (previousDisco!=null) {
-			URI prevUri = previousDisco.getId();
-			if (prevUri==null || prevUri.toString().length()==0){
-				throw new RMapApiException(ErrorCode.ER_CORE_DISCO_VERSION_ID_MALFORMED);  				
+			URI prevUri = rmapService.getDiSCOIdPreviousVersion(uriDiscoUri);
+			if (prevUri!=null && prevUri.toString().length()>0) {
+				links.append(",<" + URLUtils.makeDiscoUrl(prevUri.toString()) + ";rel=\"predecessor-version\"");
 			}
-			links.append(",<" + URLUtils.makeDiscoUrl(prevUri.toString()) + ";rel=\"predecessor-version\"");
-		}
-		RMapDiSCO nextDisco = rmapService.getDiSCONextVersion(uriDiscoUri);
-		if (nextDisco!=null){
-			URI nextUri = nextDisco.getId();
-			if (nextUri==null || nextUri.toString().length()==0){
-				throw new RMapApiException(ErrorCode.ER_CORE_DISCO_VERSION_ID_MALFORMED);  				
+			URI nextUri = rmapService.getDiSCOIdNextVersion(uriDiscoUri);
+			if (nextUri!=null && nextUri.toString().length()>0) {
+				links.append(",<" + URLUtils.makeDiscoUrl(nextUri.toString()) + ";rel=\"successor-version\"");
 			}
-			links.append(",<" + URLUtils.makeDiscoUrl(nextUri.toString()) + ">" + ";rel=\"successor-version\"");
+		} catch (Exception ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_CORE_COULD_NOT_RETRIEVE_DISCO_VERSION);
 		}
 		
 		try {

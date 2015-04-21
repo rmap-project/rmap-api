@@ -60,10 +60,11 @@ public class EventResponseManager {
 	public Response getEventServiceOptions() throws RMapApiException {
 		Response response = null;
 		try {				
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.entity("{\"description\":\"will show copy of swagger content\"}")
 					.header("Allow", "HEAD,OPTIONS,GET")
-					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/event"),DC.DESCRIPTION.toString())
+					.header("Link",linkRel)	
 					.build();
 		}
 		catch (Exception ex){
@@ -81,9 +82,10 @@ public class EventResponseManager {
 	public Response getEventServiceHead() throws RMapApiException	{
 		Response response = null;
 		try {				
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET")
-					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/event"),DC.DESCRIPTION.toString())
+					.header("Link",linkRel)	
 					.build();
 		}
 		catch (Exception ex){
@@ -101,7 +103,7 @@ public class EventResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapEvent(String strEventUri, String acceptsType)	{
+	public Response getRMapEvent(String strEventUri, String acceptsType) throws RMapApiException	{
 		Response response = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
@@ -169,7 +171,7 @@ public class EventResponseManager {
 	 * @param returnType
 	 * @return Response
 	 */
-	public Response getRMapEventRelatedObjs(String strEventUri, String objType, BasicOutputType returnType)	{
+	public Response getRMapEventRelatedObjs(String strEventUri, String objType, BasicOutputType returnType) throws RMapApiException	{
 		Response response = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{

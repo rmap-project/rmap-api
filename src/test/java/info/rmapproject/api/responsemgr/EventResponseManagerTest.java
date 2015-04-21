@@ -153,9 +153,9 @@ public class EventResponseManagerTest {
 		}
 
 		assertNotNull(response);
-		String location = response.getLocation().toString();
+		//String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
-		assertTrue(location.contains("event"));
+		//assertTrue(location.contains("event"));
 		assertTrue(body.contains("<eventTargetType xmlns=\"http://rmap-project.org/rmap/terms/\">http://rmap-project.org/rmap/terms/1.0/DiSCO</eventTargetType>"));
 		assertEquals(200, response.getStatus());
 	}

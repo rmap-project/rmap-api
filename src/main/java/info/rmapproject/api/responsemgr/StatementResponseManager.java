@@ -67,10 +67,11 @@ public class StatementResponseManager {
 	public Response getStatementServiceOptions() throws RMapApiException {
 		Response response = null;
 		try {				
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.entity("{\"description\":\"will show copy of swagger content\"}")
 					.header("Allow", "HEAD,OPTIONS,GET")
-					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/statement"),DC.DESCRIPTION.toString())
+					.header("Link",linkRel)	
 					.build();
 
 		}
@@ -88,10 +89,11 @@ public class StatementResponseManager {
 	 */
 	public Response getStatementServiceHead() throws RMapApiException	{
 		Response response = null;
-		try {				
+		try {		
+			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";		
 			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET")
-					.link(new URI("http://rmapdns.ddns.net:8080/swagger/docs/statement"),DC.DESCRIPTION.toString())
+					.header("Link",linkRel)	
 					.build();
 		}
 		catch (Exception ex){

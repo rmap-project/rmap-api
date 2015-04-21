@@ -78,11 +78,11 @@ public class HttpTypeMediator {
 	public static RdfType getRdfTypeOfRequest(HttpHeaders headers) throws RMapApiException	{
 		RdfType requestType = null;
 		try {
-			String contentType = headers.getHeaderString(HttpHeaders.CONTENT_TYPE);
-			RdfMediaType matchingType = RdfMediaType.get(contentType);
+			List <String> contentType = headers.getRequestHeader(HttpHeaders.CONTENT_TYPE);
+			RdfMediaType matchingType = RdfMediaType.get(contentType.get(0));
 			if (matchingType!=null){
 				requestType=matchingType.getReturnType();
-			}    		
+			}
 			
 			if (requestType==null){
 				throw new RMapApiException(ErrorCode.ER_CANNOT_ACCEPT_CONTENTTYPE_PROVIDED);

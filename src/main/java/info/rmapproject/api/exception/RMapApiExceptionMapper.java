@@ -16,26 +16,19 @@ public class RMapApiExceptionMapper implements ExceptionMapper<RMapApiException>
     @Override
     public Response toResponse(RMapApiException exception)
     {
-    	Response response = null;
-    	try{
-	    	ErrorCode errorCode = exception.getErrorCode();
-	    	Status errType = errorCode.getStatus();
-	    	String rmapApiMsg = ErrorMessage.getUserText(errorCode);
-	    	if (rmapApiMsg == null)	{
-	    		rmapApiMsg = "";
-	    	}
-	    	String exMsg = exception.getMessage();
-	    	if (exMsg == null)	{
-	    		exMsg = "";
-	    	}
-	    	response = Response.status(errType).entity(rmapApiMsg + "; " + exMsg).build(); 
-	        log.fatal(rmapApiMsg + "; " + exMsg, exception);
+    	ErrorCode errorCode = exception.getErrorCode();
+    	Status errType = errorCode.getStatus();
+    	String rmapApiMsg = ErrorMessage.getUserText(errorCode);
+    	if (rmapApiMsg == null)	{
+    		rmapApiMsg = "";
     	}
-    	catch (Exception ex) {
-    		String msg = "Error during exception handling. Customized message could not be constructed. System message: " + ex.getMessage();
-	    	response = Response.status(500).entity(msg).build();    
-	        log.fatal(msg, ex);
+    	String exMsg = exception.getMessage();
+    	if (exMsg == null)	{
+    		exMsg = "";
     	}
+    	Response response = Response.status(errType).type("text/plain").entity(rmapApiMsg + "; " + exMsg).build(); 
+        log.fatal(rmapApiMsg + "; " + exMsg, exception);
+    	
     	return response;
     }
 }

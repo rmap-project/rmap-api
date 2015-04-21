@@ -39,7 +39,12 @@ public class DiSCOApiService {
 			responseManager = new DiscoResponseManager();
 		}
 		catch (Exception e){
-			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);
+			try {
+				throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);
+			} catch (RMapApiException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 	}
 	

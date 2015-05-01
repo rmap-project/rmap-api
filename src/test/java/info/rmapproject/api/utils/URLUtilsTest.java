@@ -49,5 +49,4 @@ public class URLUtilsTest {
 		assertFalse(baseURL.endsWith("/resource/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
-
 }

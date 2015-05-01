@@ -1,22 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxrs="http://cxf.apache.org/jaxrs" xmlns:context="http://www.springframework.org/schema/context" xsi:schemaLocation=" http://www.springframework.org/schema/beans  http://www.springframework.org/schema/beans/spring-beans-3.0.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd">
-    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:jaxrs="http://cxf.apache.org/jaxrs" 
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://cxf.apache.org/jaxrs http://cxf.apache.org/schemas/jaxrs.xsd"> 
+    
+    <!-- 
+    xmlns:aop="http://www.springframework.org/schema/aop"
+	#schemaLocations:
+	http://www.springframework.org/schema/aop  
+	http://www.springframework.org/schema/aop/spring-aop.xsd 
+	 -->
+    
+  <import resource="classpath:META-INF/cxf/cxf.xml"/>
     <context:property-placeholder/>
     <context:annotation-config/>
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer"/>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
+	
+	<bean id="authUserToAgentMediator" class="info.rmapproject.api.authentication.AuthUserToAgentMediator"/>
+	
+	<!-- <bean id="authUserToAgentMediator" class="info.rmapproject.api.authentication.AuthUserToAgentMediator">
+		<property name="propertiesFileName" value="/rmap/apache/tomcat7/conf/rmap_apitest_userNameToSysAgent.map"/>
+	</bean>	 -->
+	
+	<bean id="defaultUsers" class="info.rmapproject.api.authentication.CreateDefaultUsers" init-method="createDefaultUsers">
+  		<constructor-arg ref="authUserToAgentMediator"/>
+  	</bean>
+  		
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
             <bean class="info.rmapproject.api.service.DiSCOApiService"/>
             <bean class="info.rmapproject.api.service.EventApiService"/>
             <bean class="info.rmapproject.api.service.AgentApiService"/>
-            <bean class="info.rmapproject.api.service.ProfileApiService"/>
             <bean class="info.rmapproject.api.service.StatementApiService"/>
             <bean class="info.rmapproject.api.service.ResourceApiService"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
-    		<bean class="info.rmapproject.api.exception.RMapApiExceptionMapper"/>
+       		<bean class="info.rmapproject.api.exception.RMapApiExceptionHandler"/>
         </jaxrs:providers>
+		<jaxrs:inInterceptors>
+		    <ref bean="securityInterceptor"/>
+		</jaxrs:inInterceptors>
     </jaxrs:server>
+	<bean id="securityInterceptor" class="info.rmapproject.api.authentication.AuthenticationInterceptor">
+		<property name="users">
+			<map>
+				<entry key="ieee" value="ieee"/>
+				<entry key="jhu" value="jhu"/>
+				<entry key="portico" value="portico"/>
+			</map>
+		</property>
+	</bean>   
+	
+	
+	
+    <!-- 
+    aspect example, in case ever want to try this...
+	<aop:config>
+		<aop:aspect id="loggingAspect" ref="logging">
+			<aop:before method="log" pointcut="execution(* info.rmapproject.api.service.*.api*(..))"/>
+		</aop:aspect>
+	</aop:config>  
+   <bean id="logging" 
+         class="info.rmapproject.api.logging.LoggingAspect"/> -->
+   <!--   
+   <aop:config>
+   		<aop:aspect id="sysAgentAspect" ref="checkSysAgent">
+   			<aop:before method="verifyRMapSystemAgent" 
+   				pointcut="execution(* info.rmap.api.responsemgr.DiscoResponseManager.*(..))"/>
+   		</aop:aspect>
+   </aop:config>
+   <bean id="checkSysAgent" class="info.rmapproject.api.authentication.SystemAgentAspect"/>
+   --> 
+	
 </beans>
+

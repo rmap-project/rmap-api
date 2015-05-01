@@ -269,7 +269,7 @@ public class AgentResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response createRMapAgent(InputStream agentRdf, RdfType contentType) throws RMapApiException {
+	public Response createRMapAgent(InputStream agentRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
 	Response response = null;
 	
 		try	{
@@ -279,24 +279,24 @@ public class AgentResponseManager {
 			if (contentType == null){
 				throw new RMapApiException(ErrorCode.ER_NO_CONTENT_TYPE_PROVIDED);
 			}
+			if (sysAgentUri == null){
+				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED);
+			}
 			
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			if (rdfHandler ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
-			
-			//TODO This is temporary - SYSAGENT will eventually come from oauth module
-			URI SYSAGENT_URI; 
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
-						
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(SYSAGENT_URI, agentRdf, URLUtils.getAgentBaseUrl(), contentType.toString());
+						 						
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(sysAgentUri, agentRdf, URLUtils.getAgentBaseUrl(), contentType.toString());
 			if (rmapAgent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_AGENT_FAILED);
 			}  
-			
+
 			initRMapService();
 			
-			RMapEventCreation agentEvent = (RMapEventCreation)rmapService.createAgent(SYSAGENT_URI, rmapAgent);
+			
+			RMapEventCreation agentEvent = (RMapEventCreation)rmapService.createAgent(sysAgentUri, rmapAgent);
 			if (agentEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATEAGENT_NOT_COMPLETED);
 			} 
@@ -354,13 +354,16 @@ public class AgentResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response tombstoneRMapAgent(String agentUri) throws RMapApiException {
+	public Response tombstoneRMapAgent(String agentUri, URI sysAgentUri) throws RMapApiException {
 		Response response = null;
 
 		try	{		
 			if (agentUri==null || agentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}	
+			if (sysAgentUri == null){
+				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED);
+			}
 			
 			URI uriAgentUri = null;
 			try {
@@ -370,15 +373,11 @@ public class AgentResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
-						
-			//TODO This is temporary - SYSAGENT will eventually come from oauth module
-			URI SYSAGENT_URI; 
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 
+			initRMapService();
+			
 			RMapEvent agentEvent = null;
-			agentEvent = (RMapEvent)rmapService.deleteAgent(SYSAGENT_URI, uriAgentUri);					
+			agentEvent = (RMapEvent)rmapService.deleteAgent(sysAgentUri, uriAgentUri);					
 				
 			if (agentEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEAGENT_NOT_COMPLETED);

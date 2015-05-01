@@ -46,10 +46,10 @@ public class DiscoResponseManager {
 
 
 	private static RMapService rmapService = null;
-
+	
 	public DiscoResponseManager() {
 	}		
-
+	
 	/**
 	 * Creates new RMapService object if not already initiated.
 	 * @throws RMapApiException
@@ -284,7 +284,7 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response createRMapDiSCO(InputStream discoRdf, RdfType contentType) throws RMapApiException {
+	public Response createRMapDiSCO(InputStream discoRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
 		Response response = null;
 		try	{ 
 			if (discoRdf == null || discoRdf.toString().length()==0){
@@ -293,7 +293,10 @@ public class DiscoResponseManager {
 			if (contentType == null){
 				throw new RMapApiException(ErrorCode.ER_NO_CONTENT_TYPE_PROVIDED);
 			}
-
+			if (sysAgentUri==null)	{
+				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED); 
+			}	
+						
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			if (rdfHandler ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
@@ -303,13 +306,9 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
 
-			initRMapService();
-
-			//TODO This is temporary - SYSAGENT will eventually come from oauth module
-			URI SYSAGENT_URI; 
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
-
-			RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(new RMapUri(SYSAGENT_URI), rmapDisco);
+			initRMapService();	
+			
+			RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(new RMapUri(sysAgentUri), rmapDisco);
 			if (discoEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATEDISCO_NOT_COMPLETED);
 			} 
@@ -369,7 +368,7 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, RdfType contentType) throws RMapApiException {
+	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
 		Response response = null;
 
 		try	{		
@@ -382,6 +381,10 @@ public class DiscoResponseManager {
 			if (contentType == null){
 				throw new RMapApiException(ErrorCode.ER_NO_CONTENT_TYPE_PROVIDED);
 			}
+			if (sysAgentUri==null)	{
+				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED); 
+			}	
+			initRMapService();			
 			
 			URI uriOrigDiscoUri = null;
 			try {
@@ -400,16 +403,10 @@ public class DiscoResponseManager {
 			if (newRmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
-
-			initRMapService();
-
-			//TODO This is temporary - SYSAGENT will eventually come from oauth module
-			URI SYSAGENT_URI;
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 			
-			RMapEvent discoEvent = rmapService.updateDiSCO(new RMapUri(SYSAGENT_URI), 
-					uriOrigDiscoUri, 
-					newRmapDisco);
+			RMapEvent discoEvent = rmapService.updateDiSCO(new RMapUri(sysAgentUri), 
+															uriOrigDiscoUri, 
+															newRmapDisco);
 			
 			if (discoEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEDISCO_NOT_COMPLETED);
@@ -483,19 +480,18 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response tombstoneRMapDiSCO(String discoUri) throws RMapApiException {
-		return changeRMapDiSCOStatus(discoUri, "TOMBSTONED");
+	public Response tombstoneRMapDiSCO(String discoUri, URI sysAgentUri) throws RMapApiException {
+		return changeRMapDiSCOStatus(discoUri, "TOMBSTONED", sysAgentUri);
 	}
 
-	
 	/**
 	 * Sets status of RMap:DiSCO to inactive.  
 	 * @param discoUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response inactivateRMapDiSCO(String discoUri) throws RMapApiException {
-		return changeRMapDiSCOStatus(discoUri, "INACTIVE");
+	public Response inactivateRMapDiSCO(String discoUri, URI sysAgentUri) throws RMapApiException {
+		return changeRMapDiSCOStatus(discoUri, "INACTIVE", sysAgentUri);
 	}
 	
 
@@ -506,13 +502,16 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	private Response changeRMapDiSCOStatus(String discoUri, String newStatus) throws RMapApiException {
+	private Response changeRMapDiSCOStatus(String discoUri, String newStatus, URI sysAgentUri) throws RMapApiException {
 		Response response = null;
 
 		try	{		
 			if (discoUri==null || discoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}	
+			if (sysAgentUri==null)	{
+				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED); 
+			}		
 			
 			URI uriDiscoUri = null;
 			try {
@@ -522,20 +521,16 @@ public class DiscoResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
-						
-			//TODO This is temporary - SYSAGENT will eventually come from oauth module
-			URI SYSAGENT_URI; 
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
 
+			initRMapService();		
+			
 			RMapEvent discoEvent = null;
 			if (newStatus == "TOMBSTONED")	{
-				discoEvent = (RMapEvent)rmapService.deleteDiSCO(uriDiscoUri, new RMapUri(SYSAGENT_URI));					
+				discoEvent = (RMapEvent)rmapService.deleteDiSCO(uriDiscoUri, new RMapUri(sysAgentUri));					
 			}
 			else if (newStatus == "INACTIVE")	{
 				//TODO:this is incorrect - currently no inactivate disco method, so this is a placeholder!
-				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(new RMapUri(SYSAGENT_URI), uriDiscoUri);						
+				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(new RMapUri(sysAgentUri), uriDiscoUri);						
 			}
 				
 			if (discoEvent == null) {
@@ -633,11 +628,11 @@ public class DiscoResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			initRMapService();
-			
 			String outputString="";
 			List <URI> uriList = null;
-		
+
+			initRMapService();
+			
 			if (retAgentVersionsOnly)	{
 				uriList = rmapService.getDiSCOAllAgentVersions(uriDiscoUri);				
 			}

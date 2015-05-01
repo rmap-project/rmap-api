@@ -10,7 +10,7 @@ public class RMapApiExceptionMapperTest {
 	public void test() {
 		
 		RMapApiException e = new RMapApiException(ErrorCode.ER_DISCO_OBJECT_NOT_FOUND);
-		RMapApiExceptionMapper mapper = new RMapApiExceptionMapper();
+		RMapApiExceptionHandler mapper = new RMapApiExceptionHandler();
 		Response response = mapper.toResponse(e);
 		System.out.print(response.getEntity().toString());
 	}

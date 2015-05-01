@@ -1,13 +1,15 @@
 package info.rmapproject.api.service;
 
-import java.io.InputStream;
-
+import info.rmapproject.api.authentication.AuthUserToAgentMediator;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.BasicOutputType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.AgentResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
+
+import java.io.InputStream;
+import java.net.URI;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,6 +25,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.apache.cxf.configuration.security.AuthorizationPolicy;
+import org.apache.cxf.jaxrs.utils.JAXRSUtils;
+import org.apache.cxf.message.Message;
+
 /**
  * 
  * API service for RMap Agents
@@ -32,7 +38,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/agent")
 public class AgentApiService {
-
+	
 	protected static AgentResponseManager responseManager = null;
 	static{
 		try {
@@ -49,6 +55,31 @@ public class AgentApiService {
 	}
 	
 	
+	//map auth to sysagent
+
+	//@Context 
+	//private SecurityContext userInfo;
+	
+    private URI sysAgentId = null;    
+
+    private URI getSysAgentId() throws RMapApiException {
+		try {
+			AuthUserToAgentMediator userMediator = new AuthUserToAgentMediator();
+			//String username = userInfo.getUserPrincipal().getName();
+			Message message = JAXRSUtils.getCurrentMessage();
+		    AuthorizationPolicy policy = (AuthorizationPolicy)message.get(AuthorizationPolicy.class);
+		    String username = policy.getUserName();
+	    	this.sysAgentId = userMediator.getRMapAgentForUser(username);
+		}
+		catch(Exception ex){
+			throw new RMapApiException(ex, ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED);
+		}
+    	
+		return this.sysAgentId;
+	}
+	
+	
+
 	/**
 	 * GET /agent or GET /agent?representedAgent={uri}[&creator={creatorUri}]
      * If no additional filters applied, returns link to Agent API information, and lists HTTP options
@@ -57,9 +88,8 @@ public class AgentApiService {
 	 * @throws RMapApiException
 	 */
     @GET
-    @Path("/")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response getServiceInfo(@Context HttpHeaders headers, 
+    public Response apiGetServiceInfo(@Context HttpHeaders headers, 
     								@QueryParam("representedAgent") String uri, 
     								@QueryParam("creator") String creator) throws RMapApiException {
     	Response response = null;
@@ -73,8 +103,7 @@ public class AgentApiService {
     	}    	
     	return response;
     }
-    
-    
+
 	/**
 	 * HEAD /agent
      * Returns Agent API information/link, and lists HTTP options
@@ -82,8 +111,7 @@ public class AgentApiService {
 	 * @throws RMapApiException
 	 */
     @HEAD
-    @Path("/")
-    public Response getAgentApiDetails() throws RMapApiException {
+    public Response apiGetApiDetails() throws RMapApiException {
     	Response response = responseManager.getAgentServiceHead();
 	    return response;
     }
@@ -96,8 +124,7 @@ public class AgentApiService {
 	 * @throws RMapApiException
 	 */
     @OPTIONS
-    @Path("/")
-    public Response getAgentApiDetailedOptions() throws RMapApiException {
+    public Response apiGetApiDetailedOptions() throws RMapApiException {
     	Response response = responseManager.getAgentServiceHead();
 	    return response;
     }
@@ -126,7 +153,7 @@ public class AgentApiService {
 				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
-    public Response getRMapAgent(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
+    public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
     	RdfType returnType = HttpTypeMediator.getRdfTypeOfResponse(headers);
     	Response response=responseManager.getRMapAgent(agentUri, returnType);
     	return response;
@@ -149,7 +176,7 @@ public class AgentApiService {
 	 */
     @HEAD
     @Path("/{agentUri}")
-    public Response getDiSCOStatus(@PathParam("agentUri") String agentUri) throws RMapApiException {
+    public Response apiGetAgentStatus(@PathParam("agentUri") String agentUri) throws RMapApiException {
     	Response response = responseManager.getRMapAgentHeader(agentUri);
 	    return response;
     }
@@ -178,9 +205,9 @@ public class AgentApiService {
 		"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 		"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 		})
-    public Response createRMapAgent(@Context HttpHeaders headers, InputStream agentRdf) throws RMapApiException {
+    public Response apiCreateRMapAgent(@Context HttpHeaders headers, InputStream agentRdf) throws RMapApiException {
     	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfResponse(headers);
-    	Response createResponse = responseManager.createRMapAgent(agentRdf, requestFormat);
+    	Response createResponse = responseManager.createRMapAgent(agentRdf, requestFormat, getSysAgentId());
 		return createResponse;
     }	
     
@@ -195,8 +222,8 @@ public class AgentApiService {
 	 */    
     @DELETE
     @Path("/{agentUri}")
-    public Response deleteRMapAgent(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response response = responseManager.tombstoneRMapAgent(agentUri);
+    public Response apiDeleteRMapAgent(@PathParam("agentUri") String agentUri) throws RMapApiException {
+    	Response response = responseManager.tombstoneRMapAgent(agentUri,getSysAgentId());
 	    return response;
     }
     
@@ -221,7 +248,7 @@ public class AgentApiService {
     @GET
     @Path("/{agentUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response getRMapDiSCOEventList(@Context HttpHeaders headers, @PathParam("discoUri") String agentUri) throws RMapApiException {
+    public Response apiGetRMapDiSCOEventList(@Context HttpHeaders headers, @PathParam("discoUri") String agentUri) throws RMapApiException {
     	BasicOutputType outputType = HttpTypeMediator.getTypeForResponse(headers);
     	Response eventList = responseManager.getRMapAgentEvents(agentUri, outputType);
     	return eventList;

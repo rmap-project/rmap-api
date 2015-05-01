@@ -23,6 +23,7 @@ import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplest
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -284,10 +285,10 @@ public class DiscoResponseManagerTest {
 		Response response = null;
 		try {
 			//create new ORMapAgent
-			createAgentforTest();
+			//createAgentforTest();
 			
 			InputStream stream = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML);
+			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, new URI("http://isni.org/isni/0000000406115044"));
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -310,7 +311,7 @@ public class DiscoResponseManagerTest {
 			createAgentforTest();
 
 			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML);
+			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, new URI("http://isni.org/isni/0000000406115044"));
 			
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);

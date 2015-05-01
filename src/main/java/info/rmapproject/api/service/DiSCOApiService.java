@@ -1,5 +1,6 @@
 package info.rmapproject.api.service;
 
+import info.rmapproject.api.authentication.AuthUserToAgentMediator;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.BasicOutputType;
@@ -8,6 +9,7 @@ import info.rmapproject.api.responsemgr.DiscoResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
 
 import java.io.InputStream;
+import java.net.URI;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -22,6 +24,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
+import org.apache.cxf.configuration.security.AuthorizationPolicy;
+import org.apache.cxf.jaxrs.utils.JAXRSUtils;
+import org.apache.cxf.message.Message;
+
 
 /**
  * 
@@ -48,6 +55,33 @@ public class DiSCOApiService {
 		}
 	}
 	
+	
+	//map auth to sysagent
+
+	//@Context 
+	//private SecurityContext userInfo;
+	
+    private URI sysAgentId = null;    
+
+    private URI getSysAgentId() throws RMapApiException {
+		try {
+			AuthUserToAgentMediator userMediator = new AuthUserToAgentMediator();
+			//String username = userInfo.getUserPrincipal().getName();
+			Message message = JAXRSUtils.getCurrentMessage();
+		    AuthorizationPolicy policy = (AuthorizationPolicy)message.get(AuthorizationPolicy.class);
+		    String username = policy.getUserName();
+	    	this.sysAgentId = userMediator.getRMapAgentForUser(username);
+		}
+		catch(Exception ex){
+			throw new RMapApiException(ex, ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED);
+		}
+    	
+		return this.sysAgentId;
+	}
+	
+
+	
+	
 /*
  * ------------------------------
  * 
@@ -63,7 +97,6 @@ public class DiSCOApiService {
 	 * @throws RMapApiException
 	 */
     @GET
-    @Path("/")
     @Produces("application/json;charset=UTF-8;")
     public Response getServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
@@ -79,8 +112,7 @@ public class DiSCOApiService {
 	 * @throws RMapApiException
 	 */
     @HEAD
-    @Path("/")
-    public Response getDiSCOApiDetails() throws RMapApiException {
+    public Response getApiDetails() throws RMapApiException {
     	Response response = responseManager.getDiSCOServiceHead();
 	    return response;
     }
@@ -93,8 +125,7 @@ public class DiSCOApiService {
 	 * @throws RMapApiException
 	 */
     @OPTIONS
-    @Path("/")
-    public Response getDiSCOApiDetailedOptions() throws RMapApiException {
+    public Response apiGetApiDetailedOptions() throws RMapApiException {
     	Response response = responseManager.getDiSCOServiceHead();
 	    return response;
     }
@@ -124,7 +155,7 @@ public class DiSCOApiService {
 				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
-    public Response getRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	RdfType returnType = HttpTypeMediator.getRdfTypeOfResponse(headers);
     	Response response=responseManager.getRMapDiSCO(discoUri, returnType);
     	return response;
@@ -153,7 +184,7 @@ public class DiSCOApiService {
 				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
-    public Response getLatestRMapDiSCOAsRdfXml(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetLatestRMapDiSCOAsRdfXml(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	RdfType returnType = HttpTypeMediator.getRdfTypeOfResponse(headers);
     	Response response=responseManager.getLatestRMapDiSCOVersion(discoUri, returnType);
     	return response;
@@ -178,7 +209,7 @@ public class DiSCOApiService {
 	 */
     @HEAD
     @Path("/{discoUri}")
-    public Response getDiSCOStatus(@PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetDiSCOStatus(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response response = responseManager.getRMapDiSCOHeader(discoUri);
 	    return response;
     }
@@ -206,9 +237,9 @@ public class DiSCOApiService {
 		"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 		"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 		})
-    public Response createRMapDiSCO(@Context HttpHeaders headers, InputStream discoRdf) throws RMapApiException {
+    public Response apiCreateRMapDiSCO(@Context HttpHeaders headers, InputStream discoRdf) throws RMapApiException {
     	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfResponse(headers);
-    	Response createResponse = responseManager.createRMapDiSCO(discoRdf, requestFormat);
+    	Response createResponse = responseManager.createRMapDiSCO(discoRdf, requestFormat, getSysAgentId());
 		return createResponse;
     }	
 
@@ -235,11 +266,11 @@ public class DiSCOApiService {
 		"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 		"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 		})
-    public Response updateRMapDiSCO(@Context HttpHeaders headers, 
+    public Response apiUpdateRMapDiSCO(@Context HttpHeaders headers, 
     										@PathParam("discoid") String origDiscoId, 
     										InputStream discoRdf) throws RMapApiException {
     	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfResponse(headers);
-    	Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, requestFormat);
+    	Response updateResponse = responseManager.updateRMapDiSCO(origDiscoId, discoRdf, requestFormat, getSysAgentId());
 		return updateResponse;
     }
 
@@ -261,7 +292,7 @@ public class DiSCOApiService {
     @GET
     @Path("/{discoUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response getRMapDiSCOEventList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetRMapDiSCOEventList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	BasicOutputType outputType = HttpTypeMediator.getTypeForResponse(headers);
     	Response eventList = responseManager.getRMapDiSCOEvents(discoUri, outputType);
     	return eventList;
@@ -286,8 +317,8 @@ public class DiSCOApiService {
 	 */    
     @DELETE
     @Path("/{discoUri}")
-    public Response deleteRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = responseManager.tombstoneRMapDiSCO(discoUri);
+    public Response apiDeleteRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
+    	Response response = responseManager.tombstoneRMapDiSCO(discoUri, getSysAgentId());
 	    return response;
     }
 
@@ -302,8 +333,8 @@ public class DiSCOApiService {
     //TODO:using PUT temporarily to distinguish but we didn't decide on an HTTP verb for this update.
     @PUT
     @Path("/{discoUri}")
-    public Response inactivateRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = responseManager.inactivateRMapDiSCO(discoUri);
+    public Response apiInactivateRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
+    	Response response = responseManager.inactivateRMapDiSCO(discoUri, getSysAgentId());
 	    return response;
     }
     
@@ -325,7 +356,7 @@ public class DiSCOApiService {
     @GET
     @Path("/{discoUri}/allversions")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response getRMapDiSCOVersionList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetRMapDiSCOVersionList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	BasicOutputType outputType = HttpTypeMediator.getTypeForResponse(headers);
     	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, outputType, false);
     	return versionList;
@@ -342,7 +373,7 @@ public class DiSCOApiService {
     @GET
     @Path("/{discoUri}/agentversions")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response getRMapDiSCOAgentVersionList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetRMapDiSCOAgentVersionList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	BasicOutputType outputType = HttpTypeMediator.getTypeForResponse(headers);
     	Response versionList = responseManager.getRMapDiSCOVersions(discoUri, outputType, true);
     	return versionList;

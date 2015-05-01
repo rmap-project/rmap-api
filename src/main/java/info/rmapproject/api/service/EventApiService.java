@@ -52,9 +52,8 @@ public class EventApiService {
 	 * @throws RMapApiException
 	 */	
     @GET
-    @Path("/")
     @Produces("application/json;charset=UTF-8;")
-    public Response getServiceInfo() throws RMapApiException {
+    public Response apiGetServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
     	Response response = responseManager.getEventServiceOptions();
 	    return response;
@@ -68,8 +67,7 @@ public class EventApiService {
 	 * @throws RMapApiException
 	 */
     @HEAD
-    @Path("/")
-    public Response getEventApiDetails() throws RMapApiException {
+    public Response apiGetEventApiDetails() throws RMapApiException {
     	Response response = responseManager.getEventServiceHead();
 	    return response;
     }
@@ -82,9 +80,8 @@ public class EventApiService {
 	 * @throws RMapApiException
 	 */
     @OPTIONS
-    @Path("/")
     @Produces("application/json;charset=UTF-8;")
-    public Response getEventApiDetailedOptions() throws RMapApiException {
+    public Response apiGetEventApiDetailedOptions() throws RMapApiException {
     	Response response = responseManager.getEventServiceOptions();
 	    return response;
 
@@ -107,7 +104,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}")
     @Produces({"application/rdf+xml;charset=UTF-8;","application/xml;charset=UTF-8;","application/vnd.rmap-project.event+rdf+xml;charset=UTF-8;"})
-    public Response getRMapEventAsRdfXml(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventAsRdfXml(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfXMLStmt = responseManager.getRMapEvent(eventUri, "RDFXML");
 	    return rdfXMLStmt;
     }
@@ -122,7 +119,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}")
     @Produces({"application/ld+json;charset=UTF-8;","application/vnd.rmap-project.event+ld+json;charset=UTF-8;"})
-    public Response getRMapEventAsJsonLD(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventAsJsonLD(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfJsonEvent = responseManager.getRMapEvent(eventUri, "JSONLD");
     	return rdfJsonEvent;
     }
@@ -137,7 +134,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}")
     @Produces({"application/n-quads;charset=UTF-8;","application/vnd.rmap-project.event+n-quads;charset=UTF-8;"})
-    public Response getRMapEventAsRdfNQuads(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventAsRdfNQuads(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfNquadsEvent = responseManager.getRMapEvent(eventUri, "RDFNQUADS");
     	return rdfNquadsEvent;
     }    
@@ -152,7 +149,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}")
     @Produces({"text/turtle;charset=UTF-8;","application/vnd.rmap-project.event+turtle;charset=UTF-8;"})
-    public Response getRMapEventAsTurtle(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventAsTurtle(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response rdfXmlEvent = responseManager.getRMapEvent(eventUri, "TURTLE");
     	return rdfXmlEvent;
     }
@@ -176,7 +173,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/stmts")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapEventStmtsAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventStmtsAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedStmts = responseManager.getRMapEventRelatedObjs(eventUri, "STATEMENTS",BasicOutputType.PLAIN_TEXT);
 	    return relatedStmts;
     }  
@@ -191,7 +188,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/stmts")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapEventStmtsAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventStmtsAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedStmts = responseManager.getRMapEventRelatedObjs(eventUri, "STATEMENTS",BasicOutputType.JSON);
 	    return relatedStmts;
     }
@@ -206,7 +203,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/discos")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapEventDiSCOsAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventDiSCOsAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedDiscos = responseManager.getRMapEventRelatedObjs(eventUri, "DISCOS",BasicOutputType.PLAIN_TEXT);
 	    return relatedDiscos;
     }
@@ -221,7 +218,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/discos")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapEventDiSCOsAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventDiSCOsAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedDiscos = responseManager.getRMapEventRelatedObjs(eventUri, "DISCOS",BasicOutputType.JSON);
 	    return relatedDiscos;
     }
@@ -236,7 +233,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/agents")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapEventAgentsAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventAgentsAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedAgents = responseManager.getRMapEventRelatedObjs(eventUri, "AGENTS",BasicOutputType.PLAIN_TEXT);
 	    return relatedAgents;
     }
@@ -251,7 +248,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/agents")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapEventAgentsAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventAgentsAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedAgents = responseManager.getRMapEventRelatedObjs(eventUri, "AGENTS",BasicOutputType.JSON);
 	    return relatedAgents;
     }
@@ -266,7 +263,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/resources")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapEventResourcesAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventResourcesAsTXT(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedResources = responseManager.getRMapEventRelatedObjs(eventUri, "RESOURCES",BasicOutputType.PLAIN_TEXT);
 	    return relatedResources;
     }
@@ -281,7 +278,7 @@ public class EventApiService {
     @GET
     @Path("/{eventUri}/resources")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapEventResourcesAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
+    public Response apiGetRMapEventResourcesAsJSON(@PathParam("eventUri") String eventUri) throws RMapApiException {
     	Response relatedResources = responseManager.getRMapEventRelatedObjs(eventUri, "RESOURCES",BasicOutputType.JSON);
 	    return relatedResources;
     }

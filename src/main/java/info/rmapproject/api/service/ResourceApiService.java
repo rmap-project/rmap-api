@@ -53,9 +53,8 @@ public class ResourceApiService {
 	 * @throws RMapApiException
 	 */
 	@GET
-    @Path("/")
     @Produces("application/json;charset=UTF-8;")
-    public Response getServiceInfo() throws RMapApiException {
+    public Response apiGetServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
     	Response response = responseManager.getResourceServiceOptions();
 	    return response;
@@ -69,8 +68,7 @@ public class ResourceApiService {
 	 * @throws RMapApiException
 	 */
     @HEAD
-    @Path("/")
-    public Response getResourceApiDetails()	throws RMapApiException {
+    public Response apiGetResourceApiDetails()	throws RMapApiException {
     	Response response = responseManager.getResourceServiceHead();
 	    return response;
     }
@@ -83,9 +81,8 @@ public class ResourceApiService {
 	 * @throws RMapApiException
 	 */
     @OPTIONS
-    @Path("/")
     @Produces("application/json;charset=UTF-8;")
-    public Response getResourceApiDetailedOptions()	throws RMapApiException {
+    public Response apiGetResourceApiDetailedOptions()	throws RMapApiException {
     	Response response = responseManager.getResourceServiceOptions();
 	    return response;
 
@@ -109,7 +106,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceAllAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceAllAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, BasicOutputType.JSON, null);
 	    return response;	
     }
@@ -124,7 +121,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceAllAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceAllAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, BasicOutputType.PLAIN_TEXT, null);
 	    return response;	
     }
@@ -140,7 +137,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/stmts")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceStmtsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceStmtsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, BasicOutputType.JSON, null);
 	    return response;	
     }
@@ -155,7 +152,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/stmts")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceStmtsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceStmtsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, BasicOutputType.PLAIN_TEXT, null);
 	    return response;	
     }
@@ -171,7 +168,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/events")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceEventsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceEventsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, BasicOutputType.JSON, null);
 	    return response;	
     }
@@ -186,7 +183,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/events")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceEventsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceEventsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, BasicOutputType.PLAIN_TEXT, null);
 	    return response;	
     }
@@ -202,7 +199,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/agents")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceAgentsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceAgentsAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, BasicOutputType.JSON, null);
 	    return response;	
     }
@@ -218,7 +215,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/agents")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceAgentsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceAgentsAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, BasicOutputType.PLAIN_TEXT, null);
 	    return response;	
     }
@@ -232,7 +229,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/discos")
     @Produces("application/json;charset=UTF-8;")
-    public Response getRMapResourceDiscosAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceDiscosAsJson(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.DISCOS, BasicOutputType.JSON, null);
 	    return response;	
     }
@@ -248,7 +245,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/discos")
     @Produces("text/plain;charset=UTF-8;")
-    public Response getRMapResourceDiscosAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceDiscosAsText(@PathParam("resourceUri") String resourceUri) throws RMapApiException {
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.DISCOS, BasicOutputType.PLAIN_TEXT, null);
 	    return response;	
     }

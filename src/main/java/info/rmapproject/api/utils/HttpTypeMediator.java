@@ -2,7 +2,7 @@ package info.rmapproject.api.utils;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.lists.RdfType;
 
@@ -15,25 +15,26 @@ import javax.ws.rs.core.MediaType;
  * @author khanson
  */
 public class HttpTypeMediator {
-	
+
+	//private static final Logger log = LogManager.getLogger(HttpTypeMediator.class);
 	/**
 	 * Maps the accept-type to the matching response type
 	 * @param headers
 	 * @return BasicOutputType
 	 * @throws RMapApiException
 	 */
-	public static BasicOutputType getTypeForResponse(HttpHeaders headers) throws RMapApiException {
-		BasicOutputType outputType = null;
+	public static NonRdfType getNonRdfResponseType(HttpHeaders headers) throws RMapApiException {
+		NonRdfType outputType = null;
 		try {
 			List<MediaType> acceptTypes=headers.getAcceptableMediaTypes();
 			for (MediaType acceptType : acceptTypes)	{
-				outputType = BasicOutputType.get(acceptType.toString());
+				outputType = NonRdfType.get(acceptType.toString());
 				if (outputType!=null){
 					break;
 				}    		
 			}
 			if (outputType == null){
-				outputType = BasicOutputType.PLAIN_TEXT; //default
+				outputType = NonRdfType.PLAIN_TEXT; //default
 			}
 		} catch (Exception ex){
 			throw RMapApiException.wrap(ex,ErrorCode.ER_COULD_NOT_MAP_CONTENTTYPE_PARAMETER_TO_TYPE);
@@ -47,7 +48,7 @@ public class HttpTypeMediator {
 	 * @return RdfType
 	 * @throws RMapApiException
 	 */
-	public static RdfType getRdfTypeOfResponse(HttpHeaders headers) throws RMapApiException	{
+	public static RdfType getRdfResponseType(HttpHeaders headers) throws RMapApiException	{
 		RdfType returnType = null;
 		try {
 			List<MediaType> acceptTypes=headers.getAcceptableMediaTypes();
@@ -78,8 +79,12 @@ public class HttpTypeMediator {
 	public static RdfType getRdfTypeOfRequest(HttpHeaders headers) throws RMapApiException	{
 		RdfType requestType = null;
 		try {
-			List <String> contentType = headers.getRequestHeader(HttpHeaders.CONTENT_TYPE);
-			RdfMediaType matchingType = RdfMediaType.get(contentType.get(0));
+			MediaType contentType = headers.getMediaType();
+			RdfMediaType matchingType = null;
+			if (contentType!=null){
+				String sContentType = contentType.getType() + "/" + contentType.getSubtype();
+				matchingType = RdfMediaType.get(sContentType);
+			}
 			if (matchingType!=null){
 				requestType=matchingType.getReturnType();
 			}

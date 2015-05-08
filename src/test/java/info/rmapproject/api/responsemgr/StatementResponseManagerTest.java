@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.model.RMapResource;
@@ -174,7 +175,7 @@ public class StatementResponseManagerTest {
 		//getRMapStatement
 		Response response = null;
 		try {
-			response = responseManager.getRMapStatement(URLEncoder.encode(stmtUri, "UTF-8"),"RDFXML");
+			response = responseManager.getRMapStatement(URLEncoder.encode(stmtUri, "UTF-8"),RdfType.RDFXML);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -199,7 +200,7 @@ public class StatementResponseManagerTest {
 		Response response = null;
 		boolean correctExceptionThrown = false;
 		try {
-			response = responseManager.getRMapStatement(URLEncoder.encode("ark:/29292/nomatchhere", "UTF-8"),"RDFXML");
+			response = responseManager.getRMapStatement(URLEncoder.encode("ark:/29292/nomatchhere", "UTF-8"),RdfType.RDFXML);
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(),ErrorCode.ER_STMT_OBJECT_NOT_FOUND);
 			System.out.print(e.getMessage());

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import info.rmapproject.api.authentication.AuthUserToAgentMediator;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfMediaType;
@@ -11,15 +12,10 @@ import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
-import info.rmapproject.core.model.impl.openrdf.ORAdapter;
-import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.ORMapAgentMgr;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -39,6 +35,7 @@ public class DiscoResponseManagerTest {
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
 			+ " xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""  
 			+ " xmlns:rmap=\"http://rmap-project.org/rmap/terms/\""  
+			+ " xmlns:ore=\"http://www.openarchives.org/ore/terms/\""  
 			+ " xmlns:dcterms=\"http://purl.org/dc/terms/\""  
 			+ " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""  
 			+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
@@ -48,8 +45,8 @@ public class DiscoResponseManagerTest {
 			+ "<dc:description>"  
 			+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
 			+ "</dc:description>"  
-			+ "<rmap:aggregates rdf:resource=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\"/>"  
-			+ "<rmap:aggregates rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\"/>"  
+			+ "<ore:aggregates rdf:resource=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\"/>"  
+			+ "<ore:aggregates rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\"/>"  
 	    	+ "</rmap:DiSCO>"  
 	    	+ "<fabio:JournalArticle rdf:about=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\">"  
 	    	+ "<dc:title>Toward Scalable Systems for Big Data Analytics: A Technology Tutorial</dc:title>"  
@@ -77,6 +74,7 @@ public class DiscoResponseManagerTest {
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
 			+ " xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""  
 			+ " xmlns:rmap=\"http://rmap-project.org/rmap/terms/\""  
+			+ " xmlns:ore=\"http://www.openarchives.org/ore/terms/\""  
 			+ " xmlns:dcterms=\"http://purl.org/dc/terms/\""  
 			+ " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""  
 			+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
@@ -85,8 +83,8 @@ public class DiscoResponseManagerTest {
 			+ "<dc:description>"  
 			+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
 			+ "</dc:description>"  
-			+ "<rmap:aggregates rdf:resource=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\"/>"  
-			+ "<rmap:aggregates rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\"/>"  
+			+ "<ore:aggregates rdf:resource=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\"/>"  
+			+ "<ore:aggregates rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\"/>"  
 	    	+ "</rmap:DiSCO>"  
 	    	+ "<fabio:JournalArticle rdf:about=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\">"  
 	    	+ "<dc:title>Toward Scalable Systems for Big Data Analytics: A Technology Tutorial</dc:title>"  
@@ -108,6 +106,55 @@ public class DiscoResponseManagerTest {
 	    	+ "<dc:extent>194KB</dc:extent>"  
 	    	+ "</rdf:Description>"  
 	    	+ "</rdf:RDF>";
+	
+	
+	protected String discoTurtleRdf = 
+			"@prefix dc: <http://purl.org/dc/elements/1.1/> ."
+			+ "@prefix frbr: <http://purl.org/vocab/frbr/core#> ."
+			+ "@prefix cito: <http://purl.org/spar/cito/> ."
+			+ "@prefix dcterms: <http://purl.org/dc/terms/> ."
+			+ "@prefix foaf: <http://xmlns.com/foaf/0.1/> ."
+			+ "@prefix scoro: <http://purl.org/spar/scoro/> ."
+			+ "@prefix rmap: <http://rmap-project.org/rmap/terms/> ."
+			+ "<http://dx.doi.org/10.5281/zenodo.13962>"
+			+ "  a <http://purl.org/dc/dcmitype/Software> ;"
+			+ " dc:identifier \"http://zenodo.org/record/13962\" ;"
+			+ "	frbr:supplementOf \"https://github.com/ComputationalRadiationPhysics/mallocMC/tree/2.0.1crp\" ;"
+			+ "  cito:cites \"http://dx.doi.org/10.1109/InPar.2012.6339604\", \"http://www.icg.tugraz.at/project/mvp/downloads\" ;"
+			+ "  dcterms:isVersionOf \"http://dx.doi.org/10.5281/zenodo.10307\" ;"
+			+ "  dc:title \"mallocMC: 2.0.1crp: Bugfixes\" ;"
+			+ "  dcterms:abstract \"\"\"<p>This release fixes several"
+			+ "            bugs that occurred after the release of"
+			+ "            2.0.0crp.</p>\\n\\n<p>We closed all issues documented in"
+			+ "            Milestone <em>Bugfixes</em>.</p>\"\"\" ;"
+			+ "  dcterms:description \"\"\"This library started as a fork of"
+			+ "            ScatterAlloc, see citations"
+			+ "            http://dx.doi.org/10.1109/InPar.2012.6339604\"\"\" ;"
+			+ "  dcterms:creator <http://orcid.org/0000-0002-6459-0842>, ["
+			+ "    foaf:name \"Axel Huebl\" ;"
+			+ "    a dcterms:Agent"
+			+ "  ], ["
+			+ "    foaf:name \"René Widera\" ;"
+			+ "    a dcterms:Agent"
+			+ "  ] ;"
+			+ "  scoro:contact-person <http://orcid.org/0000-0002-6459-0842> ;"
+			+ "  scoro:data-manager <http://orcid.org/0000-0002-6459-0842> ;"
+			+ "  scoro:project-leader ["
+			+ "    foaf:name \"Axel Huebl\" ;"
+			+ "    a dcterms:Agent"
+			+ "  ] ;"
+			+ "  scoro:project-member ["
+			+ "    foaf:name \"René Widera\" ;"
+			+ "    a dcterms:Agent"
+			+ "  ] ;"
+			+ "  dc:subject \"CUDA, HPC, Manycore, GPU, Policy Based Design\" ."
+			+ "<http://orcid.org/0000-0002-6459-0842>"
+			+ "  foaf:name \"Carlchristian Eckert\" ;"
+			+ "  a dcterms:Agent ."
+			+ "[]"
+			+ "  a <http://rmap-project.org/rmap/terms/DiSCO> ;"
+			+ "  dcterms:creator <http://datacite.org> ;"
+			+ "  rmap:aggregates <http://dx.doi.org/10.5281/zenodo.13962> .";
 	
 	protected DiscoResponseManager responseManager = null;
 	/**
@@ -278,17 +325,45 @@ public class DiscoResponseManagerTest {
 	}
 	
 	
-	
 
 	@Test
-	public void testCreateDisco() {
+	public void testCreateTurtleDisco() {
 		Response response = null;
 		try {
 			//create new ORMapAgent
 			//createAgentforTest();
+
+			AuthUserToAgentMediator userToAgentObj = new AuthUserToAgentMediator();
+			URI uriSystemAgent = userToAgentObj.getRMapAgentForUser("portico");
+			
+			InputStream stream = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
+			response = responseManager.createRMapDiSCO(stream, RdfType.TURTLE, uriSystemAgent);
+			
+		} catch (Exception e) {
+			System.out.print(e.getMessage());
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+	
+		assertNotNull(response);
+		assertEquals(201, response.getStatus());
+
+	}
+	
+	
+
+	@Test
+	public void testCreateRdfXmlDisco() {
+		Response response = null;
+		try {
+			//create new ORMapAgent
+			//createAgentforTest();
+
+			AuthUserToAgentMediator userToAgentObj = new AuthUserToAgentMediator();
+			URI uriSystemAgent = userToAgentObj.getRMapAgentForUser("portico");
 			
 			InputStream stream = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, new URI("http://isni.org/isni/0000000406115044"));
+			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, uriSystemAgent);
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -308,10 +383,11 @@ public class DiscoResponseManagerTest {
 		Response response = null;
 		boolean correctErrorThrown = false;
 		try {
-			createAgentforTest();
-
+			AuthUserToAgentMediator userToAgentObj = new AuthUserToAgentMediator();
+			URI uriSystemAgent = userToAgentObj.getRMapAgentForUser("portico");
+			
 			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, new URI("http://isni.org/isni/0000000406115044"));
+			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, uriSystemAgent);
 			
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
@@ -329,42 +405,5 @@ public class DiscoResponseManagerTest {
 		
 	}
 
-	public void createAgentforTest() {
-		//create new ORMapAgent
-		java.net.URI SYSAGENT_URI = null;
-		try {
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("cant retrieve default system agent URI");
-		}
-
-		SesameTriplestore ts = null;
-		try {
-			ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("cant create triplestore");
-		}
-
-		//yep, agent creates itself… just for now.
-		org.openrdf.model.URI agentURI = ORAdapter.uri2OpenRdfUri(SYSAGENT_URI);
-		
-		ORMapAgentMgr agentMgr = new ORMapAgentMgr();
-		if (!agentMgr.isAgentId(agentURI, ts))	{
-			ORMapAgent agent = new ORMapAgent(agentURI, agentURI);
-			//create through ORMapAgentMgr
-
-			agentMgr.createAgentTriples (agent, ts);
-			try {
-				ts.commitTransaction();
-			} catch (Exception e) {
-				e.printStackTrace();
-				fail("cant commit");
-			}
-		}
-		assertTrue(agentMgr.isAgentId(agentURI, ts));
-	}
-	
 
 }

@@ -6,13 +6,13 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
-public enum BasicOutputType {
+public enum NonRdfType {
 	JSON(MediaType.APPLICATION_JSON), 
 	PLAIN_TEXT(MediaType.TEXT_PLAIN);
 		
 	private final String mediaType;
 
-	private BasicOutputType (String mediaType) {
+	private NonRdfType (String mediaType) {
 		this.mediaType = mediaType;
 	}
 	
@@ -20,9 +20,9 @@ public enum BasicOutputType {
 		return mediaType;
 	}
 
-    public static BasicOutputType get(String mediaType) { 
-    	Map<String, BasicOutputType> lookup = new HashMap<String, BasicOutputType>();
-        for(BasicOutputType mt : EnumSet.allOf(BasicOutputType.class)) {
+    public static NonRdfType get(String mediaType) { 
+    	Map<String, NonRdfType> lookup = new HashMap<String, NonRdfType>();
+        for(NonRdfType mt : EnumSet.allOf(NonRdfType.class)) {
             lookup.put(mt.getMediaType(), mt);
         }
         return lookup.get(mediaType); 

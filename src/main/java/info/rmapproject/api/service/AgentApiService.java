@@ -3,7 +3,7 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.authentication.AuthUserToAgentMediator;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.AgentResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
@@ -94,7 +94,7 @@ public class AgentApiService {
     								@QueryParam("creator") String creator) throws RMapApiException {
     	Response response = null;
     	if (uri!=null)	{
-        	BasicOutputType outputType = HttpTypeMediator.getTypeForResponse(headers);
+        	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
        		response = responseManager.getRMapAgentRepresentations(uri, creator, outputType);    
     	}
     	else	{
@@ -148,13 +148,13 @@ public class AgentApiService {
 	 */    
     @GET
     @Path("/{agentUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
-				"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.disco+ld+json;charset=UTF-8;",
-				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
-				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
+    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.agent+rdf+xml;charset=UTF-8;",
+				"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.agent+ld+json;charset=UTF-8;",
+				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.agent+n-quads;charset=UTF-8;",
+				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.agent+turtle;charset=UTF-8;"
 				})
     public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
-    	RdfType returnType = HttpTypeMediator.getRdfTypeOfResponse(headers);
+    	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
     	Response response=responseManager.getRMapAgent(agentUri, returnType);
     	return response;
     }
@@ -193,20 +193,19 @@ public class AgentApiService {
     
 	/**
 	 * POST /agent/
-	 * Creates new Agent from RDF/XML, JSON-LD, NQUADS or TURTLE
+	 * Creates new Agent from RDF/XML, JSON-LD or TURTLE
 	 * @param agentUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */
     @POST
     @Path("/")
-    @Consumes({"application/rdf+xml;charset=UTF-8;", "application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
-		"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.disco+ld+json;charset=UTF-8;",
-		"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
-		"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
+    @Consumes({"application/rdf+xml;charset=UTF-8;", "application/vnd.rmap-project.agent+rdf+xml;charset=UTF-8;",
+		"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.agent+ld+json;charset=UTF-8;",
+		"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.agent+turtle;charset=UTF-8;"
 		})
     public Response apiCreateRMapAgent(@Context HttpHeaders headers, InputStream agentRdf) throws RMapApiException {
-    	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfResponse(headers);
+    	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
     	Response createResponse = responseManager.createRMapAgent(agentRdf, requestFormat, getSysAgentId());
 		return createResponse;
     }	
@@ -248,8 +247,8 @@ public class AgentApiService {
     @GET
     @Path("/{agentUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapDiSCOEventList(@Context HttpHeaders headers, @PathParam("discoUri") String agentUri) throws RMapApiException {
-    	BasicOutputType outputType = HttpTypeMediator.getTypeForResponse(headers);
+    public Response apiGetRMapAgentEventList(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
+    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
     	Response eventList = responseManager.getRMapAgentEvents(agentUri, outputType);
     	return eventList;
     }

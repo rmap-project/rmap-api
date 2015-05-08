@@ -3,7 +3,7 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
@@ -161,7 +161,7 @@ public class AgentResponseManager {
 						.header("Link",linkRel)    //switch this to link()
         				.type("application/vnd.rmap-project.agent; version=1.0-beta") //TODO move version number to a property?
 						.build();    	
-
+		    
 		}
 		catch(RMapApiException ex)	{
 			throw RMapApiException.wrap(ex);
@@ -188,6 +188,9 @@ public class AgentResponseManager {
 		}  
 		catch(Exception ex)	{
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+		    rmapService.closeConnection();
 		}
 		return response;
     }
@@ -228,8 +231,8 @@ public class AgentResponseManager {
 		    response = Response.status(Response.Status.OK)
 						.location(new URI(URLUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
-						.build();    	
-
+						.build();   
+		    
 		}
 		catch(RMapApiException ex)	{
 			throw RMapApiException.wrap(ex);
@@ -256,6 +259,9 @@ public class AgentResponseManager {
 		}  
 		catch(Exception ex)	{
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+		    rmapService.closeConnection();
 		}
 		return response;
     }
@@ -294,8 +300,7 @@ public class AgentResponseManager {
 			}  
 
 			initRMapService();
-			
-			
+						
 			RMapEventCreation agentEvent = (RMapEventCreation)rmapService.createAgent(sysAgentUri, rmapAgent);
 			if (agentEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATEAGENT_NOT_COMPLETED);
@@ -342,6 +347,9 @@ public class AgentResponseManager {
 		}  
 		catch(Exception ex)	{
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+		    rmapService.closeConnection();
 		}
 	return response;  
 	}
@@ -431,6 +439,9 @@ public class AgentResponseManager {
 		catch(Exception ex)	{
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
+		finally{
+		    rmapService.closeConnection();
+		}
 	return response;		
 		
 	}
@@ -444,12 +455,12 @@ public class AgentResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapAgentEvents(String agentUri, BasicOutputType returnType) throws RMapApiException {
+	public Response getRMapAgentEvents(String agentUri, NonRdfType returnType) throws RMapApiException {
 
 		Response response = null;
 		try {
 			//assign default value when null
-			if (returnType==null)	{returnType=BasicOutputType.PLAIN_TEXT;}
+			if (returnType==null)	{returnType=NonRdfType.PLAIN_TEXT;}
 			
 			if (agentUri==null || agentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -473,7 +484,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 									
-			if (returnType==BasicOutputType.JSON)	{
+			if (returnType==NonRdfType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, "rmap:Events");				
 			}
 			else	{
@@ -504,6 +515,9 @@ public class AgentResponseManager {
 		catch(Exception ex)	{
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
+		finally{
+		    rmapService.closeConnection();
+		}
     	return response;
 	}
 	
@@ -516,7 +530,7 @@ public class AgentResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapAgentRepresentations(String nonRmapAgentUri, String creatorUri, BasicOutputType returnType) throws RMapApiException	{
+	public Response getRMapAgentRepresentations(String nonRmapAgentUri, String creatorUri, NonRdfType returnType) throws RMapApiException	{
 
 		Response response = null;
 		
@@ -562,7 +576,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_RELATED_AGENTS_FOUND);				
 			}
 			
-			if (returnType == BasicOutputType.JSON)	{
+			if (returnType == NonRdfType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, "rmap:Profiles");				
 			}
 			else	{
@@ -572,8 +586,6 @@ public class AgentResponseManager {
     		if (outputString == null || outputString.length()==0){	
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_RELATEDAGENTLIST_RETURNED_NULL);    			
 	        }		    			
-    		
-
     		
 			response = Response.status(Response.Status.OK)
 						.entity(outputString.toString())
@@ -599,6 +611,9 @@ public class AgentResponseManager {
 		}  
 		catch(Exception ex)	{
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+		    rmapService.closeConnection();
 		}
 		return response;
 	}

@@ -2,8 +2,10 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.StatementResponseManager;
+import info.rmapproject.api.utils.HttpTypeMediator;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -11,6 +13,8 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 /**
@@ -103,62 +107,22 @@ public class StatementApiService {
  */
 	/**
 	 * GET /stmt/{stmtUri}
-	 * Returns requested RMap:Statement as RDF/XML
+	 * Returns requested RMap:Statement as RDF/XML, JSON-LD, NQUADs or TURTLE
 	 * @param stmtUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{stmtUri}")
-    @Produces("application/rdf+xml,application/xml,application/vnd.rmap-project.statement+rdf+xml")
-    public Response apiGetRMapStmtAsRdfXml(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response rdfXMLStmt = responseManager.getRMapStatement(stmtUri, "RDFXML");
+    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.statement+rdf+xml;charset=UTF-8;",
+				"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.statement+ld+json;charset=UTF-8;",
+				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.statement+n-quads;charset=UTF-8;",
+				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.statement+turtle;charset=UTF-8;"
+				})
+    public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("stmtUri") String stmtUri) throws RMapApiException {
+    	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
+    	Response rdfXMLStmt = responseManager.getRMapStatement(stmtUri, returnType);
 	    return rdfXMLStmt;
-    }
-
-	/**
-	 * GET /stmt/{stmtUri}
-	 * Returns requested RMap:Statement as JSON-LD
-	 * @param stmtUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
-    @GET
-    @Path("/{stmtUri}")
-    @Produces("application/ld+json,application/vnd.rmap-project.statement+ld+json")
-    public Response apiGetRMapStmtAsJsonLD(@PathParam("stmtUri") String stmtUri)  throws RMapApiException {
-    	Response rdfJsonStmt = responseManager.getRMapStatement(stmtUri, "JSONLD");
-    	return rdfJsonStmt;
-    }
-
-	/**
-	 * GET /stmt/{stmtUri}
-	 * Returns requested RMap:Statement as NQUADS
-	 * @param stmtUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
-    @GET
-    @Path("/{stmtUri}")
-    @Produces("application/n-quads,application/vnd.rmap-project.statement+n-quads")
-    public Response apiGetRMapStmtAsRdfNQuads(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response rdfNquadsStmt = responseManager.getRMapStatement(stmtUri, "RDFNQUADS");
-    	return rdfNquadsStmt;
-    }    
-
-	/**
-	 * GET /stmt/{stmtUri}
-	 * Returns requested RMap:Statement as TURTLE
-	 * @param stmtUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
-    @GET
-    @Path("/{stmtUri}")
-    @Produces("text/turtle,application/vnd.rmap-project.statement+turtle")
-    public Response apiGetRMapStmtAsTurtle(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response rdfXmlStmt = responseManager.getRMapStatement(stmtUri, "TURTLE");
-    	return rdfXmlStmt;
     }
     
     
@@ -203,7 +167,7 @@ public class StatementApiService {
     @GET
     @Path("/{subject}/{predicate}/{object}")
     @Produces("text/plain")
-    public Response apiGetRMapstmtUriAsTEXT(@PathParam("subject") String subject, 
+    public Response apiGetRMapstmtUri(@PathParam("subject") String subject, 
     									@PathParam("predicate") String predicate,
     									@PathParam("object") String object) throws RMapApiException {
     	Response stmtUriResponse = responseManager.getRMapStatementID(subject, predicate, object);
@@ -227,26 +191,11 @@ public class StatementApiService {
 	 */    
     @GET
     @Path("/{stmtUri}/events")
-	@Produces("application/json")
-    public Response apiGetRMapStmtEventsAsJSON(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, BasicOutputType.JSON);
+    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
+    public Response apiGetRMapStmtEvents(@Context HttpHeaders headers, @PathParam("stmtUri") String stmtUri) throws RMapApiException {
+    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
+    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, outputType);
     	return eventList;
     }
-
-	/**
-	 * GET /stmt/{stmtUri}/events
-	 * Returns list of RMap:Event URIs related to the RMap:Statement URI as plain text
-	 * @param stmtUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
-    @GET
-    @Path("/{stmtUri}/events")
-    @Produces("text/plain")
-    public Response apiGetRMapStmtEventsAsText(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, BasicOutputType.PLAIN_TEXT);
-    	return eventList;
-    }
-
        
 }

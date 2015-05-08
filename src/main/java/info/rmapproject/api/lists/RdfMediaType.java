@@ -38,7 +38,5 @@ public enum RdfMediaType {
         }
         return lookup.get(mimeType); 
     }
-	
-	
-	
+
 }

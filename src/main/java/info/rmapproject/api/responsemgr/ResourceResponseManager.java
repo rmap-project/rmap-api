@@ -2,7 +2,7 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.FilterObjType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
@@ -99,7 +99,7 @@ public class ResourceResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, BasicOutputType returnType, RMapStatus status) throws RMapApiException {
+	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, NonRdfType returnType, RMapStatus status) throws RMapApiException {
 		Response response = null;
 		try {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
@@ -148,7 +148,7 @@ public class ResourceResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 			 
-			if (returnType == BasicOutputType.JSON)	{
+			if (returnType == NonRdfType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
 			}
 			else	{
@@ -175,6 +175,9 @@ public class ResourceResponseManager {
     	}  
 		catch(Exception ex)	{
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+		    rmapService.closeConnection();
 		}
     	return response;
 	}	

@@ -2,7 +2,8 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.BasicOutputType;
+import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.URLUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -103,13 +104,13 @@ public class EventResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapEvent(String strEventUri, String acceptsType) throws RMapApiException	{
+	public Response getRMapEvent(String strEventUri, RdfType returnType) throws RMapApiException	{
 		Response response = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}		
-			if (acceptsType==null || acceptsType.length()==0)	{
+			if (returnType==null)	{
 				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
 			}
 			
@@ -134,7 +135,7 @@ public class EventResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
 			
-    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, acceptsType);
+    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, returnType.toString());
 			if (eventOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}	
@@ -161,6 +162,9 @@ public class EventResponseManager {
 		catch(Exception ex)	{
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
+		finally{
+		    rmapService.closeConnection();
+		}
 		return response;
 	}
 
@@ -171,7 +175,7 @@ public class EventResponseManager {
 	 * @param returnType
 	 * @return Response
 	 */
-	public Response getRMapEventRelatedObjs(String strEventUri, String objType, BasicOutputType returnType) throws RMapApiException	{
+	public Response getRMapEventRelatedObjs(String strEventUri, String objType, NonRdfType returnType) throws RMapApiException	{
 		Response response = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
@@ -218,7 +222,7 @@ public class EventResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTRELATEDLIST_EMPTY); 
 			}	
 									
-			if (returnType==BasicOutputType.JSON)	{
+			if (returnType==NonRdfType.JSON)	{
 				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
 			}
 			else	{
@@ -249,6 +253,9 @@ public class EventResponseManager {
     	}
 		catch(Exception ex)	{
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+		    rmapService.closeConnection();
 		}
     	return response;
 	}

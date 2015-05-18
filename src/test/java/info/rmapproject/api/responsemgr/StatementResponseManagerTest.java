@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.model.RMapResource;
 import info.rmapproject.core.model.RMapTriple;
@@ -151,11 +151,11 @@ public class StatementResponseManagerTest {
 			
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
-			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, URLUtils.getDiscoBaseUrl(), "RDFXML");
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			
 			//TODO: System agent param is a default setting until we have proper auth handling.
-			rmapService.createDiSCO(new RMapUri(URLUtils.getDefaultSystemAgentURI()), rmapDisco);
+			rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);
 			
 			RMapTriple stmt = rmapDisco.getRelatedStatements().get(1);
 			RMapResource subject = stmt.getSubject();
@@ -300,7 +300,7 @@ public class StatementResponseManagerTest {
 		//create new ORMapAgent
 		java.net.URI SYSAGENT_URI = null;
 		try {
-			SYSAGENT_URI = URLUtils.getDefaultSystemAgentURI();
+			SYSAGENT_URI = RestApiUtils.getDefaultSystemAgentURI();
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("cant retrieve default system agent URI");

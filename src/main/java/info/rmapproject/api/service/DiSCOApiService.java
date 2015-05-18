@@ -37,7 +37,7 @@ import org.apache.cxf.message.Message;
  *
  */
 
-@Path("/disco")
+@Path("/discos")
 public class DiSCOApiService {
 
 	protected static DiscoResponseManager responseManager = null;

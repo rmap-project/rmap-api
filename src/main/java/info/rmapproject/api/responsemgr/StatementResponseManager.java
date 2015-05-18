@@ -5,7 +5,7 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URIListHandler;
-import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDiSCONotFoundException;
 import info.rmapproject.core.exception.RMapException;
@@ -155,12 +155,12 @@ public class StatementResponseManager {
     		}
 
     		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = URLUtils.getStmtBaseUrl() + strStatementUri + "/events";
+    		String eventUrl = RestApiUtils.getStmtBaseUrl() + strStatementUri + "/events";
         	linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     				   	
 		    response = Response.status(Response.Status.OK)
 						.entity(statementOutput.toString())
-						.location(new URI(URLUtils.makeStmtUrl(strStatementUriDecoded)))
+						.location(new URI(RestApiUtils.makeStmtUrl(strStatementUriDecoded)))
         				.header("Link",linkRel)						//switch this to link() or links()?
         				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
 						.build();
@@ -219,11 +219,11 @@ public class StatementResponseManager {
     		}
     		
     		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = URLUtils.getStmtBaseUrl() + strStatementUri + "/events";
+    		String eventUrl = RestApiUtils.getStmtBaseUrl() + strStatementUri + "/events";
     		linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
     				   	
 		    response = Response.status(Response.Status.OK)
-						.location(new URI(URLUtils.makeStmtUrl(strDecodedStatementUri)))
+						.location(new URI(RestApiUtils.makeStmtUrl(strDecodedStatementUri)))
         				.header("Link",linkRel)						//switch this to link() or links()?
         				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
 						.build();
@@ -305,7 +305,7 @@ public class StatementResponseManager {
 			
 			response = Response.status(Response.Status.OK)
 						.entity(stmtURI.toString())
-						.location(new URI (URLUtils.makeStmtUrl(stmtURI.toString())))
+						.location(new URI (RestApiUtils.makeStmtUrl(stmtURI.toString())))
 						.build();
 	    }
 		catch(RMapApiException ex)	{
@@ -377,7 +377,7 @@ public class StatementResponseManager {
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (URLUtils.makeStmtUrl(strStatementUri)))
+							.location(new URI (RestApiUtils.makeStmtUrl(strStatementUri)))
 							.build();    			
 	        }
 		}

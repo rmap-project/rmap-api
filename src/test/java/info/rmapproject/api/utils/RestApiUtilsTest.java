@@ -6,46 +6,39 @@ import info.rmapproject.api.exception.RMapApiException;
 
 import org.junit.Test;
 
-public class URLUtilsTest {
+public class RestApiUtilsTest {
 
 	@Test
 	public void testGetBaseUrl() throws RMapApiException {
-		String baseURL = URLUtils.getBaseUrl();
+		String baseURL = RestApiUtils.getBaseUrl();
 		assertFalse(baseURL.endsWith("/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetStmtBaseUrl() throws RMapApiException {
-		String baseURL = URLUtils.getStmtBaseUrl();
+		String baseURL = RestApiUtils.getStmtBaseUrl();
 		assertFalse(baseURL.endsWith("/stmt/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetDiscoBaseUrl() throws RMapApiException {
-		String baseURL = URLUtils.getDiscoBaseUrl();
+		String baseURL = RestApiUtils.getDiscoBaseUrl();
 		assertFalse(baseURL.endsWith("/disco/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetAgentBaseUrl() throws RMapApiException {
-		String baseURL = URLUtils.getAgentBaseUrl();
+		String baseURL = RestApiUtils.getAgentBaseUrl();
 		assertFalse(baseURL.endsWith("/agent/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
-	public void testGetProfileBaseUrl() throws RMapApiException {
-		String baseURL = URLUtils.getProfileBaseUrl();
-		assertFalse(baseURL.endsWith("/profile/"));
-		assertTrue(baseURL.startsWith("http"));		
-	}
-
-	@Test
 	public void testGetResourceBaseUrl() throws RMapApiException {
-		String baseURL = URLUtils.getResourceBaseUrl();
+		String baseURL = RestApiUtils.getResourceBaseUrl();
 		assertFalse(baseURL.endsWith("/resource/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}

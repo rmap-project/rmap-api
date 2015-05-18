@@ -5,7 +5,7 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URIListHandler;
-import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapDiSCONotFoundException;
@@ -192,7 +192,7 @@ public class DiscoResponseManager {
 
 			response = Response.status(Response.Status.OK)
 					.entity(discoOutput.toString())
-					.location(new URI(URLUtils.makeDiscoUrl(strDiscoUri)))
+					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
 					.type("application/vnd.rmap-project.disco; version=1.0-beta") //TODO move version number to a property?
 					.build();  	
@@ -257,7 +257,7 @@ public class DiscoResponseManager {
 			String linkRel = buildGetDiscoLinks(uriDiscoUri);
 
 			response = Response.status(Response.Status.OK)
-					.location(new URI(URLUtils.makeDiscoUrl(strDiscoUri)))
+					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
 					.build();  
 		}
@@ -304,7 +304,7 @@ public class DiscoResponseManager {
 			if (rdfHandler ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
-			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, URLUtils.getDiscoBaseUrl(), contentType.getRdfType());
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, RestApiUtils.getDiscoBaseUrl(), contentType.getRdfType());
 			if (rmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
@@ -334,8 +334,8 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
 			} 
 
-			String newEventURL = URLUtils.makeEventUrl(sEventURI); 
-			String newDiscoUrl = URLUtils.makeDiscoUrl(sDiscoURI); 
+			String newEventURL = RestApiUtils.makeEventUrl(sEventURI); 
+			String newDiscoUrl = RestApiUtils.makeDiscoUrl(sDiscoURI); 
 
 			String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
 
@@ -405,7 +405,7 @@ public class DiscoResponseManager {
 			if (rdfHandler ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
-			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, URLUtils.getDiscoBaseUrl(), contentType.getRdfType());
+			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, RestApiUtils.getDiscoBaseUrl(), contentType.getRdfType());
 			if (newRmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
@@ -436,9 +436,9 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
 			} 
 
-			String newEventURL = URLUtils.makeEventUrl(sEventURI); 
-			String prevDiscoUrl = URLUtils.makeDiscoUrl(origDiscoUri); 
-			String newDiscoUrl = URLUtils.makeDiscoUrl(sDiscoURI); 
+			String newEventURL = RestApiUtils.makeEventUrl(sEventURI); 
+			String prevDiscoUrl = RestApiUtils.makeDiscoUrl(origDiscoUri); 
+			String newDiscoUrl = RestApiUtils.makeDiscoUrl(sDiscoURI); 
 
 			String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
 			linkRel = linkRel.concat(",<" + prevDiscoUrl + ">" + ";rel=\"predecessor-version\"");
@@ -555,8 +555,8 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
 			} 
 
-			String newEventURL = URLUtils.makeEventUrl(sEventURI); 
-			String origDiscoUrl = URLUtils.makeDiscoUrl(discoUri); 
+			String newEventURL = RestApiUtils.makeEventUrl(sEventURI); 
+			String origDiscoUrl = RestApiUtils.makeDiscoUrl(discoUri); 
 			String linkRel = "";
 			
 			if (newStatus == "TOMBSTONED")	{
@@ -667,7 +667,7 @@ public class DiscoResponseManager {
 		    			
 			response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (URLUtils.makeStmtUrl(discoUri)))
+							.location(new URI (RestApiUtils.makeStmtUrl(discoUri)))
 							.build();
 
 		}
@@ -742,7 +742,7 @@ public class DiscoResponseManager {
     		
     		response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (URLUtils.makeDiscoUrl(discoUri)))
+							.location(new URI (RestApiUtils.makeDiscoUrl(discoUri)))
 							.build();
 	        
 		}
@@ -802,15 +802,15 @@ public class DiscoResponseManager {
 			try {
 				URI latestUri = rmapService.getDiSCOIdLatestVersion(uriDiscoUri);
 				if (latestUri!=null && latestUri.toString().length()>0) {
-					links.append(",<" + URLUtils.makeDiscoUrl(latestUri.toString()) + ">" + ";rel=\"latest-version\"");  			
+					links.append(",<" + RestApiUtils.makeDiscoUrl(latestUri.toString()) + ">" + ";rel=\"latest-version\"");  			
 				}
 				URI prevUri = rmapService.getDiSCOIdPreviousVersion(uriDiscoUri);
 				if (prevUri!=null && prevUri.toString().length()>0) {
-					links.append(",<" + URLUtils.makeDiscoUrl(prevUri.toString()) + ";rel=\"predecessor-version\"");
+					links.append(",<" + RestApiUtils.makeDiscoUrl(prevUri.toString()) + ";rel=\"predecessor-version\"");
 				}
 				URI nextUri = rmapService.getDiSCOIdNextVersion(uriDiscoUri);
 				if (nextUri!=null && nextUri.toString().length()>0) {
-					links.append(",<" + URLUtils.makeDiscoUrl(nextUri.toString()) + ";rel=\"successor-version\"");
+					links.append(",<" + RestApiUtils.makeDiscoUrl(nextUri.toString()) + ";rel=\"successor-version\"");
 				}
 			} catch (Exception ex){
 				throw RMapApiException.wrap(ex, ErrorCode.ER_CORE_COULD_NOT_RETRIEVE_DISCO_VERSION);
@@ -824,7 +824,7 @@ public class DiscoResponseManager {
 			}		
 			
 			//get DiSCO event link
-			String eventUrl = URLUtils.getDiscoBaseUrl() + strDiscoUri + "/events";
+			String eventUrl = RestApiUtils.getDiscoBaseUrl() + strDiscoUri + "/events";
 	
 			links.append(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
 		}

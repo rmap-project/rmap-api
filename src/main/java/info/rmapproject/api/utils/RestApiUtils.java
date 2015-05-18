@@ -3,6 +3,7 @@ package info.rmapproject.api.utils;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.core.exception.RMapException;
+import info.rmapproject.core.model.RMapStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +11,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Properties;
 
-public class URLUtils {
+public class RestApiUtils {
 	
 	private static final String BASE_URL_KEY = "baseURL";
 	private static final String DEFAULT_SYSAGENT_KEY = "defaultSysAgent";
@@ -22,7 +23,7 @@ public class URLUtils {
 		InputStream input = null;
 		String propertiesFile = "/rmap_api.properties";
 		try {	
-			input = URLUtils.class.getResourceAsStream(propertiesFile);
+			input = RestApiUtils.class.getResourceAsStream(propertiesFile);
 			if (input==null)	{
 				throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_FILENOTFOUND);
 			}
@@ -59,32 +60,27 @@ public class URLUtils {
 	}
 	
 	public static String getStmtBaseUrl() throws RMapApiException {
-		String stmtBaseUrl = getBaseUrl() + "/stmt/";
+		String stmtBaseUrl = getBaseUrl() + "/stmts/";
 		return stmtBaseUrl;
 	}
 	
 	public static String getDiscoBaseUrl() throws RMapApiException {
-		String discoBaseUrl = getBaseUrl() + "/disco/";
+		String discoBaseUrl = getBaseUrl() + "/discos/";
 		return discoBaseUrl;
 	}
 
 	public static String getEventBaseUrl() throws RMapApiException {
-		String eventBaseUrl = getBaseUrl() + "/event/";
+		String eventBaseUrl = getBaseUrl() + "/events/";
 		return eventBaseUrl;
 	}
 	
 	public static String getAgentBaseUrl() throws RMapApiException {
-		String agentBaseUrl = getBaseUrl() + "/agent/";
+		String agentBaseUrl = getBaseUrl() + "/agents/";
 		return agentBaseUrl;
 	}	
 	
-	public static String getProfileBaseUrl() throws RMapApiException {
-		String profileBaseUrl = getBaseUrl() + "/profile/";
-		return profileBaseUrl;
-	}	
-	
 	public static String getResourceBaseUrl() throws RMapApiException {
-		String resourceBaseUrl = getBaseUrl() + "/resource/";
+		String resourceBaseUrl = getBaseUrl() + "/resources/";
 		return resourceBaseUrl;
 	}
 	
@@ -135,6 +131,28 @@ public class URLUtils {
 		}
 		return url;
 	}
+	
+	public static RMapStatus convertToRMapStatus(String status) throws RMapApiException {
+		RMapStatus rmapStatus = null;
+		if (status==null)	{
+			status="active";
+		}
+		switch(status) {
+			case "active": rmapStatus = RMapStatus.ACTIVE;
+				break;
+			case "deleted": rmapStatus = RMapStatus.TOMBSTONED;
+				break;
+			case "inactive": rmapStatus = RMapStatus.INACTIVE;
+				break;
+			case "all": rmapStatus = null;
+				break;
+			default: 
+				throw new RMapApiException(ErrorCode.ER_STATUS_TYPE_NOT_RECOGNIZED);		
+		}
+		return rmapStatus;
+	}
+	
+	
 	/*
 	 * TODO: this is here as a temporary measure to make it easy to share a system agent ID between all classes...
 	 * just until we have proper authentication.

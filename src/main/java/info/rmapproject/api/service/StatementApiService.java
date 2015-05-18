@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
  * @author khanson
  */
 
-@Path("/stmt")
+@Path("/stmts")
 public class StatementApiService {
 	
 	protected static StatementResponseManager responseManager = null;
@@ -106,7 +106,7 @@ public class StatementApiService {
  *-------------------------------
  */
 	/**
-	 * GET /stmt/{stmtUri}
+	 * GET /stmts/{stmtUri}
 	 * Returns requested RMap:Statement as RDF/XML, JSON-LD, NQUADs or TURTLE
 	 * @param stmtUri
 	 * @return Response
@@ -134,7 +134,7 @@ public class StatementApiService {
  *-------------------------------
  */
 	/**
-	 * HEAD /stmt/{stmtUri}
+	 * HEAD /stmts/{stmtUri}
      * Returns status information for specific RMap:Statement as a HTTP response header. 
      * Includes event list and URI
 	 * @param stmtUri
@@ -156,7 +156,7 @@ public class StatementApiService {
  *-------------------------------
  */
 	/**
-	 * GET /stmt/{subject}/{predicate}/{object}
+	 * GET /stmts/{subject}/{predicate}/{object}
 	 * Returns RMap:Statement URI for subject, predicate, object
      * @param subject
      * @param predicate
@@ -183,7 +183,7 @@ public class StatementApiService {
  */
     
 	/**
-	 * GET /stmt/{stmtUri}/events
+	 * GET /stmts/{stmtUri}/events
 	 * Returns list of RMap:Event URIs related to the RMap:Statement URI as JSON
 	 * @param stmtUri
 	 * @return Response

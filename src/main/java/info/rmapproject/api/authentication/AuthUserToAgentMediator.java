@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class AuthUserToAgentMediator {
 	
-	private String PROPERTIES_FILEPATH = "/rmap/apache/tomcat7/conf/rmap_apiprod_userNameToSysAgent.map";
+	private String PROPERTIES_FILEPATH = "/rmap/apache/tomcat7/conf/rmap_apitest_userNameToSysAgent.map";
 	//private String PROPERTIES_FILEPATH = "C:/rmap_apitest_userNameToSysAgent.map";
 	/*
 	private String propertiesFileName = null;

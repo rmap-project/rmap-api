@@ -22,7 +22,7 @@ import javax.ws.rs.core.Response;
  * @author khanson
  */
 
-@Path("/event")
+@Path("/events")
 public class EventApiService {
 
 	protected static EventResponseManager responseManager = null;

@@ -6,7 +6,7 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.URIListHandler;
-import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapAgentNotFoundException;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
@@ -157,7 +157,7 @@ public class AgentResponseManager {
 
 		    response = Response.status(Response.Status.OK)
 						.entity(agentOutput.toString())
-						.location(new URI(URLUtils.makeAgentUrl(strAgentUri)))
+						.location(new URI(RestApiUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
         				.type("application/vnd.rmap-project.agent; version=1.0-beta") //TODO move version number to a property?
 						.build();    	
@@ -229,7 +229,7 @@ public class AgentResponseManager {
     		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
 
 		    response = Response.status(Response.Status.OK)
-						.location(new URI(URLUtils.makeAgentUrl(strAgentUri)))
+						.location(new URI(RestApiUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
 						.build();   
 		    
@@ -294,7 +294,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
 						 						
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(sysAgentUri, agentRdf, URLUtils.getAgentBaseUrl(), contentType.toString());
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(sysAgentUri, agentRdf, RestApiUtils.getAgentBaseUrl(), contentType.toString());
 			if (rmapAgent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_AGENT_FAILED);
 			}  
@@ -324,8 +324,8 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
 			} 
 
-			String newEventURL = URLUtils.makeEventUrl(sEventURI); 
-			String newAgentUrl = URLUtils.makeAgentUrl(sAgentURI); 
+			String newEventURL = RestApiUtils.makeEventUrl(sEventURI); 
+			String newAgentUrl = RestApiUtils.makeAgentUrl(sAgentURI); 
 
 			String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
 
@@ -400,8 +400,8 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
 			} 
 
-			String newEventURL = URLUtils.makeEventUrl(sEventURI); 
-			String origAgentUrl = URLUtils.makeAgentUrl(agentUri); 
+			String newEventURL = RestApiUtils.makeEventUrl(sEventURI); 
+			String origAgentUrl = RestApiUtils.makeAgentUrl(agentUri); 
 			String linkRel = "";
 
 			//TODO: EVENT_TYPE_TOMBSTONE a place holder - need to consider what this should be.
@@ -493,7 +493,7 @@ public class AgentResponseManager {
     		
     		response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (URLUtils.makeAgentUrl(agentUri)))
+							.location(new URI (RestApiUtils.makeAgentUrl(agentUri)))
 							.build();
 	        
 		}
@@ -589,7 +589,7 @@ public class AgentResponseManager {
     		
 			response = Response.status(Response.Status.OK)
 						.entity(outputString.toString())
-						.location(new URI (URLUtils.makeAgentUrl(nonRmapAgentUri)))
+						.location(new URI (RestApiUtils.makeAgentUrl(nonRmapAgentUri)))
 						.build();    			
 		} 
 		catch(RMapApiException ex)	{

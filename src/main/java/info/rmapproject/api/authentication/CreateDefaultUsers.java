@@ -1,6 +1,6 @@
 package info.rmapproject.api.authentication;
 
-import info.rmapproject.api.utils.URLUtils;
+import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.model.agent.RMapAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
@@ -109,7 +109,7 @@ public class CreateDefaultUsers {
 		if (authUserToAgentMediator.getRMapAgentForUser(username) == null)	{
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			InputStream rdf = new ByteArrayInputStream(agentRdf.getBytes(StandardCharsets.UTF_8));	
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(systemAgentUri, rdf, URLUtils.getAgentBaseUrl(), "RDFXML");
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(systemAgentUri, rdf, RestApiUtils.getAgentBaseUrl(), "RDFXML");
 			rmapService.createAgent(systemAgentUri, rmapAgent);
 			String newAgentURI = rmapAgent.getId().toString();
 			authUserToAgentMediator.setRMapAgentForUser(username, newAgentURI);

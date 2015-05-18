@@ -2,8 +2,9 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.FilterObjType;
+import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.ResourceResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
 
@@ -13,6 +14,7 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -22,7 +24,7 @@ import javax.ws.rs.core.Response;
  * @author khanson
  */
 
-@Path("/resource")
+@Path("/resources")
 public class ResourceApiService {
 
 	protected static ResourceResponseManager responseManager = null;
@@ -102,15 +104,16 @@ public class ResourceApiService {
 	 * GET /resource/{resourceUri}
 	 * Returns list of URIs related to the rdfs:Resource URI as PLAIN TEXT or JSON
 	 * @param resourceUri
+	 * @param status
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceAll(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceAll(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, outputType, null);
+    	Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, outputType, status);
 	    return response;	
     }
 
@@ -120,15 +123,16 @@ public class ResourceApiService {
 	 * GET /resource/{resourceUri}/stmts
 	 * Returns list of all RMap:Statement URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
+	 * @param status
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}/stmts")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceStmts(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceStmts(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, outputType, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, outputType, status);
 	    return response;	
     }
 
@@ -153,15 +157,16 @@ public class ResourceApiService {
 	 * GET /resource/{resourceUri}/agents
 	 * Returns list of all RMap:Agent URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
+	 * @param status
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}/agents")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceAgentsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceAgentsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, outputType, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, outputType, status);
 	    return response;	
     }
     
@@ -169,16 +174,41 @@ public class ResourceApiService {
 	 * GET /resource/{resourceUri}/discos
 	 * Returns list of all RMap:DiSCO URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
+	 * @param status
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}/discos")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceDiscosAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceDiscosAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.DISCOS, outputType, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.DISCOS, outputType, status);
 	    return response;	
     }
+    
+	
+
+	/**
+	 * GET /resources/{resourceUri}/rdfstmts
+	 * Returns list of all rdf:Statements related to the rdfs:Resource URI as RDF serialization
+	 * @param resourceUri
+	 * @param status
+	 * @return Response
+	 * @throws RMapApiException
+	 */  
+    @GET
+    @Path("/{resourceUri}/rdfstmts")
+    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;",
+				"application/ld+json;charset=UTF-8;", "application/n-quads;charset=UTF-8;",
+				"text/turtle;charset=UTF-8;"
+				})
+    public Response apiGetRMapResourceRdfStmts(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    	RdfType outputType = HttpTypeMediator.getRdfResponseType(headers);
+		Response response = responseManager.getRMapResourceRdfStmts(resourceUri, outputType, status);
+	    return response;	
+    }
+    
+    
    
 }

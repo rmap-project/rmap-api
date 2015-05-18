@@ -36,7 +36,7 @@ import org.apache.cxf.message.Message;
  *
  */
 
-@Path("/agent")
+@Path("/agents")
 public class AgentApiService {
 	
 	protected static AgentResponseManager responseManager = null;

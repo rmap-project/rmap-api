@@ -5,6 +5,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapAgentNotFoundException;
@@ -159,7 +160,7 @@ public class AgentResponseManager {
 						.entity(agentOutput.toString())
 						.location(new URI(RestApiUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
-        				.type("application/vnd.rmap-project.agent; version=1.0-beta") //TODO move version number to a property?
+        				.type(HttpTypeMediator.getResponseMediaType("agent", returnType)) //TODO move version number to a property?
 						.build();    	
 		    
 		}

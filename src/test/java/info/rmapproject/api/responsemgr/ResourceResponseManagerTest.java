@@ -65,7 +65,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FLGRS.2012.2189934", FilterObjType.ALL, NonRdfType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1594%2FPANGAEA.834198", FilterObjType.ALL, NonRdfType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

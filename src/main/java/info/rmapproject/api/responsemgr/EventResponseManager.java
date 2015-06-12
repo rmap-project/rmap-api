@@ -4,6 +4,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -143,7 +144,7 @@ public class EventResponseManager {
 			response = Response.status(Response.Status.OK)
 						.entity(eventOutput.toString())
 						.location(new URI(RestApiUtils.makeEventUrl(strEventUri)))
-        				.type("application/vnd.rmap-project.event; version=1.0-beta") //TODO move version number to a property?
+        				.type(HttpTypeMediator.getResponseMediaType("event", returnType)) //TODO move version number to a property?
 						.build();
 
 		}

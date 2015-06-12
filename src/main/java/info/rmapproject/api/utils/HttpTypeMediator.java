@@ -16,6 +16,9 @@ import javax.ws.rs.core.MediaType;
  */
 public class HttpTypeMediator {
 
+	private static String MEDIATYPE_VERSION = "1.0-beta";
+	
+	
 	//private static final Logger log = LogManager.getLogger(HttpTypeMediator.class);
 	/**
 	 * Maps the accept-type to the matching response type
@@ -97,6 +100,32 @@ public class HttpTypeMediator {
 		}
 		return requestType;
 	}
+	
+	/**
+	 * Determine media type that will be returned in the response
+	 * @param rmapType
+	 * @param rdfType
+	 * @return
+	 */
+	public static String getResponseMediaType(String rmapType, RdfType rdfType){
+		String mediatype;
+		
+        switch (rdfType) {
+            case JSONLD: mediatype = "application/vnd.rmap-project." + rmapType + "+ld+json; version=" + MEDIATYPE_VERSION;
+                     break;
+            case RDFNQUADS: mediatype = "application/vnd.rmap-project." + rmapType + "+n-quads; version=" + MEDIATYPE_VERSION;
+            	break;
+            case RDFXML: mediatype = "application/vnd.rmap-project." + rmapType + "+rdf+xml; version=" + MEDIATYPE_VERSION;
+            	break;
+            case TURTLE: mediatype = "text/vnd.rmap-project." + rmapType + "+turtle; version=" + MEDIATYPE_VERSION;
+            	break;
+            default: mediatype = "application/vnd.rmap-project." + rmapType + "+rdf+xml; version=" + MEDIATYPE_VERSION;
+            	break;
+        }
+
+		return mediatype;
+	}
+	
 	
 	
 }

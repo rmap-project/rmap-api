@@ -17,7 +17,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -321,15 +320,14 @@ public class DiSCOApiService {
     }
 
 	/**
-	 * PUT /disco/{discoUri}
+	 * PATCH /disco/{discoUri}
 	 * Sets status of target RMap:DiSCO to "inactive".  It will still be stored in the triplestore
 	 * and will still be visible through the API for certain requests.
 	 * @param discoUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */    
-    //TODO:using PUT temporarily to distinguish but we didn't decide on an HTTP verb for this update.
-    @PUT
+    @PATCH
     @Path("/{discoUri}")
     public Response apiInactivateRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response response = responseManager.inactivateRMapDiSCO(discoUri, getSysAgentId());

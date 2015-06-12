@@ -4,6 +4,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -76,7 +77,7 @@ public class DiscoResponseManager {
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.entity("{\"description\":\"will show copy of swagger content\"}")
-					.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
+					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
 					.header("Link",linkRel)	
 					.build();
 
@@ -98,7 +99,7 @@ public class DiscoResponseManager {
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
-					.header("Allow", "HEAD,OPTIONS,GET,POST,PUT,DELETE")
+					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
 					.header("Link",linkRel)	
 					.build();
 		}
@@ -194,7 +195,7 @@ public class DiscoResponseManager {
 					.entity(discoOutput.toString())
 					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
-					.type("application/vnd.rmap-project.disco; version=1.0-beta") //TODO move version number to a property?
+					.type(HttpTypeMediator.getResponseMediaType("disco", returnType)) //TODO move version number to a property?
 					.build();  	
 
 		}

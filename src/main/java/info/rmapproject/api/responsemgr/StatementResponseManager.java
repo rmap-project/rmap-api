@@ -4,6 +4,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
@@ -162,7 +163,7 @@ public class StatementResponseManager {
 						.entity(statementOutput.toString())
 						.location(new URI(RestApiUtils.makeStmtUrl(strStatementUriDecoded)))
         				.header("Link",linkRel)						//switch this to link() or links()?
-        				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
+        				.type(HttpTypeMediator.getResponseMediaType("statement", returnType)) //TODO move version number to a property?
 						.build();
 
 		}

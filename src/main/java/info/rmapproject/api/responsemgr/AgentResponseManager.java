@@ -43,26 +43,9 @@ import org.openrdf.model.vocabulary.DC;
  */
 
 public class AgentResponseManager {
-
-	private static RMapService rmapService = null;
 	
 	public AgentResponseManager() {
 	}		
-	
-	
-	/**
-	 * Creates new RMapService object if not already initiated.
-	 * @throws RMapApiException
-	 * @throws RMapException
-	 */	
-	private static void initRMapService() throws RMapApiException, RMapException {
-		if (rmapService == null){
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-		}
-	}
 	
 	/**
 	 * Displays Agent Service Options
@@ -116,6 +99,7 @@ public class AgentResponseManager {
 	 */	
 	public Response getRMapAgent(String strAgentUri, RdfType returnType) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {			
 			if (strAgentUri==null || strAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -133,7 +117,10 @@ public class AgentResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 					
-			initRMapService();
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
     		RMapAgent rmapAgent = rmapService.readAgent(uriAgentId);
 			if (rmapAgent ==null){
@@ -191,7 +178,9 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
 		return response;
     }
@@ -207,6 +196,7 @@ public class AgentResponseManager {
 	 */	
 	public Response getRMapAgentHeader(String strAgentUri) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {			
 			if (strAgentUri==null || strAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -220,8 +210,11 @@ public class AgentResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-					
-			initRMapService();
+			
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
     		RMapStatus status = rmapService.getAgentStatus(uriAgentId);
     		if (status==null){
@@ -277,8 +270,8 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response createRMapAgent(InputStream agentRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
-	Response response = null;
-	
+		Response response = null;
+		RMapService rmapService = null;
 		try	{
 			if (agentRdf == null || agentRdf.toString().length()==0){
 				throw new RMapApiException(ErrorCode.ER_NO_AGENT_RDF_PROVIDED);
@@ -299,8 +292,11 @@ public class AgentResponseManager {
 			if (rmapAgent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_AGENT_FAILED);
 			}  
-
-			initRMapService();
+			
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 						
 			RMapEventCreation agentEvent = (RMapEventCreation)rmapService.createAgent(sysAgentUri, rmapAgent);
 			if (agentEvent == null) {
@@ -350,7 +346,9 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
 	return response;  
 	}
@@ -365,7 +363,7 @@ public class AgentResponseManager {
 	 */
 	public Response tombstoneRMapAgent(String agentUri, URI sysAgentUri) throws RMapApiException {
 		Response response = null;
-
+		RMapService rmapService = null;
 		try	{		
 			if (agentUri==null || agentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -382,8 +380,11 @@ public class AgentResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-
-			initRMapService();
+			
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			RMapEvent agentEvent = null;
 			agentEvent = (RMapEvent)rmapService.deleteAgent(sysAgentUri, uriAgentUri);					
@@ -441,7 +442,9 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
 	return response;		
 		
@@ -459,6 +462,7 @@ public class AgentResponseManager {
 	public Response getRMapAgentEvents(String agentUri, NonRdfType returnType) throws RMapApiException {
 
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			//assign default value when null
 			if (returnType==null)	{returnType=NonRdfType.PLAIN_TEXT;}
@@ -476,7 +480,10 @@ public class AgentResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			initRMapService();
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			String outputString="";
 			List <URI> uriList = rmapService.getAgentEvents(uriAgentUri);						
@@ -517,7 +524,9 @@ public class AgentResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
     	return response;
 	}
@@ -534,7 +543,7 @@ public class AgentResponseManager {
 	public Response getRMapAgentRepresentations(String nonRmapAgentUri, String creatorUri, NonRdfType returnType) throws RMapApiException	{
 
 		Response response = null;
-		
+		RMapService rmapService = null;
 		try {			
 			if (nonRmapAgentUri==null || nonRmapAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -548,8 +557,11 @@ public class AgentResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-
-			initRMapService();
+			
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			String outputString="";
 			
@@ -614,7 +626,9 @@ public class AgentResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
 		return response;
 	}

@@ -52,7 +52,7 @@ public class DiscoResponseManagerTest {
 	    	+ "<dc:title>Toward Scalable Systems for Big Data Analytics: A Technology Tutorial</dc:title>"  
 	    	+ "<dc:creator>Yonggang Wen</dc:creator>"  
 	    	+ "<dc:creator>Tat-Seng Chua</dc:creator>"  
-	    	+ "<dc:creator>Xuelong Li</dc:creator>"  
+	    	+ "<dcterms:creator rdf:nodeID=\"N65580\"/>"  
 	    	+ "<dc:subject>Hadoop</dc:subject>"  
 	    	+ "<dc:subject>Big data analytics</dc:subject>"  
 	    	+ "<dc:subject>data acquisition</dc:subject>"  
@@ -67,6 +67,10 @@ public class DiscoResponseManagerTest {
 	    	+ "<dc:format>video/x-msvideo</dc:format>"  
 	    	+ "<dc:extent>194KB</dc:extent>"  
 	    	+ "</rdf:Description>"  
+	    	+ "<rdf:Description rdf:nodeID=\"N65580\">"
+	    	+ "<foaf:name>Xuelong Li</foaf:name>"
+	    	+ "<rdf:type rdf:resource=\"http://purl.org/dc/terms/Agent\"/>"
+	    	+ "</rdf:Description>"	
 	    	+ "</rdf:RDF>";
 
 	protected String discoRDFNoCreator = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
@@ -224,17 +228,17 @@ public class DiscoResponseManagerTest {
 		
 		//createDisco
 		
-		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-		InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
-		String discoURI = "";
+		//RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+		//InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
+		//RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
+		String discoURI = "ark:/22573/rmd1s3d2v";
 		
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
-		rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);
-		discoURI = rmapDisco.getId().toString();		
-        assertNotNull(discoURI);
+		//rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);
+		//discoURI = rmapDisco.getId().toString();		
+        //assertNotNull(discoURI);
 		
 		try {
 			response = responseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);

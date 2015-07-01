@@ -34,25 +34,8 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class EventResponseManager {
 
-	private static RMapService rmapService = null;
-	
 	public EventResponseManager() {
 	}		
-
-	/**
-	 * Creates new RMapService object if not already initiated.
-	 * @throws RMapApiException
-	 * @throws RMapException
-	 */	
-	private static void initRMapService() throws RMapApiException, RMapException {
-		if (rmapService == null){
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-		}
-	}
-
 
 	/**
 	 * Displays Event Service Options
@@ -107,6 +90,7 @@ public class EventResponseManager {
 	 */	
 	public Response getRMapEvent(String strEventUri, RdfType returnType) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -124,7 +108,10 @@ public class EventResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			initRMapService();
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
     		RMapEvent rmapEvent = rmapService.readEvent(uriEventUri);
 			if (rmapEvent ==null){
@@ -164,7 +151,9 @@ public class EventResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
 		return response;
 	}
@@ -178,6 +167,7 @@ public class EventResponseManager {
 	 */
 	public Response getRMapEventRelatedObjs(String strEventUri, String objType, NonRdfType returnType) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -194,8 +184,11 @@ public class EventResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
+
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			String outputString="";
 			String jsonType="";
@@ -256,7 +249,9 @@ public class EventResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
     	return response;
 	}

@@ -42,25 +42,8 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class StatementResponseManager {
 
-	private static RMapService rmapService = null;
-
 	public StatementResponseManager() {
 	}		
-	
-	/**
-	 * Creates new RMapService object if not already initiated.
-	 * @throws RMapApiException
-	 * @throws RMapException
-	 */	
-	private static void initRMapService() throws RMapApiException, RMapException {
-		if (rmapService == null){
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-		}
-	}
-
 	/**
 	 * Displays Statement Service Options
 	 * @return
@@ -115,6 +98,7 @@ public class StatementResponseManager {
 	 */	
 	public Response getRMapStatement(String strStatementUri, RdfType returnType) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strStatementUri==null || strStatementUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -132,8 +116,11 @@ public class StatementResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
+
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
     		RMapStatement rmapStatement = rmapService.readStatement(uriStatementUri);
 			if (rmapStatement ==null){
@@ -183,7 +170,9 @@ public class StatementResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null) {
+				rmapService.closeConnection();
+			}
 		}
 		return response;
 	}
@@ -197,6 +186,7 @@ public class StatementResponseManager {
 	 */	
 	public Response getRMapStatementHeader(String strStatementUri) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strStatementUri==null || strStatementUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -211,8 +201,11 @@ public class StatementResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
+
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
     		RMapStatus status = rmapService.getStatementStatus(uriStatementUri);
     		if (status==null){
@@ -246,7 +239,9 @@ public class StatementResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null) {
+				rmapService.closeConnection();
+			}
 		}
 		return response;
 	}
@@ -264,6 +259,7 @@ public class StatementResponseManager {
 	 */	
 	public Response getRMapStatementID(String subject, String predicate, String object) throws RMapApiException	{
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (subject==null || subject.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_SUBJECT_PROVIDED); 
@@ -297,7 +293,10 @@ public class StatementResponseManager {
 				rmapObject = new RMapLiteral(object);
 			}
 			
-			initRMapService();
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			URI stmtURI = rmapService.getStatementID(rmapSubject, rmapPredicate, rmapObject);
 			if (stmtURI == null){
@@ -328,7 +327,9 @@ public class StatementResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService!=null){
+				rmapService.closeConnection();
+			}
 		}
 		return response;
 	}
@@ -344,6 +345,7 @@ public class StatementResponseManager {
 	 */
 	public Response getRMapStatementRelatedEvents(String strStatementUri, NonRdfType returnType) throws RMapApiException {
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strStatementUri==null || strStatementUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -357,8 +359,11 @@ public class StatementResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
+
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			String outputString="";
 			
@@ -401,7 +406,9 @@ public class StatementResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
+			if (rmapService != null){
 		    rmapService.closeConnection();
+			}
 		}
     	return response;
 	}

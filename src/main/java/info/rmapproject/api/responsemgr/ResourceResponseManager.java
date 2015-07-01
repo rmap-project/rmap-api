@@ -36,24 +36,8 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class ResourceResponseManager {
 
-	private static RMapService rmapService = null;
-	
 	public ResourceResponseManager() {
 	}		
-
-	/**
-	 * Creates new RMapService object if not already initiated.
-	 * @throws RMapApiException
-	 * @throws RMapException
-	 */	
-	private static void initRMapService() throws RMapApiException, RMapException {
-		if (rmapService == null){
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-		}
-	}
 
 	/**
 	 * Displays Resource Service Options
@@ -109,6 +93,7 @@ public class ResourceResponseManager {
 	 */
 	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, NonRdfType returnType, String status) throws RMapApiException {
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -126,8 +111,11 @@ public class ResourceResponseManager {
 			}
 			
 			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-			
-			initRMapService();
+
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			List <URI> uriList = null;
 			String outputString="";
@@ -187,7 +175,9 @@ public class ResourceResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null) {
+				rmapService.closeConnection();
+			}
 		}
     	return response;
 	}	
@@ -195,6 +185,7 @@ public class ResourceResponseManager {
 	
 	public Response getRMapResourceRdfStmts(String strResourceUri, RdfType returnType, String status) throws RMapApiException {
 		Response response = null;
+		RMapService rmapService = null;
 		try {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -209,8 +200,11 @@ public class ResourceResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			initRMapService();
+
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
 			
 			List <RMapTriple> stmtList = null;
 
@@ -273,7 +267,9 @@ public class ResourceResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null){
+				rmapService.closeConnection();
+			}
 		}
 		return response;
 	}

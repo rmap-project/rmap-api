@@ -2,33 +2,6 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.api.utils.URIListHandler;
-import info.rmapproject.api.utils.RestApiUtils;
-import info.rmapproject.core.exception.RMapDefectiveArgumentException;
-import info.rmapproject.core.exception.RMapDiSCONotFoundException;
-import info.rmapproject.core.exception.RMapException;
-import info.rmapproject.core.exception.RMapObjectNotFoundException;
-import info.rmapproject.core.exception.RMapStatementNotFoundException;
-import info.rmapproject.core.model.RMapLiteral;
-import info.rmapproject.core.model.RMapStatus;
-import info.rmapproject.core.model.RMapUri;
-import info.rmapproject.core.model.RMapValue;
-import info.rmapproject.core.model.statement.RMapStatement;
-import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
-import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.RMAP;
-
-import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
-import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -89,94 +62,6 @@ public class StatementResponseManager {
 	
 	
 
-	/**
-	 * Retrieves RMap Statement in requested RDF format and forms an HTTP response.
-	 * @param strStatementUri
-	 * @param acceptType
-	 * @return HTTP Response
-	 * @throws RMapApiException
-	 */	
-	public Response getRMapStatement(String strStatementUri, RdfType returnType) throws RMapApiException	{
-		Response response = null;
-		RMapService rmapService = null;
-		try {
-			if (strStatementUri==null || strStatementUri.length()==0)	{
-				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
-			}		
-			if (returnType==null)	{
-				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
-			}
-			
-			URI uriStatementUri = null;
-			String strStatementUriDecoded = null;
-			try {
-				strStatementUriDecoded = URLDecoder.decode(strStatementUri, "UTF-8");
-				uriStatementUri = new URI(strStatementUriDecoded);
-			}
-			catch (Exception ex)  {
-				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-			}
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
-    		RMapStatement rmapStatement = rmapService.readStatement(uriStatementUri);
-			if (rmapStatement ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_READ_STMT_RETURNED_NULL);
-			}
-			
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-			
-    		OutputStream statementOutput = rdfHandler.statement2Rdf(rmapStatement, returnType.toString());
-			if (statementOutput ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
-			}	
-
-    		RMapStatus status = rmapService.getStatementStatus(uriStatementUri);
-    		if (status==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
-    		}
-
-    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = RestApiUtils.getStmtBaseUrl() + strStatementUri + "/events";
-        	linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
-    				   	
-		    response = Response.status(Response.Status.OK)
-						.entity(statementOutput.toString())
-						.location(new URI(RestApiUtils.makeStmtUrl(strStatementUriDecoded)))
-        				.header("Link",linkRel)						//switch this to link() or links()?
-        				.type(HttpTypeMediator.getResponseMediaType("statement", returnType)) //TODO move version number to a property?
-						.build();
-
-		}
-		catch(RMapApiException ex)	{
-        	throw RMapApiException.wrap(ex);
-		}
-		catch(RMapStatementNotFoundException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_STMT_OBJECT_NOT_FOUND);			
-		}
-		catch(RMapDefectiveArgumentException ex){
-			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_STMT_BAD_ARGUMENT);			
-		}
-    	catch(RMapException ex) {  
-        	throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
-    	}  
-		catch(Exception ex)	{
-        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
-		}
-		finally{
-			if (rmapService != null) {
-				rmapService.closeConnection();
-			}
-		}
-		return response;
-	}
-
 
 	/**
 	 * Retrieves RMap Statement header and forms an HTTP response.
@@ -184,67 +69,67 @@ public class StatementResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapStatementHeader(String strStatementUri) throws RMapApiException	{
-		Response response = null;
-		RMapService rmapService = null;
-		try {
-			if (strStatementUri==null || strStatementUri.length()==0)	{
-				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
-			}		
-			
-			URI uriStatementUri = null;
-			String strDecodedStatementUri = null;
-			try {
-				strDecodedStatementUri = URLDecoder.decode(strStatementUri, "UTF-8");
-				uriStatementUri = new URI(strStatementUri);
-			}
-			catch (Exception ex)  {
-				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-			}
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
-    		RMapStatus status = rmapService.getStatementStatus(uriStatementUri);
-    		if (status==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
-    		}
-    		
-    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
-    		String eventUrl = RestApiUtils.getStmtBaseUrl() + strStatementUri + "/events";
-    		linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
-    				   	
-		    response = Response.status(Response.Status.OK)
-						.location(new URI(RestApiUtils.makeStmtUrl(strDecodedStatementUri)))
-        				.header("Link",linkRel)						//switch this to link() or links()?
-        				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
-						.build();
-
-		}
-		catch(RMapApiException ex)	{
-        	throw RMapApiException.wrap(ex);
-		}
-		catch(RMapStatementNotFoundException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_STMT_OBJECT_NOT_FOUND);			
-		}
-		catch(RMapDefectiveArgumentException ex){
-			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_STMT_BAD_ARGUMENT);			
-		}
-    	catch(RMapException ex) {  
-        	throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
-    	}  
-		catch(Exception ex)	{
-        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
-		}
-		finally{
-			if (rmapService != null) {
-				rmapService.closeConnection();
-			}
-		}
-		return response;
-	}
+//	public Response getRMapStatementHeader(String strStatementUri) throws RMapApiException	{
+//		Response response = null;
+//		RMapService rmapService = null;
+//		try {
+//			if (strStatementUri==null || strStatementUri.length()==0)	{
+//				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
+//			}		
+//			
+//			URI uriStatementUri = null;
+//			String strDecodedStatementUri = null;
+//			try {
+//				strDecodedStatementUri = URLDecoder.decode(strStatementUri, "UTF-8");
+//				uriStatementUri = new URI(strStatementUri);
+//			}
+//			catch (Exception ex)  {
+//				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+//			}
+//
+//			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+//			if (rmapService ==null){
+//				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+//			}
+//			
+//    		RMapStatus status = rmapService.getStatementStatus(uriStatementUri);
+//    		if (status==null){
+//				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
+//    		}
+//    		
+//    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+//    		String eventUrl = RestApiUtils.getStmtBaseUrl() + strStatementUri + "/events";
+//    		linkRel = linkRel.concat(",<" + eventUrl + ">" + ";rel=\"" + PROV.HAS_PROVENANCE + "\"");
+//    				   	
+//		    response = Response.status(Response.Status.OK)
+//						.location(new URI(RestApiUtils.makeStmtUrl(strDecodedStatementUri)))
+//        				.header("Link",linkRel)						//switch this to link() or links()?
+//        				.type("application/vnd.rmap-project.statement; version=1.0-beta") //TODO move version number to a property?
+//						.build();
+//
+//		}
+//		catch(RMapApiException ex)	{
+//        	throw RMapApiException.wrap(ex);
+//		}
+//		/*catch(RMapStatementNotFoundException ex) {
+//			throw RMapApiException.wrap(ex,ErrorCode.ER_STMT_OBJECT_NOT_FOUND);			
+//		}*/
+//		catch(RMapDefectiveArgumentException ex){
+//			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_STMT_BAD_ARGUMENT);			
+//		}
+//    	catch(RMapException ex) {  
+//        	throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
+//    	}  
+//		catch(Exception ex)	{
+//        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+//		}
+//		finally{
+//			if (rmapService != null) {
+//				rmapService.closeConnection();
+//			}
+//		}
+//		return response;
+//	}
 	
 	
 
@@ -257,7 +142,7 @@ public class StatementResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapStatementID(String subject, String predicate, String object) throws RMapApiException	{
+	/*public Response getRMapStatementID(String subject, String predicate, String object) throws RMapApiException	{
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -297,7 +182,6 @@ public class StatementResponseManager {
 			if (rmapService ==null){
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}
-			
 			URI stmtURI = rmapService.getStatementID(rmapSubject, rmapPredicate, rmapObject);
 			if (stmtURI == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STMTID_RETURNED_NULL);
@@ -332,7 +216,7 @@ public class StatementResponseManager {
 			}
 		}
 		return response;
-	}
+	}*/
 	
 
 	/**
@@ -343,7 +227,7 @@ public class StatementResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapStatementRelatedEvents(String strStatementUri, NonRdfType returnType) throws RMapApiException {
+	/*public Response getRMapStatementRelatedEvents(String strStatementUri, NonRdfType returnType) throws RMapApiException {
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -411,6 +295,6 @@ public class StatementResponseManager {
 			}
 		}
     	return response;
-	}
+	}*/
 	
 }

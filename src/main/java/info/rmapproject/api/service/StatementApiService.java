@@ -2,19 +2,13 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.StatementResponseManager;
-import info.rmapproject.api.utils.HttpTypeMediator;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 /**
@@ -97,34 +91,6 @@ public class StatementApiService {
 	    return response;
     }
         
-
-/*
- * ------------------------------
- * 
- *  	  GET STATEMENT RDF
- *  
- *-------------------------------
- */
-	/**
-	 * GET /stmts/{stmtUri}
-	 * Returns requested RMap:Statement as RDF/XML, JSON-LD, NQUADs or TURTLE
-	 * @param stmtUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
-    @GET
-    @Path("/{stmtUri}")
-    @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.statement+rdf+xml;charset=UTF-8;",
-				"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.statement+ld+json;charset=UTF-8;",
-				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.statement+n-quads;charset=UTF-8;",
-				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.statement+turtle;charset=UTF-8;"
-				})
-    public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
-    	Response rdfXMLStmt = responseManager.getRMapStatement(stmtUri, returnType);
-	    return rdfXMLStmt;
-    }
-    
     
 /*
  *-------------------------------
@@ -141,12 +107,12 @@ public class StatementApiService {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-    @HEAD
-    @Path("/{stmtUri}")
-    public Response apiGetRMapStmtHeader(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	Response eventList = responseManager.getRMapStatementHeader(stmtUri);
-    	return eventList;
-    }
+//    @HEAD
+//    @Path("/{stmtUri}")
+//    public Response apiGetRMapStmtHeader(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
+//    	Response eventList = responseManager.getRMapStatementHeader(stmtUri);
+//    	return eventList;
+//    }
     
 /*
  * ------------------------------
@@ -164,15 +130,15 @@ public class StatementApiService {
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
-    @GET
-    @Path("/{subject}/{predicate}/{object}")
-    @Produces("text/plain")
-    public Response apiGetRMapstmtUri(@PathParam("subject") String subject, 
-    									@PathParam("predicate") String predicate,
-    									@PathParam("object") String object) throws RMapApiException {
-    	Response stmtUriResponse = responseManager.getRMapStatementID(subject, predicate, object);
-    	return stmtUriResponse;
-    }
+//    @GET
+//    @Path("/{subject}/{predicate}/{object}")
+//    @Produces("text/plain")
+//    public Response apiGetRMapstmtUri(@PathParam("subject") String subject, 
+//    									@PathParam("predicate") String predicate,
+//    									@PathParam("object") String object) throws RMapApiException {
+//    	Response stmtUriResponse = responseManager.getRMapStatementID(subject, predicate, object);
+//    	return stmtUriResponse;
+//    }
     
 /*
  * ------------------------------
@@ -189,13 +155,13 @@ public class StatementApiService {
 	 * @return Response
 	 * @throws RMapApiException
 	 */    
-    @GET
-    @Path("/{stmtUri}/events")
-    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapStmtEvents(@Context HttpHeaders headers, @PathParam("stmtUri") String stmtUri) throws RMapApiException {
-    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, outputType);
-    	return eventList;
-    }
+//    @GET
+//    @Path("/{stmtUri}/events")
+//    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
+//    public Response apiGetRMapStmtEvents(@Context HttpHeaders headers, @PathParam("stmtUri") String stmtUri) throws RMapApiException {
+//    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
+//    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, outputType);
+//    	return eventList;
+//    }
        
 }

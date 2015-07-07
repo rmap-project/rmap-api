@@ -9,13 +9,6 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.RestApiUtils;
-import info.rmapproject.core.model.RMapUri;
-import info.rmapproject.core.model.disco.RMapDiSCO;
-import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
-import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -112,6 +105,7 @@ public class DiscoResponseManagerTest {
 	    	+ "</rdf:RDF>";
 	
 	
+
 	protected String discoTurtleRdf = 
 			"@prefix dc: <http://purl.org/dc/elements/1.1/> ."
 			+ "@prefix frbr: <http://purl.org/vocab/frbr/core#> ."
@@ -119,6 +113,7 @@ public class DiscoResponseManagerTest {
 			+ "@prefix dcterms: <http://purl.org/dc/terms/> ."
 			+ "@prefix foaf: <http://xmlns.com/foaf/0.1/> ."
 			+ "@prefix scoro: <http://purl.org/spar/scoro/> ."
+			+ "@prefix ore: <http://www.openarchives.org/ore/terms/> ."
 			+ "@prefix rmap: <http://rmap-project.org/rmap/terms/> ."
 			+ "<http://dx.doi.org/10.5281/zenodo.13962>"
 			+ "  a <http://purl.org/dc/dcmitype/Software> ;"
@@ -158,7 +153,7 @@ public class DiscoResponseManagerTest {
 			+ "[]"
 			+ "  a <http://rmap-project.org/rmap/terms/DiSCO> ;"
 			+ "  dcterms:creator <http://datacite.org> ;"
-			+ "  rmap:aggregates <http://dx.doi.org/10.5281/zenodo.13962> .";
+			+ "  ore:aggregates <http://dx.doi.org/10.5281/zenodo.13962> .";
 	
 	protected DiscoResponseManager responseManager = null;
 	/**
@@ -233,7 +228,7 @@ public class DiscoResponseManagerTest {
 		//RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
 		String discoURI = "ark:/22573/rmd1s3d2v";
 		
-		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+		//RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
 		//rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);

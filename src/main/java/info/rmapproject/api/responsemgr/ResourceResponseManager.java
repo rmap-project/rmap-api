@@ -123,10 +123,6 @@ public class ResourceResponseManager {
 
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
 			 switch (objType) {
-	            case STATEMENTS:
-					uriList = rmapService.getResourceRelatedStmts(uriResourceUri, rmapStatus);
-					jsonType = "rmap:Stmts";
-	                break;
 	            case DISCOS:
 					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus);
 					jsonType = "rmap:Discos";
@@ -183,7 +179,7 @@ public class ResourceResponseManager {
 	}	
 	
 	
-	public Response getRMapResourceRdfStmts(String strResourceUri, RdfType returnType, String status) throws RMapApiException {
+	public Response getRMapResourceTriples(String strResourceUri, RdfType returnType, String status) throws RMapApiException {
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -243,7 +239,7 @@ public class ResourceResponseManager {
 			}
 			//**********************************************
 			
-			String locationUrl = RestApiUtils.makeResourceUrl(strResourceUri) + "/rdfstmts" + "?status=" +  status;
+			String locationUrl = RestApiUtils.makeResourceUrl(strResourceUri) + "/triples" + "?status=" +  status;
 			
 			response = Response.status(Response.Status.OK)
 						.entity(rdf.toString())

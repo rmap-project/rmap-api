@@ -190,22 +190,22 @@ public class ResourceApiService {
 	
 
 	/**
-	 * GET /resources/{resourceUri}/rdfstmts
-	 * Returns list of all rdf:Statements related to the rdfs:Resource URI as RDF serialization
+	 * GET /resources/{resourceUri}/triples
+	 * Returns list of all rdf:triples related to the rdfs:Resource URI as RDF serialization
 	 * @param resourceUri
 	 * @param status
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
-    @Path("/{resourceUri}/rdfstmts")
+    @Path("/{resourceUri}/triples")
     @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;",
 				"application/ld+json;charset=UTF-8;", "application/n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;"
 				})
-    public Response apiGetRMapResourceRdfStmts(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    public Response apiGetRMapResourceTriples(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	RdfType outputType = HttpTypeMediator.getRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRdfStmts(resourceUri, outputType, status);
+		Response response = responseManager.getRMapResourceTriples(resourceUri, outputType, status);
 	    return response;	
     }
     

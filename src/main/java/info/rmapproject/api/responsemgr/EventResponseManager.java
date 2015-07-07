@@ -195,10 +195,6 @@ public class EventResponseManager {
 
 			List <URI> uriList = null;
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
-			if (objType == "STATEMENTS") {
-				uriList = rmapService.getEventRelatedStatements(uriEventUri);
-				jsonType = "rmap:Statement";
-			}
 			if (objType == "RESOURCES") {
 				uriList = rmapService.getEventRelatedResources(uriEventUri);
 				jsonType = "rdfs:Resource";

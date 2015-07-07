@@ -83,7 +83,7 @@ public class ResourceResponseManagerTest {
 	public void getRMapResourceRdfStmts() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRdfStmts("http%3A%2F%2Fdx.doi.org%2F10.1109%2FLGRS.2012.2189934", RdfType.RDFXML, null);
+			response = responseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FLGRS.2012.2189934", RdfType.RDFXML, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

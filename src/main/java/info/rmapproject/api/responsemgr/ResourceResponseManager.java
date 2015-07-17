@@ -45,6 +45,7 @@ public class ResourceResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getResourceServiceOptions() throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/resource>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -53,10 +54,15 @@ public class ResourceResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
 					.build();
+			
+			reqSuccessful = true;
 
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;  
 	}
@@ -68,6 +74,7 @@ public class ResourceResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getResourceServiceHead() throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {			
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/resource>;rel=\"" + DC.DESCRIPTION.toString() + "\"";	
@@ -75,9 +82,14 @@ public class ResourceResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
 					.build();
+			
+			reqSuccessful = true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response; 
 	}
@@ -91,7 +103,9 @@ public class ResourceResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, NonRdfType returnType, String status) throws RMapApiException {
+	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, 
+												NonRdfType returnType, String status) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -152,7 +166,9 @@ public class ResourceResponseManager {
 			response = Response.status(Response.Status.OK)
 						.entity(outputString.toString())
 						.location(new URI (RestApiUtils.makeResourceUrl(strResourceUri)))
-						.build();    			
+						.build();    
+			
+			reqSuccessful = true;			
 	        
 		}
 		catch(RMapApiException ex)	{
@@ -171,15 +187,15 @@ public class ResourceResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null) {
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
     	return response;
 	}	
 	
 	
 	public Response getRMapResourceTriples(String strResourceUri, RdfType returnType, String status) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -244,7 +260,9 @@ public class ResourceResponseManager {
 			response = Response.status(Response.Status.OK)
 						.entity(rdf.toString())
 						.location(new URI (locationUrl))
-						.build();    			
+						.build();    	
+			
+			reqSuccessful = true;		
 	        
 		}
 		catch(RMapApiException ex)	{
@@ -263,9 +281,8 @@ public class ResourceResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
 	}

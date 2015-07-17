@@ -59,6 +59,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getDiSCOServiceOptions() throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -67,10 +68,15 @@ public class DiscoResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
 					.header("Link",linkRel)	
 					.build();
+			
+			reqSuccessful = true;
 
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;  
 	}
@@ -82,6 +88,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getDiSCOServiceHead() throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -89,9 +96,14 @@ public class DiscoResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
 					.header("Link",linkRel)	
 					.build();
+			
+			reqSuccessful = true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response; 
 	}
@@ -132,6 +144,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */	
 	private Response getRMapDiSCO(String strDiscoUri, RdfType returnType, Boolean viewLatestVersion) throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {			
@@ -194,7 +207,9 @@ public class DiscoResponseManager {
 					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
 					.type(HttpTypeMediator.getResponseMediaType("disco", returnType)) //TODO move version number to a property?
-					.build();  	
+					.build(); 
+			
+			reqSuccessful = true;
 
 		}
 		catch(RMapApiException ex)	{
@@ -224,9 +239,8 @@ public class DiscoResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;		
 	}
@@ -241,6 +255,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */	
 	public Response getRMapDiSCOHeader(String strDiscoUri) throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {			
 			if (strDiscoUri==null || strDiscoUri.length()==0)	{
@@ -261,6 +276,8 @@ public class DiscoResponseManager {
 					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
 					.build();  
+			
+			reqSuccessful = true;
 		}
 		catch(RMapApiException ex)	{
 			throw RMapApiException.wrap(ex);
@@ -277,6 +294,9 @@ public class DiscoResponseManager {
 		catch(Exception ex)	{
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
+		}
 		return response;	
 	}
 
@@ -289,6 +309,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response createRMapDiSCO(InputStream discoRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try	{ 
@@ -353,8 +374,9 @@ public class DiscoResponseManager {
 						.entity(sDiscoURI)
 						.location(new URI(newDiscoUrl)) //switch this to location()
 						.header("Link",linkRel)    //switch this to link()
-						.build();   
+						.build(); 
 			
+			reqSuccessful = true;  
 		}
 		catch(RMapApiException ex)	{
 			throw RMapApiException.wrap(ex);
@@ -369,9 +391,8 @@ public class DiscoResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;	
 	}
@@ -387,6 +408,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try	{		
@@ -464,6 +486,8 @@ public class DiscoResponseManager {
 						.location(new URI(newDiscoUrl)) 
 						.header("Link",linkRel)    //switch this to link()
 						.build();   
+			
+			reqSuccessful = true;
     	
 		}
 		catch(RMapApiException ex)	{
@@ -493,9 +517,8 @@ public class DiscoResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 	return response;	
 	}
@@ -530,6 +553,7 @@ public class DiscoResponseManager {
 	 * @throws RMapApiException
 	 */
 	private Response changeRMapDiSCOStatus(String discoUri, String newStatus, URI sysAgentUri) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 
@@ -594,6 +618,8 @@ public class DiscoResponseManager {
 					.location(new URI(origDiscoUrl)) 
 					.header("Link",linkRel)    //switch this to link()
 					.build();   
+			
+			reqSuccessful = true;
     	
 		}
 		catch(RMapApiException ex)	{
@@ -623,9 +649,8 @@ public class DiscoResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 	return response;		
 		
@@ -644,6 +669,7 @@ public class DiscoResponseManager {
 	 */
 	public Response getRMapDiSCOVersions(String discoUri, NonRdfType returnType, Boolean retAgentVersionsOnly) throws RMapApiException {
 
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -697,6 +723,8 @@ public class DiscoResponseManager {
 							.entity(outputString.toString())
 							.location(new URI (RestApiUtils.makeStmtUrl(discoUri)))
 							.build();
+			
+			reqSuccessful = true;
 
 		}
     	catch(RMapApiException ex) { 
@@ -718,9 +746,8 @@ public class DiscoResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
     	return response;
 	}
@@ -736,6 +763,7 @@ public class DiscoResponseManager {
 	 */
 	public Response getRMapDiSCOEvents(String discoUri, NonRdfType returnType) throws RMapApiException {
 
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -778,6 +806,8 @@ public class DiscoResponseManager {
 							.entity(outputString.toString())
 							.location(new URI (RestApiUtils.makeDiscoUrl(discoUri)))
 							.build();
+			
+			reqSuccessful = true;
 	        
 		}
     	catch(RMapApiException ex) { 
@@ -799,9 +829,8 @@ public class DiscoResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
     	return response;
 	}
@@ -871,9 +900,7 @@ public class DiscoResponseManager {
 			throw RMapApiException.wrap(ex, ErrorCode.ER_COULDNT_RETRIEVE_DISCO_VERSION_LINKS);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
 		}
 		return links.toString();	
 

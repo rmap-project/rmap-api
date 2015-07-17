@@ -23,6 +23,7 @@ public class StatementResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getStatementServiceOptions() throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -31,10 +32,15 @@ public class StatementResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
 					.build();
+				
+			reqSuccessful=true;
 
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;  
 	}
@@ -46,6 +52,7 @@ public class StatementResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getStatementServiceHead() throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {		
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";		
@@ -53,9 +60,14 @@ public class StatementResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
 					.build();
+			
+		reqSuccessful=true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response; 
 	}

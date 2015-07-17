@@ -43,6 +43,7 @@ public class EventResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getEventServiceOptions() throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -51,9 +52,14 @@ public class EventResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
 					.build();
+			
+			reqSuccessful = true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;  
 	}
@@ -65,6 +71,7 @@ public class EventResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getEventServiceHead() throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -72,9 +79,14 @@ public class EventResponseManager {
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
 					.build();
+			
+			reqSuccessful = true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response; 
 	}
@@ -89,6 +101,7 @@ public class EventResponseManager {
 	 * @throws RMapApiException
 	 */	
 	public Response getRMapEvent(String strEventUri, RdfType returnType) throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -133,6 +146,8 @@ public class EventResponseManager {
 						.location(new URI(RestApiUtils.makeEventUrl(strEventUri)))
         				.type(HttpTypeMediator.getResponseMediaType("event", returnType)) //TODO move version number to a property?
 						.build();
+			
+			reqSuccessful = true;
 
 		}
 		catch(RMapApiException ex)	{
@@ -151,9 +166,8 @@ public class EventResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
 	}
@@ -166,6 +180,7 @@ public class EventResponseManager {
 	 * @return Response
 	 */
 	public Response getRMapEventRelatedObjs(String strEventUri, String objType, NonRdfType returnType) throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -225,6 +240,8 @@ public class EventResponseManager {
 							.location(new URI (RestApiUtils.makeEventUrl(strEventUri)))
 							.build();    			
 	        }
+			
+			reqSuccessful = true;
 		}
     	catch(RMapApiException ex) { 
     		throw RMapApiException.wrap(ex);
@@ -245,9 +262,8 @@ public class EventResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
     	return response;
 	}

@@ -53,6 +53,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getAgentServiceOptions() throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/agent>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -61,10 +62,13 @@ public class AgentResponseManager {
 						.header("Allow", "HEAD,OPTIONS,GET,POST,DELETE")
 						.header("Link",linkRel)	
 						.build();
-
+			reqSuccessful = true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_OPTIONS);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;    
 	}
@@ -76,6 +80,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getAgentServiceHead() throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/agent>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
@@ -83,9 +88,13 @@ public class AgentResponseManager {
 						.header("Allow", "HEAD,OPTIONS,GET,POST,DELETE")
 						.header("Link",linkRel)	
 						.build();
+			reqSuccessful = true;
 		}
 		catch (Exception ex){
 			throw RMapApiException.wrap(ex, ErrorCode.ER_RETRIEVING_API_HEAD);
+		}
+		finally{
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;    
 	}
@@ -98,6 +107,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */	
 	public Response getRMapAgent(String strAgentUri, RdfType returnType) throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {			
@@ -148,7 +158,9 @@ public class AgentResponseManager {
 						.location(new URI(RestApiUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
         				.type(HttpTypeMediator.getResponseMediaType("agent", returnType)) //TODO move version number to a property?
-						.build();    	
+						.build();   
+		    
+			reqSuccessful = true; 	
 		    
 		}
 		catch(RMapApiException ex)	{
@@ -178,9 +190,8 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
     }
@@ -195,6 +206,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */	
 	public Response getRMapAgentHeader(String strAgentUri) throws RMapApiException	{
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {			
@@ -226,6 +238,8 @@ public class AgentResponseManager {
 						.location(new URI(RestApiUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
 						.build();   
+
+			reqSuccessful = true;
 		    
 		}
 		catch(RMapApiException ex)	{
@@ -255,7 +269,8 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-		    rmapService.closeConnection();
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
     }
@@ -270,6 +285,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response createRMapAgent(InputStream agentRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try	{
@@ -331,6 +347,8 @@ public class AgentResponseManager {
 					.location(new URI(newAgentUrl)) //switch this to location()
 					.header("Link",linkRel)    //switch this to link()
 					.build();  
+			
+			reqSuccessful = true;
 					
 		}
 		catch(RMapApiException ex)	{
@@ -346,9 +364,8 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 	return response;  
 	}
@@ -362,6 +379,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response tombstoneRMapAgent(String agentUri, URI sysAgentUri) throws RMapApiException {
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try	{		
@@ -413,6 +431,8 @@ public class AgentResponseManager {
 					.location(new URI(origAgentUrl)) 
 					.header("Link",linkRel)    //switch this to link()
 					.build();   
+
+			reqSuccessful = true;
     	
 		}
 		catch(RMapApiException ex)	{
@@ -442,9 +462,8 @@ public class AgentResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 	return response;		
 		
@@ -460,7 +479,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getRMapAgentEvents(String agentUri, NonRdfType returnType) throws RMapApiException {
-
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -503,6 +522,8 @@ public class AgentResponseManager {
 							.entity(outputString.toString())
 							.location(new URI (RestApiUtils.makeAgentUrl(agentUri)))
 							.build();
+    		
+    		reqSuccessful=true;
 	        
 		}
     	catch(RMapApiException ex) { 
@@ -524,9 +545,8 @@ public class AgentResponseManager {
     		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
     	return response;
 	}
@@ -541,7 +561,7 @@ public class AgentResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getRMapAgentRepresentations(String nonRmapAgentUri, String creatorUri, NonRdfType returnType) throws RMapApiException	{
-
+		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
 		try {			
@@ -603,7 +623,9 @@ public class AgentResponseManager {
 			response = Response.status(Response.Status.OK)
 						.entity(outputString.toString())
 						.location(new URI (RestApiUtils.makeAgentUrl(nonRmapAgentUri)))
-						.build();    			
+						.build(); 
+			
+			reqSuccessful=true;
 		} 
 		catch(RMapApiException ex)	{
         	throw RMapApiException.wrap(ex);
@@ -626,9 +648,8 @@ public class AgentResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService != null){
-				rmapService.closeConnection();
-			}
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
 	}

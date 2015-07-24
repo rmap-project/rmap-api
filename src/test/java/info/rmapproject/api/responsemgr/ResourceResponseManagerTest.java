@@ -65,7 +65,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1594%2FPANGAEA.834198", FilterObjType.ALL, NonRdfType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", FilterObjType.ALL, NonRdfType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -79,11 +79,30 @@ public class ResourceResponseManagerTest {
 		assertEquals(200, response.getStatus());		
 	}
 	
+
+	@Test
+	public void testGetRMapResourceRelatedDiSCOs() {
+		Response response = null;
+		try {
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F22573%2Frmd18m7k3x", FilterObjType.DISCOS, NonRdfType.JSON, null);
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+
+		assertNotNull(response);
+		//String location = response.getLocation().toString();
+		String body = response.getEntity().toString();
+		//assertTrue(location.contains("resource"));
+		assertTrue(body.contains("rmap:DiSCOs"));
+		assertEquals(200, response.getStatus());		
+	}
+	
 	@Test
 	public void getRMapResourceRdfStmts() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FLGRS.2012.2189934", RdfType.RDFXML, null);
+			response = responseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", RdfType.RDFXML, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -97,26 +116,4 @@ public class ResourceResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 	
-	@Test
-	public void testGetRMapResourceRelatedStmts() {
-		Response response = null;
-		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F27927%2Fl4tfebcdx8", FilterObjType.STATEMENTS, NonRdfType.JSON, null);
-		} catch (Exception e) {
-			e.printStackTrace();			
-			fail("Exception thrown " + e.getMessage());
-		}
-
-		assertNotNull(response);
-		//String location = response.getLocation().toString();
-		String body = response.getEntity().toString();
-		//assertTrue(location.contains("resource"));
-		assertTrue(body.contains("rmap:Stmts"));
-		assertEquals(200, response.getStatus());
-		
-		
-	}
-	
-	
-
 }

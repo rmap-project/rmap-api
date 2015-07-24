@@ -139,7 +139,7 @@ public class ResourceResponseManager {
 			 switch (objType) {
 	            case DISCOS:
 					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus);
-					jsonType = "rmap:Discos";
+					jsonType = "rmap:DiSCOs";
 	                break;
 	            case AGENTS:
 					uriList = rmapService.getResourceRelatedAgents(uriResourceUri, rmapStatus);

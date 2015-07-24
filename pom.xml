@@ -13,7 +13,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>info.rmapproject</groupId>
-			<artifactId>rmap-core2</artifactId>
+			<artifactId>rmap-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>

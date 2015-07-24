@@ -5,8 +5,8 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapDiSCONotFoundException;
@@ -20,6 +20,7 @@ import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.event.RMapEventCreation;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
+import info.rmapproject.core.rmapservice.RMapDiSCODTO;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
@@ -62,7 +63,7 @@ public class DiscoResponseManager {
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
+			String linkRel = "<http://rmapdns.ddns.net/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.entity("{\"description\":\"will show copy of swagger content\"}")
 					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
@@ -91,7 +92,7 @@ public class DiscoResponseManager {
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
+			String linkRel = "<http://rmapdns.ddns.net/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
 					.header("Link",linkRel)	
@@ -172,19 +173,21 @@ public class DiscoResponseManager {
 			if (rmapService ==null){
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}
-			
-			RMapDiSCO rmapDisco = null;
+				
+			RMapDiSCODTO rmapDiscoDTO = null;
 
 			if (viewLatestVersion)	{
-				rmapDisco = rmapService.getDiSCOLatestVersion(uriDiscoUri);
+				//rmapDisco = rmapService.getDiSCOLatestVersion(uriDiscoUri);
+				rmapDiscoDTO = rmapService.getDiSCODTOLatestVersion(uriDiscoUri);
 			}
-			else {
-				rmapDisco = rmapService.readDiSCO(uriDiscoUri);
+			else {;
+				//rmapDisco = rmapService.readDiSCO(uriDiscoUri);
+			rmapDiscoDTO = rmapService.readDiSCODTO(uriDiscoUri);
 			}
 
 			log.info("DiSCO " + strDiscoUri + " object retrieved.");
 			
-			if (rmapDisco ==null){
+			if (rmapDiscoDTO ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_READ_DISCO_RETURNED_NULL);
 			}
 
@@ -193,14 +196,15 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
 
-			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, returnType.getRdfType());
+			//OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, returnType.getRdfType());
+			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDiscoDTO.getRMapDiSCO(), returnType.getRdfType());
 			if (discoOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}		
 
 			log.info("DiSCO " + strDiscoUri + " converted to RDF.");
 			
-			String linkRel = buildGetDiscoLinks(uriDiscoUri);
+			String linkRel = buildGetDiscoLinks(rmapDiscoDTO);
 
 			response = Response.status(Response.Status.OK)
 					.entity(discoOutput.toString())
@@ -257,6 +261,7 @@ public class DiscoResponseManager {
 	public Response getRMapDiSCOHeader(String strDiscoUri) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
+		RMapService rmapService =null;
 		try {			
 			if (strDiscoUri==null || strDiscoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -269,8 +274,16 @@ public class DiscoResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
+			
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
+				
+			RMapDiSCODTO rmapDiscoDTO = null;
+			rmapDiscoDTO = rmapService.readDiSCODTO(uriDiscoUri);
 
-			String linkRel = buildGetDiscoLinks(uriDiscoUri);
+			String linkRel = buildGetDiscoLinks(rmapDiscoDTO);
 
 			response = Response.status(Response.Status.OK)
 					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
@@ -295,6 +308,7 @@ public class DiscoResponseManager {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
+			if (rmapService != null) rmapService.closeConnection();
 			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;	
@@ -840,19 +854,19 @@ public class DiscoResponseManager {
 
 	/**
 	 * Retrieves the string of links to DiSCO versions, Status and Events for HTTP Response header Link property.
-	 * @param uriDiscoUri
+	 * @param rmapDiSCODTO
 	 * @return String
 	 * @throws RMapApiException
 	 * @throws RMapException
 	 * @throws RMapDefectiveArgumentException 
 	 */
-	private String buildGetDiscoLinks(URI uriDiscoUri) throws RMapApiException, RMapException, RMapDefectiveArgumentException {
+	private String buildGetDiscoLinks(RMapDiSCODTO rmapDiSCODTO) throws RMapApiException, RMapException, RMapDefectiveArgumentException {
 		StringBuilder links = new StringBuilder("");
 		//TODO: refactor this - too much repetition... but version code may be changing, so leave for now.
 		RMapService rmapService = null;
 		try{
 			
-			String strDiscoUri = uriDiscoUri.toString();
+			String strDiscoUri = rmapDiSCODTO.getRMapDiSCO().getId().toString();
 
 			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){
@@ -860,7 +874,7 @@ public class DiscoResponseManager {
 			}
 	
 			//get the DiSCO status link
-			RMapStatus status = rmapService.getDiSCOStatus(uriDiscoUri);
+			RMapStatus status = rmapDiSCODTO.getStatus();
 			if (status==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
 			}
@@ -868,15 +882,15 @@ public class DiscoResponseManager {
 	
 			//get DiSCO version links
 			try {
-				URI latestUri = rmapService.getDiSCOIdLatestVersion(uriDiscoUri);
+				URI latestUri = rmapDiSCODTO.getLatestURI();
 				if (latestUri!=null && latestUri.toString().length()>0) {
 					links.append(",<" + RestApiUtils.makeDiscoUrl(latestUri.toString()) + ">" + ";rel=\"latest-version\"");  			
 				}
-				URI prevUri = rmapService.getDiSCOIdPreviousVersion(uriDiscoUri);
+				URI prevUri = rmapDiSCODTO.getPreviousURI();
 				if (prevUri!=null && prevUri.toString().length()>0) {
 					links.append(",<" + RestApiUtils.makeDiscoUrl(prevUri.toString()) + ";rel=\"predecessor-version\"");
 				}
-				URI nextUri = rmapService.getDiSCOIdNextVersion(uriDiscoUri);
+				URI nextUri = rmapDiSCODTO.getNextURI();
 				if (nextUri!=null && nextUri.toString().length()>0) {
 					links.append(",<" + RestApiUtils.makeDiscoUrl(nextUri.toString()) + ";rel=\"successor-version\"");
 				}

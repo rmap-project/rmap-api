@@ -181,7 +181,7 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/discos")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceDiscosAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    public Response apiGetRMapResourceDiscos(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.DISCOS, outputType, status);
 	    return response;	

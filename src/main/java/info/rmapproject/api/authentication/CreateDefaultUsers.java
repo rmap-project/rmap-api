@@ -23,7 +23,7 @@ import org.openrdf.model.vocabulary.RDF;
 
 public class CreateDefaultUsers {
 	
-	private static String systemAgent = "ark:/22573/rmd3jq0";
+	private static final String SYSTEM_AGENT_ID = "ark:/22573/rmd3jq0";
 	
 	private String rmapAgentRdf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
 								+ "<rdf:RDF"
@@ -97,7 +97,7 @@ public class CreateDefaultUsers {
 	}
 	
 	public void createDefaultUsers() throws Exception{
-		URI systemAgentUri = new URI(systemAgent);
+		URI systemAgentUri = new URI(SYSTEM_AGENT_ID);
 		rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		checkRmapSystemAgent();
 		createUser("portico", porticoAgent, systemAgentUri);
@@ -120,7 +120,7 @@ public class CreateDefaultUsers {
 		//check for rmap system agent, if it doesn't exist, create one from XML
 		SesameTriplestore ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();
 		ValueFactory vf = ts.getValueFactory();
-		org.openrdf.model.URI rmapSysAgentUri = vf.createURI("ark:/22573/rmd3jq0");
+		org.openrdf.model.URI rmapSysAgentUri = vf.createURI(SYSTEM_AGENT_ID);
 		
 		Statement typeStmt = ts.getStatement(rmapSysAgentUri, RDF.TYPE, RMAP.AGENT);
 		if (typeStmt==null)	{

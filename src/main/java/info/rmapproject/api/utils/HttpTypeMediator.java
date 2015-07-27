@@ -37,7 +37,7 @@ public class HttpTypeMediator {
 				}    		
 			}
 			if (outputType == null){
-				outputType = NonRdfType.PLAIN_TEXT; //default
+				outputType = NonRdfType.JSON; //default
 			}
 		} catch (Exception ex){
 			throw RMapApiException.wrap(ex,ErrorCode.ER_COULD_NOT_MAP_CONTENTTYPE_PARAMETER_TO_TYPE);
@@ -64,8 +64,8 @@ public class HttpTypeMediator {
 			}
 			
 			if (returnType==null){
-				returnType=RdfType.RDFXML;
-			}
+				returnType=RdfType.TURTLE; //default response type
+			} 
 		} catch (Exception ex){
 			throw RMapApiException.wrap(ex,ErrorCode.ER_COULD_NOT_MAP_ACCEPT_PARAMETER_TO_TYPE);
 		}

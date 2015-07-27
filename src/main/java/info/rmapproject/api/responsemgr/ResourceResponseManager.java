@@ -39,6 +39,8 @@ public class ResourceResponseManager {
 	public ResourceResponseManager() {
 	}		
 
+	private static final String DEFAULT_STATUS_FILTER ="all";
+	
 	/**
 	 * Displays Resource Service Options
 	 * @return Response
@@ -113,7 +115,7 @@ public class ResourceResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
 			if (objType == null)	{objType = FilterObjType.ALL;}
-			if (status == null)	{status = "active";}
+			if (status == null)	{status = DEFAULT_STATUS_FILTER;}
 			
 			URI uriResourceUri = null;
 			try {
@@ -202,7 +204,7 @@ public class ResourceResponseManager {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
-			if (status == null)	{status = "active";}
+			if (status == null)	{status = DEFAULT_STATUS_FILTER;}
 			
 			URI uriResourceUri = null;
 			try {

@@ -183,7 +183,7 @@ public class DiSCOApiService {
 				"application/n-quads;charset=UTF-8;", "application/vnd.rmap-project.disco+n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
-    public Response apiGetLatestRMapDiSCOAsRdfXml(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
+    public Response apiGetLatestRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
     	Response response=responseManager.getLatestRMapDiSCOVersion(discoUri, returnType);
     	return response;

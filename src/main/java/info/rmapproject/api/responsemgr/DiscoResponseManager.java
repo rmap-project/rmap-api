@@ -344,7 +344,7 @@ public class DiscoResponseManager {
 			if (rdfHandler ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
-			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, RestApiUtils.getDiscoBaseUrl(), contentType.getRdfType());
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, "", contentType.getRdfType());
 			if (rmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
@@ -457,7 +457,7 @@ public class DiscoResponseManager {
 			if (rdfHandler ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
-			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, RestApiUtils.getDiscoBaseUrl(), contentType.getRdfType());
+			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, "", contentType.getRdfType());
 			if (newRmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  

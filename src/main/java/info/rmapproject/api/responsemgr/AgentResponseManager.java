@@ -304,7 +304,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
 						 						
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(sysAgentUri, agentRdf, RestApiUtils.getAgentBaseUrl(), contentType.toString());
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(sysAgentUri, agentRdf, "", contentType.toString());
 			if (rmapAgent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_AGENT_FAILED);
 			}  

@@ -2,13 +2,19 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.responsemgr.StatementResponseManager;
+import info.rmapproject.api.utils.HttpTypeMediator;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 /**
@@ -92,76 +98,63 @@ public class StatementApiService {
     }
         
     
-/*
- *-------------------------------
- *
- *		GET STATEMENT HEADER
- * 
- *-------------------------------
- */
-	/**
-	 * HEAD /stmts/{stmtUri}
-     * Returns status information for specific RMap:Statement as a HTTP response header. 
-     * Includes event list and URI
-	 * @param stmtUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */
-//    @HEAD
-//    @Path("/{stmtUri}")
-//    public Response apiGetRMapStmtHeader(@PathParam("stmtUri") String stmtUri) throws RMapApiException {
-//    	Response eventList = responseManager.getRMapStatementHeader(stmtUri);
-//    	return eventList;
-//    }
-    
+   
 /*
  * ------------------------------
  * 
- *  	  GET STATEMENT ID
+ *  	  GET STMT DISCOS
  *  
  *-------------------------------
  */
 	/**
-	 * GET /stmts/{subject}/{predicate}/{object}
-	 * Returns RMap:Statement URI for subject, predicate, object
+	 * GET /stmts/{subject}/{predicate}/{object}/discos
+	 * Returns list of RMap:DiSCO URIs that contain the statement matching the subject, predicate, object provided
      * @param subject
      * @param predicate
      * @param object
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
-//    @GET
-//    @Path("/{subject}/{predicate}/{object}")
-//    @Produces("text/plain")
-//    public Response apiGetRMapstmtUri(@PathParam("subject") String subject, 
-//    									@PathParam("predicate") String predicate,
-//    									@PathParam("object") String object) throws RMapApiException {
-//    	Response stmtUriResponse = responseManager.getRMapStatementID(subject, predicate, object);
-//    	return stmtUriResponse;
-//    }
-    
+    @GET
+    @Path("/{subject}/{predicate}/{object}/discos")
+    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
+    public Response apiGetRMapDiSCOsContainingStmt(@Context HttpHeaders headers, 
+    										@PathParam("subject") String subject, 
+    										@PathParam("predicate") String predicate, 
+    										@PathParam("object") String object, 
+    										@QueryParam("status") String status) throws RMapApiException {
+    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
+    	Response response = responseManager.getStmtRelatedDiSCOs(subject, predicate, object, status, outputType);
+	    return response;	
+    }
+
 /*
  * ------------------------------
  * 
- *	  GET RELATED EVENT LIST
+ *  	  GET STMT AGENTS
  *  
  *-------------------------------
  */
-    
 	/**
-	 * GET /stmts/{stmtUri}/events
-	 * Returns list of RMap:Event URIs related to the RMap:Statement URI as JSON
-	 * @param stmtUri
+	 * GET /stmts/{subject}/{predicate}/{object}/agents
+	 * Returns list of RMap:DiSCO URIs that contain the statement matching the subject, predicate, object provided
+     * @param subject
+     * @param predicate
+     * @param object
 	 * @return Response
 	 * @throws RMapApiException
-	 */    
-//    @GET
-//    @Path("/{stmtUri}/events")
-//    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-//    public Response apiGetRMapStmtEvents(@Context HttpHeaders headers, @PathParam("stmtUri") String stmtUri) throws RMapApiException {
-//    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-//    	Response eventList = responseManager.getRMapStatementRelatedEvents(stmtUri, outputType);
-//    	return eventList;
-//    }
+	 */  
+    @GET
+    @Path("/{subject}/{predicate}/{object}/agents")
+    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
+    public Response apiGetRMapAgentsContainingStmt(@Context HttpHeaders headers, 
+    										@PathParam("subject") String subject, 
+    										@PathParam("predicate") String predicate, 
+    										@PathParam("object") String object, 
+    										@QueryParam("status") String status) throws RMapApiException {
+    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
+    	Response response = responseManager.getStmtRelatedAgents(subject, predicate, object, status, outputType);
+	    return response;	
+    }
        
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
 import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
@@ -74,7 +75,37 @@ public class StatementResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 	
+	@Test
+	public void testGetStmtRelatedDiSCOs() {
+		Response response = null;
+		try {
+			response = responseManager.getStmtRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
+															"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
+															"http://purl.org/dc/dcmitype/Text", "all", NonRdfType.JSON);
+		} catch (Exception e) {
+			e.printStackTrace();	
+		}
+		assertNotNull(response);
+		assertEquals(response.getStatus(),200);
+		assertEquals(response.getEntity(),"{\"rmap:DiSCO\":[\"ark:/22573/rmd18m7nn5\"]}");
+		
+	}
 	
+	@Test
+	public void testGetStmtRelatedAgents() {
+		Response response = null;
+		try {
+			response = responseManager.getStmtRelatedAgents("ark:/22573/rmd18m7mj4", 
+															"http://purl.org/dc/terms/isFormatOf", 
+															"http://isni.org/isni/0000000406115044", "all", NonRdfType.JSON);
+		} catch (Exception e) {
+			e.printStackTrace();	
+		}
+		assertNotNull(response);
+		assertEquals(response.getStatus(),200);
+		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
+		
+	}
 	
 
 }

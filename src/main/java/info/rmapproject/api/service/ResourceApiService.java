@@ -2,7 +2,7 @@ package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.FilterObjType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.ResourceResponseManager;
@@ -113,7 +113,7 @@ public class ResourceApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapResourceAll(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.ALL, outputType, status);
+    	Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.ALL, outputType, status);
 	    return response;	
     }
 
@@ -132,7 +132,7 @@ public class ResourceApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapResourceStmts(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.STATEMENTS, outputType, status);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.STATEMENTS, outputType, status);
 	    return response;	
     }
 
@@ -148,7 +148,7 @@ public class ResourceApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapResourceEventsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.EVENTS, outputType, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.EVENTS, outputType, null);
 	    return response;	
     }
 	
@@ -166,7 +166,7 @@ public class ResourceApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapResourceAgentsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.AGENTS, outputType, status);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.AGENTS, outputType, status);
 	    return response;	
     }
     
@@ -183,7 +183,7 @@ public class ResourceApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapResourceDiscos(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, FilterObjType.DISCOS, outputType, status);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.DISCOS, outputType, status);
 	    return response;	
     }
     

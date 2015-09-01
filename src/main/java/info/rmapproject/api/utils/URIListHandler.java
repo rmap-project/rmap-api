@@ -36,7 +36,7 @@ public class URIListHandler {
 			return builder.toString();				
 		}
 		catch(Exception exception){
-			throw RMapApiException.wrap(exception, ErrorCode.ER_BUILD_JSON_URILIST_FAILED);
+			throw RMapApiException.wrap(exception, ErrorCode.ER_BUILD_TEXT_URILIST_FAILED);
 		}
 	}
 

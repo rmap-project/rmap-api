@@ -3,11 +3,15 @@ package info.rmapproject.api.utils;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.core.exception.RMapException;
+import info.rmapproject.core.model.RMapLiteral;
 import info.rmapproject.core.model.RMapStatus;
+import info.rmapproject.core.model.RMapUri;
+import info.rmapproject.core.model.RMapValue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.Properties;
 
@@ -185,5 +189,56 @@ public class RestApiUtils {
 		
 		return uriDefaultSysAgentURI;
 	}
+	
+	/**
+	 * Converts a string of text passed in as the "object" through the API request to a valid RMapValue
+	 * determining whether it is a typed literal, URI etc.
+	 * @param sObject
+	 * @return
+	 * @throws RMapApiException
+	 * @throws URISyntaxException 
+	 */
+	public static RMapValue convertObjectStringToRMapValue(String sObject) throws RMapApiException{
+		RMapValue object = null;
+		
+		if (sObject.startsWith("\"")) {
+			String literal = sObject.substring(1, sObject.lastIndexOf("\""));
+			String literalProp = sObject.substring(sObject.lastIndexOf("\"")+1);
+			
+			if (literalProp.contains("^^")) {
+				String sType = literalProp.substring(literalProp.indexOf("^^")+2);
+				RMapUri type = null;
+				sType = sType.trim();
+
+				try {
+					type = new RMapUri(new URI(sType));
+				}
+				catch (Exception ex){
+					throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+				}
+				
+				object = new RMapLiteral(literal, type);
+			}
+			else if (literalProp.contains("@")) {
+				String language = literalProp.substring(literalProp.indexOf("@")+1);
+				language = language.trim();
+				object = new RMapLiteral(literal, language);
+			}
+			else {
+				object = new RMapLiteral(literal);
+			}
+		}
+		else { //should be a URI
+			try {
+				object = new RMapUri(new URI(sObject));
+			}
+			catch (Exception ex){
+				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);					
+			}
+		}
+		
+		return object;
+	}
+	
 	
 }

@@ -2,6 +2,7 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.HttpTypeMediator;
@@ -179,7 +180,7 @@ public class EventResponseManager {
 	 * @param returnType
 	 * @return Response
 	 */
-	public Response getRMapEventRelatedObjs(String strEventUri, String objType, NonRdfType returnType) throws RMapApiException	{
+	public Response getRMapEventRelatedObjs(String strEventUri, ObjType objType, NonRdfType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
@@ -187,7 +188,7 @@ public class EventResponseManager {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
-			if (objType==null || objType.length()==0)	{
+			if (objType==null)	{
 				throw new RMapApiException(ErrorCode.ER_NO_RELATED_OBJECT_TYPE_PROVIDED); 
 			}
 
@@ -206,21 +207,17 @@ public class EventResponseManager {
 			}
 			
 			String outputString="";
-			String jsonType="";
 
 			List <URI> uriList = null;
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
-			if (objType == "RESOURCES") {
+			if (objType == ObjType.RESOURCES) {
 				uriList = rmapService.getEventRelatedResources(uriEventUri);
-				jsonType = "rdfs:Resource";
 			}
-			if (objType == "DISCOS") {
+			if (objType == ObjType.DISCOS) {
 				uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
-				jsonType = "rmap:Disco";
 			}
-			if (objType == "AGENTS") {
+			if (objType == ObjType.AGENTS) {
 				uriList = rmapService.getEventRelatedAgents(uriEventUri);
-				jsonType = "rmap:Agent";
 			}
 			
 			if (uriList==null)	{ 
@@ -228,7 +225,7 @@ public class EventResponseManager {
 			}	
 									
 			if (returnType==NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
+				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());				
 			}
 			else	{
 				outputString= URIListHandler.uriListToPlainText(uriList);

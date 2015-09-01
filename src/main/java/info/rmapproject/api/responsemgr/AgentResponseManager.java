@@ -4,10 +4,11 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.core.exception.RMapAgentNotFoundException;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
@@ -512,7 +513,7 @@ public class AgentResponseManager {
 			}	
 									
 			if (returnType==NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, "rmap:Events");				
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());				
 			}
 			else	{
 				outputString= URIListHandler.uriListToPlainText(uriList);
@@ -610,7 +611,7 @@ public class AgentResponseManager {
 			}
 			
 			if (returnType == NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, "rmap:Profiles");				
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.AGENTS.getObjTypeLabel());				
 			}
 			else	{
 				outputString = URIListHandler.uriListToPlainText(uriList);

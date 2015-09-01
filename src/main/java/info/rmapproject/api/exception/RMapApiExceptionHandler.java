@@ -5,6 +5,7 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,9 +27,12 @@ public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException
     	if (exMsg == null)	{
     		exMsg = "";
     	}
-    	Response response = Response.status(errType).type("text/plain").entity(rmapApiMsg + "; " + exMsg).build(); 
+    	String rootCause = ExceptionUtils.getRootCauseMessage(exception);
+    	if (rootCause == null)	{
+    		rootCause = "";
+    	}
+    	Response response = Response.status(errType).type("text/plain").entity(rmapApiMsg + " : " + exMsg + " : " + rootCause).build(); 
         log.fatal(rmapApiMsg + "; " + exMsg, exception);
-    	
     	return response;
     }
 }

@@ -320,15 +320,15 @@ public class DiSCOApiService {
     }
 
 	/**
-	 * PATCH /disco/{discoUri}
+	 * POST /disco/{discoUri}/inactivate
 	 * Sets status of target RMap:DiSCO to "inactive".  It will still be stored in the triplestore
 	 * and will still be visible through the API for certain requests.
 	 * @param discoUri
 	 * @return Response
 	 * @throws RMapApiException
 	 */    
-    @PATCH
-    @Path("/{discoUri}")
+    @POST
+    @Path("/{discoUri}/inactivate")
     public Response apiInactivateRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
     	Response response = responseManager.inactivateRMapDiSCO(discoUri, getSysAgentId());
 	    return response;

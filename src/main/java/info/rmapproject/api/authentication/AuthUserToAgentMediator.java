@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class AuthUserToAgentMediator {
 	
-	private String PROPERTIES_FILEPATH = "/rmap/apache/tomcat7/conf/rmap_apitest_userNameToSysAgent.map";
+	private String PROPERTIES_FILEPATH = "/rmap/apache/tomcat7/conf/rmap_apiprod_userNameToSysAgent.map";
 	//private String PROPERTIES_FILEPATH = "C:/rmap_apitest_userNameToSysAgent.map";
 	/*
 	private String propertiesFileName = null;
@@ -57,7 +57,7 @@ public class AuthUserToAgentMediator {
 		return props;
 	}	
 	
-	private void checkMapFileExists(String filename) throws Exception{
+	private boolean checkMapFileExists(String filename) throws Exception{
 		Properties props = new Properties();
 		File file = new File(PROPERTIES_FILEPATH);
 		if (file.createNewFile())	{
@@ -65,7 +65,9 @@ public class AuthUserToAgentMediator {
 			OutputStream out = new FileOutputStream( file );
 			props.store(out, "saved user name to sys agent map");
 			out.close();
+			return false;
 		}
+		else {return true;}
 	}
 	
 

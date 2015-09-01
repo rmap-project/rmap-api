@@ -3,7 +3,7 @@ package info.rmapproject.api.lists;
 
 
 public enum RdfType {
-	JSONLD ("JSONLD"), 
+	JSONLD("JSONLD"), 
 	RDFXML("RDFXML"), 
 	TURTLE("TURTLE"), 
 	RDFNQUADS("RDFNQUADS");

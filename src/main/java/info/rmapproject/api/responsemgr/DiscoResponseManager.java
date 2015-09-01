@@ -3,6 +3,7 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.RestApiUtils;
@@ -66,7 +67,7 @@ public class DiscoResponseManager {
 			String linkRel = "<http://rmapdns.ddns.net/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.entity("{\"description\":\"will show copy of swagger content\"}")
-					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
+					.header("Allow", "HEAD,OPTIONS,GET,POST,DELETE")
 					.header("Link",linkRel)	
 					.build();
 			
@@ -726,7 +727,7 @@ public class DiscoResponseManager {
 			}	
 									
 			if (returnType == NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, "rmap:DiSCOs");				
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.DISCOS.getObjTypeLabel());				
 			}
 			else	{
 				outputString= URIListHandler.uriListToPlainText(uriList);
@@ -810,7 +811,7 @@ public class DiscoResponseManager {
 			}	
 									
 			if (returnType==NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, "rmap:Events");				
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());				
 			}
 			else	{
 				outputString= URIListHandler.uriListToPlainText(uriList);

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import info.rmapproject.api.lists.FilterObjType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 
@@ -65,7 +65,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", FilterObjType.ALL, NonRdfType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.ALL, NonRdfType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -84,7 +84,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F22573%2Frmd18m7k3x", FilterObjType.DISCOS, NonRdfType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F22573%2Frmd18m7k3x", ObjType.DISCOS, NonRdfType.JSON, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

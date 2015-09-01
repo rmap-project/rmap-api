@@ -2,7 +2,7 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.FilterObjType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.RestApiUtils;
@@ -105,7 +105,7 @@ public class ResourceResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapResourceRelatedObjs(String strResourceUri, FilterObjType objType, 
+	public Response getRMapResourceRelatedObjs(String strResourceUri, ObjType objType, 
 												NonRdfType returnType, String status) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
@@ -114,7 +114,7 @@ public class ResourceResponseManager {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
-			if (objType == null)	{objType = FilterObjType.ALL;}
+			if (objType == null)	{objType = ObjType.ALL;}
 			if (status == null)	{status = DEFAULT_STATUS_FILTER;}
 			
 			URI uriResourceUri = null;
@@ -135,21 +135,17 @@ public class ResourceResponseManager {
 			
 			List <URI> uriList = null;
 			String outputString="";
-			String jsonType="";
 
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
 			 switch (objType) {
 	            case DISCOS:
 					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus);
-					jsonType = "rmap:DiSCOs";
 	                break;
 	            case AGENTS:
 					uriList = rmapService.getResourceRelatedAgents(uriResourceUri, rmapStatus);
-					jsonType = "rmap:Agents";
 	                break;
 	            default:
 					uriList = rmapService.getResourceRelatedAll(uriResourceUri, rmapStatus);
-					jsonType = "rmap:Objects";
 	                break;
 			}
 			 
@@ -159,7 +155,7 @@ public class ResourceResponseManager {
 			}	
 			 
 			if (returnType == NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, jsonType);				
+				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());				
 			}
 			else	{
 				outputString = URIListHandler.uriListToPlainText(uriList);

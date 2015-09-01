@@ -223,11 +223,12 @@ public class DiscoResponseManagerTest {
 		
 		//createDisco
 		
-		//RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-		//InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
-		//RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
-		String discoURI = "ark:/22573/rmd1s3d2v";
-		
+		/*RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+		InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
+		String discoURI = rmapDisco.getId().toString();
+		*/
+   		String discoURI = "ark:/22573/rmd18m7p1b";
 		//RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.

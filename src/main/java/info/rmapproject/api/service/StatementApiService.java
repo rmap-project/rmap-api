@@ -124,7 +124,7 @@ public class StatementApiService {
     										@PathParam("object") String object, 
     										@QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getStmtRelatedDiSCOs(subject, predicate, object, status, outputType);
+    	Response response = responseManager.getStatementRelatedDiSCOs(subject, predicate, object, status, outputType);
 	    return response;	
     }
 
@@ -153,8 +153,37 @@ public class StatementApiService {
     										@PathParam("object") String object, 
     										@QueryParam("status") String status) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getStmtRelatedAgents(subject, predicate, object, status, outputType);
+    	Response response = responseManager.getStatementRelatedAgents(subject, predicate, object, status, outputType);
 	    return response;	
     }
+    
+    /*
+     * ------------------------------
+     * 
+     *  	  GET STMT ASSERTING AGTS
+     *  
+     *-------------------------------
+     */
+    	/**
+    	 * GET /stmts/{subject}/{predicate}/{object}/sysagents
+    	 * Returns list of RMap:DiSCO URIs that contain the statement matching the subject, predicate, object provided
+         * @param subject
+         * @param predicate
+         * @param object
+    	 * @return Response
+    	 * @throws RMapApiException
+    	 */  
+        @GET
+        @Path("/{subject}/{predicate}/{object}/sysagents")
+        @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
+        public Response apiGetStmtAssertingAgents(@Context HttpHeaders headers, 
+        										@PathParam("subject") String subject, 
+        										@PathParam("predicate") String predicate, 
+        										@PathParam("object") String object, 
+        										@QueryParam("status") String status) throws RMapApiException {
+        	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
+        	Response response = responseManager.getStatementAssertingAgents(subject, predicate, object, status, outputType);
+    	    return response;	
+        }
        
 }

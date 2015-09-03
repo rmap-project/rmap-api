@@ -96,11 +96,13 @@ public class StatementResponseManager {
 	 * @param subject
 	 * @param predicate
 	 * @param object
+	 * @param status
+	 * @param returnType
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStmtRelatedAgents(String subject, String predicate, String object, String status, NonRdfType returnType) throws RMapApiException	{
-		return this.getStmtRelatedObjs(subject, predicate, object, status, returnType, ObjType.AGENTS);
+	public Response getStatementRelatedAgents(String subject, String predicate, String object, String status, NonRdfType returnType) throws RMapApiException	{
+		return this.getStatementRelatedObjs(subject, predicate, object, status, returnType, ObjType.AGENTS);
 	}	
 		
 	/**
@@ -108,11 +110,13 @@ public class StatementResponseManager {
 	 * @param subject
 	 * @param predicate
 	 * @param object
+	 * @param status
+	 * @param returnType
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStmtRelatedDiSCOs(String subject, String predicate, String object, String status, NonRdfType returnType) throws RMapApiException	{
-		return this.getStmtRelatedObjs(subject, predicate, object, status, returnType, ObjType.DISCOS);
+	public Response getStatementRelatedDiSCOs(String subject, String predicate, String object, String status, NonRdfType returnType) throws RMapApiException	{
+		return this.getStatementRelatedObjs(subject, predicate, object, status, returnType, ObjType.DISCOS);
 	}	
 	
 	/**
@@ -120,10 +124,11 @@ public class StatementResponseManager {
 	 * @param subject
 	 * @param predicate
 	 * @param object
+	 * @param status
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStmtRelatedObjs(String subject, String predicate, String object, String status, NonRdfType returnType, ObjType objectType) throws RMapApiException	{
+	public Response getStatementRelatedObjs(String subject, String predicate, String object, String status, NonRdfType returnType, ObjType objectType) throws RMapApiException	{
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -156,10 +161,10 @@ public class StatementResponseManager {
 			List<URI> matchingObjects = new ArrayList<URI>();
 			
 			if (objectType.equals(ObjType.DISCOS)) {
-				matchingObjects = rmapService.getStmtRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, rmapStatus);
+				matchingObjects = rmapService.getStatementRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, rmapStatus);
 			}
 			else if (objectType.equals(ObjType.AGENTS)) {
-				matchingObjects = rmapService.getStmtRelatedAgents(rmapSubject, rmapPredicate, rmapObject, rmapStatus);				
+				matchingObjects = rmapService.getStatementRelatedAgents(rmapSubject, rmapPredicate, rmapObject, rmapStatus);				
 			}
 			if (matchingObjects == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDOBJS);
@@ -204,6 +209,88 @@ public class StatementResponseManager {
 		}
 		return response;
 	}
-	
+
+	/**
+	 * Retrieves RMap System Agents that asserted a statement with subject/predicate/object provided and forms an HTTP response.
+	 * @param subject
+	 * @param predicate
+	 * @param object
+	 * @param status
+	 * @return HTTP Response
+	 * @throws RMapApiException
+	 */	
+	public Response getStatementAssertingAgents(String subject, String predicate, String object, String status, NonRdfType returnType) throws RMapApiException	{
+		Response response = null;
+		RMapService rmapService = null;
+		try {
+			if (subject==null || subject.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_STMT_SUBJECT_PROVIDED); 
+			}
+			if (predicate==null || predicate.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_STMT_PREDICATE_PROVIDED); 
+			}
+			if (object==null || object.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_STMT_OBJECT_PROVIDED); 
+			}
+			
+			subject = URLDecoder.decode(subject, "UTF-8");
+			predicate = URLDecoder.decode(predicate, "UTF-8");
+			object = URLDecoder.decode(object, "UTF-8");
+			
+			URI rmapSubject = new URI(subject);
+			URI rmapPredicate = new URI(predicate);
+			RMapValue rmapObject = RestApiUtils.convertObjectStringToRMapValue(object);
+			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
+						
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
+			
+			List<URI> matchingObjects = new ArrayList<URI>();
+			matchingObjects = rmapService.getStatementAssertingAgents(rmapSubject, rmapPredicate, rmapObject, rmapStatus);
+			if (matchingObjects == null){
+				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_ASSERTINGAGTS);
+			}
+			
+			String outputString = "";
+			if (returnType == NonRdfType.JSON)	{
+				outputString= URIListHandler.uriListToJson(matchingObjects, ObjType.AGENTS.getObjTypeLabel());		
+			}
+			else	{
+				outputString= URIListHandler.uriListToPlainText(matchingObjects);
+			}
+			response = Response.status(Response.Status.OK)
+						.entity(outputString)
+						.build();
+	    }
+		catch (URISyntaxException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+		catch (UnsupportedEncodingException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+		catch(RMapApiException ex)	{
+        	throw RMapApiException.wrap(ex);
+		}
+		catch(RMapObjectNotFoundException ex) {
+			throw RMapApiException.wrap(ex,ErrorCode.ER_OBJECT_NOT_FOUND);			
+		}
+		catch(RMapDefectiveArgumentException ex){
+			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_STMT_BAD_ARGUMENT);			
+		}
+    	catch(RMapException ex) {  
+        	throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
+    	}  
+		catch(Exception ex)	{
+        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+			if (rmapService!=null){
+				rmapService.closeConnection();
+			}
+		}
+		return response;
+	}
 
 }

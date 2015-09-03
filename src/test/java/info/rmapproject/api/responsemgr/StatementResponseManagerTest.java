@@ -76,10 +76,10 @@ public class StatementResponseManagerTest {
 	}
 	
 	@Test
-	public void testGetStmtRelatedDiSCOs() {
+	public void testGetStatementRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = responseManager.getStmtRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
+			response = responseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
 															"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
 															"http://purl.org/dc/dcmitype/Text", "all", NonRdfType.JSON);
 		} catch (Exception e) {
@@ -92,10 +92,10 @@ public class StatementResponseManagerTest {
 	}
 	
 	@Test
-	public void testGetStmtRelatedAgents() {
+	public void testGetStatementRelatedAgents() {
 		Response response = null;
 		try {
-			response = responseManager.getStmtRelatedAgents("ark:/22573/rmd18m7mj4", 
+			response = responseManager.getStatementRelatedAgents("ark:/22573/rmd18m7mj4", 
 															"http://purl.org/dc/terms/isFormatOf", 
 															"http://isni.org/isni/0000000406115044", "all", NonRdfType.JSON);
 		} catch (Exception e) {
@@ -104,8 +104,22 @@ public class StatementResponseManagerTest {
 		assertNotNull(response);
 		assertEquals(response.getStatus(),200);
 		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
-		
 	}
 	
+	@Test
+	public void testGetStatementAssertingAgents() {
+		Response response = null;
+		try {
+			response = responseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
+																	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
+																	"http://purl.org/dc/dcmitype/Text", "all", NonRdfType.JSON);
+		} catch (Exception e) {
+			e.printStackTrace();	
+		}
+		assertNotNull(response);
+		assertEquals(response.getStatus(),200);
+		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
+		
+	}
 
 }

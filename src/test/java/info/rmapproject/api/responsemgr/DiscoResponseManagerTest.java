@@ -9,6 +9,13 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.core.model.RMapUri;
+import info.rmapproject.core.model.disco.RMapDiSCO;
+import info.rmapproject.core.rdfhandler.RDFHandler;
+import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
+import info.rmapproject.core.rmapservice.RMapService;
+import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -223,18 +230,17 @@ public class DiscoResponseManagerTest {
 		
 		//createDisco
 		
-		/*RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
 		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
 		String discoURI = rmapDisco.getId().toString();
-		*/
-   		String discoURI = "ark:/22573/rmd18m7p1b";
-		//RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+        assertNotNull(discoURI);
+		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
+		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
-		//rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);
-		//discoURI = rmapDisco.getId().toString();		
-        //assertNotNull(discoURI);
+		rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);
+	
 		
 		try {
 			response = responseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);

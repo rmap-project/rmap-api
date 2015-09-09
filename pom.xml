@@ -98,13 +98,6 @@
 			<artifactId>aspectjweaver</artifactId>
 			<version>1.7.0</version>
 		</dependency>
-		<!-- temporary fix for something - remove this! -->
-	  	<dependency>
-	  		<groupId>org.openrdf.sesame</groupId>
-	  		<artifactId>sesame-runtime</artifactId>
-	  		<version>2.7.14</version>
-	  	</dependency>
-		<!-- end of fix! -->
 	</dependencies>
 	<build>
 		<finalName>rmap-api-0.1</finalName>

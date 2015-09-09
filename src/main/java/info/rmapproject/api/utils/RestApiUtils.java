@@ -12,7 +12,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 public class RestApiUtils {
@@ -238,6 +244,68 @@ public class RestApiUtils {
 		}
 		
 		return object;
+	}
+	
+	public static List<URI> convertUriCsvToUriList(String uriCsv) throws RMapApiException {
+		//if empty return null - null is acceptable value for this optional param
+		if(uriCsv == null || uriCsv.length()==0) {return null;}
+		
+		try {
+			//first make sure it's not encoded
+			uriCsv = URLDecoder.decode(uriCsv, "UTF-8");
+		}
+		catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_CANNOT_DECODE_URL);
+		}
+		
+		//split string by commas
+		String[] agentList = uriCsv.split(",");
+		List<URI> uriList = new ArrayList<URI>(); 
+		
+		try {
+			//convert to URI list
+			for (String sAgent:agentList) {
+				sAgent = sAgent.trim();
+				if (sAgent.length()>0){
+					URI uriAgent = new URI(sAgent);
+					uriList.add(uriAgent);
+				}
+			}
+		}
+		catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+		return uriList;
+	}
+	
+	public static Date convertStringDateToDate(String sDate) throws RMapApiException {
+		//if empty return null - null is acceptable value for this optional param
+		if(sDate == null || sDate.length()==0) {return null;}
+		Date dDate = null;
+		
+		try {
+			//first make sure it's not encoded
+			sDate = URLDecoder.decode(sDate, "UTF-8");
+		}
+		catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_CANNOT_DECODE_URL);
+		}
+		
+		sDate = sDate.trim();
+		
+		if (sDate.length()!= 8) {
+			throw new RMapApiException(ErrorCode.ER_INVALID_DATE_PROVIDED);
+		}
+		
+		try {
+			sDate = sDate.substring(0,4) + "-" + sDate.substring(4,6) + "-" + sDate.substring(6);
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dDate = dateFormat.parse(sDate);
+		} catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_INVALID_DATE_PROVIDED);			
+		}
+		
+		return dDate;
 	}
 	
 	

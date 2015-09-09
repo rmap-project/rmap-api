@@ -49,10 +49,13 @@ import org.openrdf.model.vocabulary.DC;
 
 public class DiscoResponseManager {
 
+	
 	public DiscoResponseManager() {
 	}		
 	
 	private final Logger log = LogManager.getLogger(this.getClass()); 
+	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
+	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
 
 
 	/**
@@ -156,9 +159,7 @@ public class DiscoResponseManager {
 			if (strDiscoUri==null || strDiscoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}		
-			if (returnType==null)	{
-				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
-			}
+			if (returnType==null) {returnType = DEFAULT_RDF_TYPE;}
 			if (viewLatestVersion==null){viewLatestVersion=false;}
 
 			URI uriDiscoUri = null;
@@ -211,7 +212,7 @@ public class DiscoResponseManager {
 					.entity(discoOutput.toString())
 					.location(new URI(RestApiUtils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
-					.type(HttpTypeMediator.getResponseMediaType("disco", returnType)) //TODO move version number to a property?
+					.type(HttpTypeMediator.getResponseRdfMediaType("disco", returnType)) //TODO move version number to a property?
 					.build(); 
 			
 			reqSuccessful = true;
@@ -689,7 +690,7 @@ public class DiscoResponseManager {
 		RMapService rmapService = null;
 		try {
 			//assign default values when null
-			if (returnType==null)	{returnType=NonRdfType.PLAIN_TEXT;}
+			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
 			if (retAgentVersionsOnly==null)	{retAgentVersionsOnly=false;}
 			
 			//check discoUri param for null
@@ -726,11 +727,11 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_DISCO_VERSIONLIST_EMPTY); 
 			}	
 									
-			if (returnType == NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.DISCOS.getObjTypeLabel());				
+			if (returnType == NonRdfType.PLAIN_TEXT)	{	
+				outputString= URIListHandler.uriListToPlainText(uriList);	
 			}
 			else	{
-				outputString= URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.DISCOS.getObjTypeLabel());		
 			}
 
 		    			
@@ -783,7 +784,7 @@ public class DiscoResponseManager {
 		RMapService rmapService = null;
 		try {
 			//assign default value when null
-			if (returnType==null)	{returnType=NonRdfType.PLAIN_TEXT;}
+			if (returnType==null) {returnType = DEFAULT_NONRDF_TYPE;}
 			
 			if (discoUri==null || discoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -810,16 +811,15 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 									
-			if (returnType==NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());				
+			if (returnType==NonRdfType.PLAIN_TEXT)	{		
+				outputString= URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString= URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());		
 			}
     		
     		response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (RestApiUtils.makeDiscoUrl(discoUri)))
 							.build();
 			
 			reqSuccessful = true;

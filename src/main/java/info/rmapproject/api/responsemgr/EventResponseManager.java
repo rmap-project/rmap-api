@@ -38,6 +38,9 @@ public class EventResponseManager {
 	public EventResponseManager() {
 	}		
 
+	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
+	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
+	
 	/**
 	 * Displays Event Service Options
 	 * @return Response
@@ -108,10 +111,8 @@ public class EventResponseManager {
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
-			}		
-			if (returnType==null)	{
-				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
-			}
+			}	
+			if (returnType==null)	{returnType=DEFAULT_RDF_TYPE;}
 			
 			URI uriEventUri = null;
 			try {
@@ -145,7 +146,7 @@ public class EventResponseManager {
 			response = Response.status(Response.Status.OK)
 						.entity(eventOutput.toString())
 						.location(new URI(RestApiUtils.makeEventUrl(strEventUri)))
-        				.type(HttpTypeMediator.getResponseMediaType("event", returnType)) //TODO move version number to a property?
+        				.type(HttpTypeMediator.getResponseRdfMediaType("event", returnType)) //TODO move version number to a property?
 						.build();
 			
 			reqSuccessful = true;
@@ -191,6 +192,7 @@ public class EventResponseManager {
 			if (objType==null)	{
 				throw new RMapApiException(ErrorCode.ER_NO_RELATED_OBJECT_TYPE_PROVIDED); 
 			}
+			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
 
 			URI uriEventUri = null;
 			try {
@@ -224,11 +226,11 @@ public class EventResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTRELATEDLIST_EMPTY); 
 			}	
 									
-			if (returnType==NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());				
+			if (returnType==NonRdfType.PLAIN_TEXT)	{	
+				outputString= URIListHandler.uriListToPlainText(uriList);	
 			}
 			else	{
-				outputString= URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());		
 			}
     		
     		if (outputString.length()>0){			    			

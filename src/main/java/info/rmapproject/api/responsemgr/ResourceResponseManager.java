@@ -2,8 +2,8 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.RestApiUtils;
 import info.rmapproject.api.utils.URIListHandler;
@@ -12,21 +12,19 @@ import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.RMapTriple;
-import info.rmapproject.core.model.impl.openrdf.ORAdapter;
-import info.rmapproject.core.rdfhandler.impl.openrdf.RioRDFHandler;
+import info.rmapproject.core.rdfhandler.RDFHandler;
+import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.openrdf.model.Model;
-import org.openrdf.model.impl.LinkedHashModel;
-import org.openrdf.model.impl.StatementImpl;
 import org.openrdf.model.vocabulary.DC;
 /**
  * 
@@ -36,10 +34,13 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class ResourceResponseManager {
 
+	
 	public ResourceResponseManager() {
 	}		
 
 	private static final String DEFAULT_STATUS_FILTER ="all";
+	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
+	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
 	
 	/**
 	 * Displays Resource Service Options
@@ -106,7 +107,8 @@ public class ResourceResponseManager {
 	 * @throws RMapApiException
 	 */
 	public Response getRMapResourceRelatedObjs(String strResourceUri, ObjType objType, 
-												NonRdfType returnType, String status) throws RMapApiException {
+												NonRdfType returnType, String status, String sysAgents, 
+												String dateFrom, String dateTo) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
@@ -115,6 +117,7 @@ public class ResourceResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
 			if (objType == null)	{objType = ObjType.ALL;}
+			if (returnType==null) {returnType = DEFAULT_NONRDF_TYPE;}
 			if (status == null)	{status = DEFAULT_STATUS_FILTER;}
 			
 			URI uriResourceUri = null;
@@ -127,7 +130,10 @@ public class ResourceResponseManager {
 			}
 			
 			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-
+			List <URI> systemAgentList = RestApiUtils.convertUriCsvToUriList(sysAgents);
+			Date dDateFrom = RestApiUtils.convertStringDateToDate(dateFrom);
+			Date dDateTo = RestApiUtils.convertStringDateToDate(dateTo);
+			
 			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
@@ -139,13 +145,13 @@ public class ResourceResponseManager {
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
 			 switch (objType) {
 	            case DISCOS:
-					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus);
+					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 	                break;
 	            case AGENTS:
-					uriList = rmapService.getResourceRelatedAgents(uriResourceUri, rmapStatus);
+					uriList = rmapService.getResourceRelatedAgents(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 	                break;
 	            default:
-					uriList = rmapService.getResourceRelatedAll(uriResourceUri, rmapStatus);
+					uriList = rmapService.getResourceRelatedAll(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 	                break;
 			}
 			 
@@ -154,16 +160,15 @@ public class ResourceResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 			 
-			if (returnType == NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());				
+			if (returnType == NonRdfType.PLAIN_TEXT)	{		
+				outputString = URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString = URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());		
 			}
 			
 			response = Response.status(Response.Status.OK)
 						.entity(outputString.toString())
-						.location(new URI (RestApiUtils.makeResourceUrl(strResourceUri)))
 						.build();    
 			
 			reqSuccessful = true;			
@@ -192,7 +197,8 @@ public class ResourceResponseManager {
 	}	
 	
 	
-	public Response getRMapResourceTriples(String strResourceUri, RdfType returnType, String status) throws RMapApiException {
+	public Response getRMapResourceTriples(String strResourceUri, RdfType returnType, String status, String sysAgents, 
+											String dateFrom, String dateTo) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
@@ -200,6 +206,7 @@ public class ResourceResponseManager {
 			if (strResourceUri==null || strResourceUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
+			if (returnType == null)	{returnType = DEFAULT_RDF_TYPE;}
 			if (status == null)	{status = DEFAULT_STATUS_FILTER;}
 			
 			URI uriResourceUri = null;
@@ -219,7 +226,11 @@ public class ResourceResponseManager {
 			List <RMapTriple> stmtList = null;
 
 			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-			stmtList = rmapService.getResourceRelatedTriples(uriResourceUri, rmapStatus);
+			List <URI> systemAgentList = RestApiUtils.convertUriCsvToUriList(sysAgents);
+			Date dDateFrom = RestApiUtils.convertStringDateToDate(dateFrom);
+			Date dDateTo = RestApiUtils.convertStringDateToDate(dateTo);
+			
+			stmtList = rmapService.getResourceRelatedTriples(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 			 
 			if (stmtList==null)	{ 
 				//if the object is found, should always have at least one event
@@ -231,33 +242,15 @@ public class ResourceResponseManager {
 			}
 
 			//rdf handler
-			RioRDFHandler rdfHandler = new RioRDFHandler();
-			/*if (rdfHandler == null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}*/
+			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			String rdfFormat = returnType.getRdfType();
-			
-			//**********************************************
-			//TODO: this is a hack because there is function missing in core - need to switch this out when done
-			//ALSO NEED TO REMOVE OPENRDF FROM POM.XML WHEN FIXED
-			Model model = new LinkedHashModel();
-			
-			for (RMapTriple stmt:stmtList){
-				model.add(new StatementImpl(ORAdapter.rMapNonLiteral2OpenRdfResource(stmt.getSubject()), 
-											ORAdapter.rMapUri2OpenRdfUri(stmt.getPredicate()), 
-											ORAdapter.rMapValue2OpenRdfValue(stmt.getObject())));
-			}
-			OutputStream rdf = rdfHandler.convertStmtListToRDF(model, rdfFormat);
+			OutputStream rdf = rdfHandler.triples2Rdf(stmtList, rdfFormat);
 			if (rdf == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_CANT_CREATE_STMT_RDF);					
 			}
-			//**********************************************
-			
-			String locationUrl = RestApiUtils.makeResourceUrl(strResourceUri) + "/triples" + "?status=" +  status;
-			
+						
 			response = Response.status(Response.Status.OK)
 						.entity(rdf.toString())
-						.location(new URI (locationUrl))
 						.build();    	
 			
 			reqSuccessful = true;		

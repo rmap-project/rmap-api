@@ -102,12 +102,12 @@ public class HttpTypeMediator {
 	}
 	
 	/**
-	 * Determine media type that will be returned in the response
+	 * Determine RDF media type that will be returned in the response
 	 * @param rmapType
 	 * @param rdfType
 	 * @return
 	 */
-	public static String getResponseMediaType(String rmapType, RdfType rdfType){
+	public static String getResponseRdfMediaType(String rmapType, RdfType rdfType){
 		String mediatype;
 		
         switch (rdfType) {
@@ -126,6 +126,26 @@ public class HttpTypeMediator {
 		return mediatype;
 	}
 	
+	/**
+	 * Determine non-RDF media type that will be returned in the response
+	 * @param rmapType
+	 * @param rdfType
+	 * @return
+	 */
+	public static String getResponseNonRdfMediaType(NonRdfType rdfType){
+		String mediatype;
+		
+        switch (rdfType) {
+            case JSON: mediatype = "application/json";
+                     break;
+            case PLAIN_TEXT: mediatype = "text/plain";
+            	break;
+            default: mediatype = "application/json";
+            	break;
+        }
+
+		return mediatype;
+	}
 	
 	
 }

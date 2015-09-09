@@ -105,34 +105,20 @@ public class ResourceApiService {
 	 * Returns list of URIs related to the rdfs:Resource URI as PLAIN TEXT or JSON
 	 * @param resourceUri
 	 * @param status
+	 * @param sysagents (as csv)
+	 * @param from (date as string yyyymmdd)
+	 * @param until (date as string yyyymmdd)
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceAll(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    public Response apiGetRMapResourceAll(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
+    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
+    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.ALL, outputType, status);
-	    return response;	
-    }
-
-	
-
-	/**
-	 * GET /resource/{resourceUri}/stmts
-	 * Returns list of all RMap:Statement URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
-	 * @param resourceUri
-	 * @param status
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
-    @GET
-    @Path("/{resourceUri}/stmts")
-    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceStmts(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
-    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.STATEMENTS, outputType, status);
+    	Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.ALL, outputType, status, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
 
@@ -141,14 +127,19 @@ public class ResourceApiService {
 	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
 	 * @return Response
+	 * @param sysagents (as csv)
+	 * @param from (date as string yyyymmdd)
+	 * @param until (date as string yyyymmdd)
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceEventsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri) throws RMapApiException {
+    public Response apiGetRMapResourceEventsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
+    		@QueryParam("sysagents") String sysAgents, @QueryParam("from") String dateFrom, 
+    		@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.EVENTS, outputType, null);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.EVENTS, outputType, null, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
 	
@@ -158,15 +149,20 @@ public class ResourceApiService {
 	 * Returns list of all RMap:Agent URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
 	 * @param status
+	 * @param sysagents (as csv)
+	 * @param from (date as string yyyymmdd)
+	 * @param until (date as string yyyymmdd)
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}/agents")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceAgentsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    public Response apiGetRMapResourceAgentsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
+    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
+    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.AGENTS, outputType, status);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.AGENTS, outputType, status, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
     
@@ -175,25 +171,31 @@ public class ResourceApiService {
 	 * Returns list of all RMap:DiSCO URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
 	 * @param status
+	 * @param sysagents (as csv)
+	 * @param from (date as string yyyymmdd)
+	 * @param until (date as string yyyymmdd)
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
     @GET
     @Path("/{resourceUri}/discos")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceDiscos(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    public Response apiGetRMapResourceDiscos(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
+    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
+    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.DISCOS, outputType, status);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.DISCOS, outputType, status, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
-    
-	
 
 	/**
 	 * GET /resources/{resourceUri}/triples
 	 * Returns list of all rdf:triples related to the rdfs:Resource URI as RDF serialization
 	 * @param resourceUri
 	 * @param status
+	 * @param sysagents (as csv)
+	 * @param from (date as string yyyymmdd)
+	 * @param until (date as string yyyymmdd)
 	 * @return Response
 	 * @throws RMapApiException
 	 */  
@@ -203,9 +205,11 @@ public class ResourceApiService {
 				"application/ld+json;charset=UTF-8;", "application/n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;"
 				})
-    public Response apiGetRMapResourceTriples(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, @QueryParam("status") String status) throws RMapApiException {
+    public Response apiGetRMapResourceTriples(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
+    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
+    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
     	RdfType outputType = HttpTypeMediator.getRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceTriples(resourceUri, outputType, status);
+		Response response = responseManager.getRMapResourceTriples(resourceUri, outputType, status, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
     

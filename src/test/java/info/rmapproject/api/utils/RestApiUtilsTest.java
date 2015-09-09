@@ -6,6 +6,10 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.core.model.RMapLiteral;
 import info.rmapproject.core.model.RMapValue;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import org.junit.Test;
 
 public class RestApiUtilsTest {
@@ -64,7 +68,24 @@ public class RestApiUtilsTest {
 		litObj = (RMapLiteral)object;
 		assertTrue(litObj.getValue().equals("This is a literal"));
 		assertTrue(litObj.getLanguage().equals("en"));
-		
+	}
+	
+	@Test
+	public void testConvertUriCsvToUriList() throws RMapApiException {
+		String uriCsv = "ark:/1234/1234, ark:/5678/5678, ";
+		List<java.net.URI> uriList = RestApiUtils.convertUriCsvToUriList(uriCsv);
+		assertTrue(uriList.size()==2);
+	}
+
+	@Test
+	public void convertStringDateToDate() throws RMapApiException {
+		Date dDate = RestApiUtils.convertStringDateToDate("20150604");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(dDate);
+		int month = cal.get(Calendar.MONTH);
+		int year = cal.get(Calendar.YEAR);
+		assertTrue(month==5);
+		assertTrue(year==2015);
 	}
 	
 }

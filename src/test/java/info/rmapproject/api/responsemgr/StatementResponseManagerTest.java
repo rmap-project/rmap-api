@@ -81,7 +81,7 @@ public class StatementResponseManagerTest {
 		try {
 			response = responseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
 															"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
-															"http://purl.org/dc/dcmitype/Text", "all", NonRdfType.JSON);
+															"http://purl.org/dc/dcmitype/Text", "all", null, null, null, NonRdfType.JSON);
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}
@@ -97,7 +97,7 @@ public class StatementResponseManagerTest {
 		try {
 			response = responseManager.getStatementRelatedAgents("ark:/22573/rmd18m7mj4", 
 															"http://purl.org/dc/terms/isFormatOf", 
-															"http://isni.org/isni/0000000406115044", "all", NonRdfType.JSON);
+															"http://isni.org/isni/0000000406115044", "all", null, null, null, NonRdfType.JSON);
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}
@@ -112,7 +112,7 @@ public class StatementResponseManagerTest {
 		try {
 			response = responseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
 																	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
-																	"http://purl.org/dc/dcmitype/Text", "all", NonRdfType.JSON);
+																	"http://purl.org/dc/dcmitype/Text", "all", null, null, NonRdfType.JSON);
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}

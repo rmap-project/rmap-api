@@ -65,7 +65,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.ALL, NonRdfType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.ALL, NonRdfType.JSON, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -84,7 +84,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F22573%2Frmd18m7k3x", ObjType.DISCOS, NonRdfType.JSON, null);
+			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F22573%2Frmd18m7k3x", ObjType.DISCOS, NonRdfType.JSON, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -102,7 +102,7 @@ public class ResourceResponseManagerTest {
 	public void getRMapResourceRdfStmts() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", RdfType.RDFXML, null);
+			response = responseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", RdfType.RDFXML, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

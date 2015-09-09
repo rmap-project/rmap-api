@@ -44,6 +44,9 @@ import org.openrdf.model.vocabulary.DC;
  */
 
 public class AgentResponseManager {
+
+	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
+	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
 	
 	public AgentResponseManager() {
 	}		
@@ -115,9 +118,7 @@ public class AgentResponseManager {
 			if (strAgentUri==null || strAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}		
-			if (returnType==null)	{
-				throw new RMapApiException(ErrorCode.ER_NO_ACCEPT_TYPE_PROVIDED); 
-			}
+			if (returnType==null)	{returnType=DEFAULT_RDF_TYPE;}
 
 			URI uriAgentId = null;
 			try {
@@ -158,7 +159,7 @@ public class AgentResponseManager {
 						.entity(agentOutput.toString())
 						.location(new URI(RestApiUtils.makeAgentUrl(strAgentUri)))
 						.header("Link",linkRel)    //switch this to link()
-        				.type(HttpTypeMediator.getResponseMediaType("agent", returnType)) //TODO move version number to a property?
+        				.type(HttpTypeMediator.getResponseRdfMediaType("agent", returnType)) //TODO move version number to a property?
 						.build();   
 		    
 			reqSuccessful = true; 	
@@ -485,7 +486,7 @@ public class AgentResponseManager {
 		RMapService rmapService = null;
 		try {
 			//assign default value when null
-			if (returnType==null)	{returnType=NonRdfType.PLAIN_TEXT;}
+			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
 			
 			if (agentUri==null || agentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -512,11 +513,11 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
 									
-			if (returnType==NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());				
+			if (returnType==NonRdfType.PLAIN_TEXT)	{		
+				outputString= URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString= URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());		
 			}
     		
     		response = Response.status(Response.Status.OK)
@@ -569,6 +570,8 @@ public class AgentResponseManager {
 			if (nonRmapAgentUri==null || nonRmapAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}	
+			//assign default value when null
+			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
 
 			URI uriAgentUri = null;
 			try {
@@ -610,11 +613,11 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_RELATED_AGENTS_FOUND);				
 			}
 			
-			if (returnType == NonRdfType.JSON)	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.AGENTS.getObjTypeLabel());				
+			if (returnType == NonRdfType.PLAIN_TEXT)	{		
+				outputString = URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString = URIListHandler.uriListToPlainText(uriList);
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.AGENTS.getObjTypeLabel());		
 			}
     		
     		if (outputString == null || outputString.length()==0){	

@@ -122,17 +122,17 @@ public class StatementApiService {
     @GET
     @Path("/{subject}/{predicate}/{object}/discos")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapDiSCOsContainingStmt(@Context HttpHeaders headers, 
-    										@PathParam("subject") String subject, 
-    										@PathParam("predicate") String predicate, 
-    										@PathParam("object") String object, 
-    										@QueryParam("status") String status,
-    										@QueryParam("sysagents") String sysagents,
-    										@QueryParam("from") String dateFrom,
-    										@QueryParam("until") String dateTo) throws RMapApiException {
+    public Response apiGetRMapDiSCOsContainingStmt( @Context HttpHeaders headers, 
+		    										@PathParam("subject") String subject, 
+		    										@PathParam("predicate") String predicate, 
+		    										@PathParam("object") String object, 
+		    										@QueryParam("status") String status,
+		    										@QueryParam("sysagents") String sysagents,
+		    										@QueryParam("from") String dateFrom,
+		    										@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
     	Response response = responseManager.getStatementRelatedDiSCOs(subject, predicate, object, status, 
-    																sysagents, dateFrom, dateTo, outputType);
+    																	sysagents, dateFrom, dateTo, outputType);
 	    return response;	
     }
 

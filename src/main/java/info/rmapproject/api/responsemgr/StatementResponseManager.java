@@ -103,13 +103,18 @@ public class StatementResponseManager {
 	 * @param predicate
 	 * @param object
 	 * @param status
+	 * @param systemAgents (comma separated)
+	 * @param dateFrom
+	 * @param dateTo
 	 * @param returnType
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStatementRelatedAgents(String subject, String predicate, String object, String status,  
-					String sysAgents, String dateFrom, String dateTo, NonRdfType returnType) throws RMapApiException	{
-		return this.getStatementRelatedObjs(subject, predicate, object, status, sysAgents, dateFrom, dateTo, returnType, ObjType.AGENTS);
+	public Response getStatementRelatedAgents(String subject, String predicate, 
+												String object, String status, 
+												String systemAgents, String dateFrom, 
+												String dateTo, NonRdfType returnType) throws RMapApiException	{
+		return this.getStatementRelatedObjs(subject, predicate, object, status, systemAgents, dateFrom, dateTo, returnType, ObjType.AGENTS);
 	}	
 		
 	/**
@@ -118,13 +123,18 @@ public class StatementResponseManager {
 	 * @param predicate
 	 * @param object
 	 * @param status
+	 * @param systemAgents (comma separated)
+	 * @param dateFrom
+	 * @param dateTo
 	 * @param returnType
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStatementRelatedDiSCOs(String subject, String predicate, String object, String status,  
-			String sysAgents, String dateFrom, String dateTo, NonRdfType returnType) throws RMapApiException	{
-		return this.getStatementRelatedObjs(subject, predicate, object, status, sysAgents, dateFrom, dateTo, returnType, ObjType.DISCOS);
+	public Response getStatementRelatedDiSCOs(String subject, String predicate, 
+												String object, String status, 
+												String systemAgents, String dateFrom, 
+												String dateTo, NonRdfType returnType) throws RMapApiException	{
+		return this.getStatementRelatedObjs(subject, predicate, object, status, systemAgents, dateFrom, dateTo, returnType, ObjType.DISCOS);
 	}	
 	
 	/**
@@ -133,12 +143,17 @@ public class StatementResponseManager {
 	 * @param predicate
 	 * @param object
 	 * @param status
+	 * @param systemAgents (comma separated)
+	 * @param dateFrom
+	 * @param dateTo
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStatementRelatedObjs(String subject, String predicate, String object, 
-			String status, String systemAgents, String dateFrom, String dateTo,
-			NonRdfType returnType, ObjType objectType) throws RMapApiException	{
+	public Response getStatementRelatedObjs(String subject, String predicate, 
+											String object, String status, 
+											String systemAgents, String dateFrom, 
+											String dateTo, NonRdfType returnType, 
+											ObjType objectType) throws RMapApiException	{
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -171,8 +186,7 @@ public class StatementResponseManager {
 			if (rmapService ==null){
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}
-			
-			
+						
 			List<URI> matchingObjects = new ArrayList<URI>();
 			
 			if (objectType.equals(ObjType.DISCOS)) {

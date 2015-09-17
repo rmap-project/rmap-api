@@ -170,12 +170,16 @@ public class StatementResponseManager {
 			if (status==null) {status = DEFAULT_STATUS_FILTER;}
 			if (objectType == null)	{objectType = ObjType.ALL;}
 			
+
 			subject = URLDecoder.decode(subject, "UTF-8");
-			predicate = URLDecoder.decode(predicate, "UTF-8");
-			object = URLDecoder.decode(object, "UTF-8");
-			
+			subject = RestApiUtils.removeUriAngleBrackets(subject);
 			URI rmapSubject = new URI(subject);
+
+			predicate = URLDecoder.decode(predicate, "UTF-8");
+			predicate = RestApiUtils.removeUriAngleBrackets(predicate);
 			URI rmapPredicate = new URI(predicate);
+
+			object = URLDecoder.decode(object, "UTF-8");
 			RMapValue rmapObject = RestApiUtils.convertObjectStringToRMapValue(object);
 			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
 			List <URI> systemAgentList = RestApiUtils.convertUriCsvToUriList(systemAgents);
@@ -199,6 +203,10 @@ public class StatementResponseManager {
 			}
 			if (matchingObjects == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDOBJS);
+			}
+			
+			if (matchingObjects.size()==0){
+				throw new RMapApiException(ErrorCode.ER_STMT_NOT_FOUND);
 			}
 			
 			String outputString = "";

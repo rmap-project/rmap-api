@@ -737,7 +737,7 @@ public class DiscoResponseManager {
 		    			
 			response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (RestApiUtils.makeStmtUrl(discoUri)))
+							.location(new URI (RestApiUtils.makeDiscoUrl(discoUri)))
 							.build();
 			
 			reqSuccessful = true;

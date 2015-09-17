@@ -2,7 +2,6 @@ package info.rmapproject.api.utils;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.model.RMapLiteral;
 import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.RMapUri;
@@ -20,15 +19,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
+/**
+ * 
+ * @author khanson
+ *
+ */
 public class RestApiUtils {
 	
 	private static final String BASE_URL_KEY = "baseURL";
-	private static final String DEFAULT_SYSAGENT_KEY = "defaultSysAgent";
+	private static final String DEFAULT_SYSAGENT_KEY = "rmapSysAgent";
 
     private static Properties props = new Properties();
     private static boolean isInitialized = false;
 	
+    /**
+     * Initialize properties file
+     * @throws RMapApiException
+     */
 	public static void init() throws RMapApiException {
 		InputStream input = null;
 		String propertiesFile = "/rmap_api.properties";
@@ -45,6 +52,11 @@ public class RestApiUtils {
 		} 
 	}
 	
+	/**
+	 * Get Base URL from properties file
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String getBaseUrl() throws RMapApiException {
 		String baseUrl = null;
 		try {
@@ -68,69 +80,109 @@ public class RestApiUtils {
 					
 		return baseUrl;
 	}
-	
+	/**
+	 * Get stmts API base URL
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String getStmtBaseUrl() throws RMapApiException {
 		String stmtBaseUrl = getBaseUrl() + "/stmts/";
 		return stmtBaseUrl;
 	}
 	
+	/**
+	 * Get DiSCO API base URL
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String getDiscoBaseUrl() throws RMapApiException {
 		String discoBaseUrl = getBaseUrl() + "/discos/";
 		return discoBaseUrl;
 	}
 
+	
+	/**
+	 * Get Event API base URL
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String getEventBaseUrl() throws RMapApiException {
 		String eventBaseUrl = getBaseUrl() + "/events/";
 		return eventBaseUrl;
 	}
-	
+
+	/**
+	 * Get Agent API base URL
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String getAgentBaseUrl() throws RMapApiException {
 		String agentBaseUrl = getBaseUrl() + "/agents/";
 		return agentBaseUrl;
 	}	
+
 	
+	/**
+	 * Get Resource API base URL
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String getResourceBaseUrl() throws RMapApiException {
 		String resourceBaseUrl = getBaseUrl() + "/resources/";
 		return resourceBaseUrl;
 	}
-	
+
 	/**
-	 * Series of procedures for constructing API URLs - basically adding the base URL for the RMap API to 
-	 * an encoded identifier. 
+	 * Appends DiSCO URI to DiSCO API URL
 	 * @param uri
 	 * @return
-	 * @throws RMapException
+	 * @throws RMapApiException
 	 */
-	public static String makeStmtUrl(String uri) throws RMapApiException {
-		String stmtUrl = appendEncodedUriToURL(getStmtBaseUrl(),uri);
-		return stmtUrl;
-	}
-
 	public static String makeDiscoUrl(String uri) throws RMapApiException {
-		String stmtUrl = appendEncodedUriToURL(getDiscoBaseUrl(),uri);
-		return stmtUrl;
+		String discoUrl = appendEncodedUriToURL(getDiscoBaseUrl(),uri);
+		return discoUrl;
 	}
-
+	
+	/**
+	 * Appends Event URI to Event API URL
+	 * @param uri
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String makeEventUrl(String uri) throws RMapApiException {
-		String stmtUrl = appendEncodedUriToURL(getEventBaseUrl(),uri);
-		return stmtUrl;
+		String eventUrl = appendEncodedUriToURL(getEventBaseUrl(),uri);
+		return eventUrl;
 	}
 	
+	/**
+	 * Appends Agent URI to Agent API URL
+	 * @param uri
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String makeAgentUrl(String uri) throws RMapApiException {
-		String stmtUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
-		return stmtUrl;
+		String agentUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
+		return agentUrl;
 	}
 
-	public static String makeProfileUrl(String uri) throws RMapApiException {
-		String stmtUrl = appendEncodedUriToURL(getAgentBaseUrl(),uri);
-		return stmtUrl;
-	}
-	
+	/**
+	 * Appends Resource URI to Resource API URL
+	 * @param uri
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String makeResourceUrl(String uri) throws RMapApiException {
-		String stmtUrl = appendEncodedUriToURL(getResourceBaseUrl(),uri);
-		return stmtUrl;
+		String resourceUrl = appendEncodedUriToURL(getResourceBaseUrl(),uri);
+		return resourceUrl;
 	}
 	
+	/**
+	 * Appends encoded URI to an API URL
+	 * @param baseURL
+	 * @param objUri
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static String appendEncodedUriToURL(String baseURL, String objUri) throws RMapApiException {
 		String url = null;
 		try {
@@ -142,6 +194,12 @@ public class RestApiUtils {
 		return url;
 	}
 	
+	/**
+	 * Maps a string status from the http request to a RMapStatus
+	 * @param status
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static RMapStatus convertToRMapStatus(String status) throws RMapApiException {
 		RMapStatus rmapStatus = null;
 		if (status==null)	{
@@ -216,6 +274,8 @@ public class RestApiUtils {
 				RMapUri type = null;
 				sType = sType.trim();
 
+				sType = removeUriAngleBrackets(sType);
+				
 				try {
 					type = new RMapUri(new URI(sType));
 				}
@@ -246,6 +306,13 @@ public class RestApiUtils {
 		return object;
 	}
 	
+	/**
+	 * Converts a CSV passed through the URI as an encoded parameter into a URI list
+	 * e.g. systemAgent list as string to List<URI>
+	 * @param uriCsv
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static List<URI> convertUriCsvToUriList(String uriCsv) throws RMapApiException {
 		//if empty return null - null is acceptable value for this optional param
 		if(uriCsv == null || uriCsv.length()==0) {return null;}
@@ -278,6 +345,12 @@ public class RestApiUtils {
 		return uriList;
 	}
 	
+	/**
+	 * Converts a date passed through the API as a string into a java Date.
+	 * @param sDate
+	 * @return
+	 * @throws RMapApiException
+	 */
 	public static Date convertStringDateToDate(String sDate) throws RMapApiException {
 		//if empty return null - null is acceptable value for this optional param
 		if(sDate == null || sDate.length()==0) {return null;}
@@ -308,5 +381,20 @@ public class RestApiUtils {
 		return dDate;
 	}
 	
+	/**
+	 * Checks for angle brackets around a string URI and removes them if found
+	 * @param sUri
+	 * @return
+	 */
+	public static String removeUriAngleBrackets(String sUri) {
+		//remove any angle brackets on a string Uri
+		if (sUri.startsWith("<")) {
+			sUri = sUri.substring(1);
+		}
+		if (sUri.endsWith(">")) {
+			sUri = sUri.substring(0,sUri.length()-1);
+		}
+		return sUri;
+	}
 	
 }

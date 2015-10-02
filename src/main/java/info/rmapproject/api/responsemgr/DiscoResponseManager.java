@@ -179,12 +179,13 @@ public class DiscoResponseManager {
 			RMapDiSCODTO rmapDiscoDTO = null;
 
 			if (viewLatestVersion)	{
-				//rmapDisco = rmapService.getDiSCOLatestVersion(uriDiscoUri);
 				rmapDiscoDTO = rmapService.getDiSCODTOLatestVersion(uriDiscoUri);
+				//now we are using a different disco URI
+				uriDiscoUri = rmapDiscoDTO.getRMapDiSCO().getId();
+				strDiscoUri = uriDiscoUri.toString();
 			}
 			else {;
-				//rmapDisco = rmapService.readDiSCO(uriDiscoUri);
-			rmapDiscoDTO = rmapService.readDiSCODTO(uriDiscoUri);
+				rmapDiscoDTO = rmapService.readDiSCODTO(uriDiscoUri);
 			}
 
 			log.info("DiSCO " + strDiscoUri + " object retrieved.");

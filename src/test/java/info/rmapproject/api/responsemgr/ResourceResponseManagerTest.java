@@ -75,7 +75,7 @@ public class ResourceResponseManagerTest {
 		//String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
 		//assertTrue(location.contains("resource"));
-		assertTrue(body.contains("rmap:Objects"));
+		assertTrue(body.contains("rmap:Object"));
 		assertEquals(200, response.getStatus());		
 	}
 	
@@ -84,7 +84,7 @@ public class ResourceResponseManagerTest {
 	public void testGetRMapResourceRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("ark%3A%2F22573%2Frmd18m7k3x", ObjType.DISCOS, NonRdfType.JSON, null, null, null, null);
+			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.DISCOS, NonRdfType.JSON, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -94,10 +94,38 @@ public class ResourceResponseManagerTest {
 		//String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
 		//assertTrue(location.contains("resource"));
-		assertTrue(body.contains("rmap:DiSCOs"));
+		assertTrue(body.contains("rmap:DiSCO"));
 		assertEquals(200, response.getStatus());		
 	}
 	
+
+	@Test
+	public void testGetRMapResourceRelatedDiSCOsWithStatus() {
+		Response responseActive = null;
+		Response responseInactive = null;
+		try {
+			responseActive = responseManager.getRMapResourceRelatedObjs("ark:/27927/pgg3r5df1cp", ObjType.DISCOS, NonRdfType.JSON, "active", null, null, null);
+			responseInactive = responseManager.getRMapResourceRelatedObjs("ark:/27927/pgg3r5df1cp", ObjType.DISCOS, NonRdfType.JSON, "inactive", null, null, null);
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+
+		assertNotNull(responseActive);
+		assertNotNull(responseInactive);
+		
+		String bodyActive = responseActive.getEntity().toString();
+		assertTrue(bodyActive.contains("rmap:DiSCO"));
+		
+		String bodyInactive = responseInactive.getEntity().toString();
+		assertTrue(bodyInactive.contains("rmap:DiSCO"));
+		
+		assertTrue(!bodyActive.equals(bodyInactive));
+		
+		assertEquals(200, responseActive.getStatus());	
+		assertEquals(200, responseInactive.getStatus());			
+	}
+		
 	@Test
 	public void getRMapResourceRdfStmts() {
 		Response response = null;
@@ -112,7 +140,7 @@ public class ResourceResponseManagerTest {
 		//String location = response.getLocation().toString();
 		String body = response.getEntity().toString();
 		//assertTrue(location.contains("resource"));
-		assertTrue(body.contains("JournalArticle"));
+		assertTrue(body.contains("http://purl.org/dc/dcmitype/Text"));
 		assertEquals(200, response.getStatus());	
 	}
 	

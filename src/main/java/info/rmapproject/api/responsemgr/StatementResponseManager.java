@@ -110,11 +110,10 @@ public class StatementResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStatementRelatedAgents(String subject, String predicate, 
-												String object, String status, 
-												String systemAgents, String dateFrom, 
-												String dateTo, NonRdfType returnType) throws RMapApiException	{
-		return this.getStatementRelatedObjs(subject, predicate, object, status, systemAgents, dateFrom, dateTo, returnType, ObjType.AGENTS);
+	public Response getStatementRelatedAgents(String subject, String predicate, String object, 
+												String systemAgents, String dateFrom, String dateTo, 
+												NonRdfType returnType) throws RMapApiException	{
+		return this.getStatementRelatedObjs(subject, predicate, object, null, systemAgents, dateFrom, dateTo, returnType, ObjType.AGENTS);
 	}	
 		
 	/**
@@ -199,7 +198,7 @@ public class StatementResponseManager {
 			}
 			else if (objectType.equals(ObjType.AGENTS)) {
 				matchingObjects = rmapService.getStatementRelatedAgents(rmapSubject, rmapPredicate, rmapObject, 
-																		rmapStatus, systemAgentList, dDateFrom, dDateTo);				
+																		systemAgentList, dDateFrom, dDateTo);				
 			}
 			if (matchingObjects == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDOBJS);

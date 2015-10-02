@@ -95,15 +95,15 @@ public class StatementResponseManagerTest {
 	public void testGetStatementRelatedAgents() {
 		Response response = null;
 		try {
-			response = responseManager.getStatementRelatedAgents("ark:/22573/rmd18m7mj4", 
-															"http://purl.org/dc/terms/isFormatOf", 
-															"http://isni.org/isni/0000000406115044", "all", null, null, null, NonRdfType.JSON);
+			response = responseManager.getStatementRelatedAgents("http://isni.org/isni/000000010941358X", 
+															"http://xmlns.com/foaf/0.1/name", 
+															"\"IEEE\"", null, null, null, NonRdfType.JSON);
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}
 		assertNotNull(response);
 		assertEquals(response.getStatus(),200);
-		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
+		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18nd2p4\"]}");
 	}
 	
 	@Test
@@ -118,7 +118,7 @@ public class StatementResponseManagerTest {
 		}
 		assertNotNull(response);
 		assertEquals(response.getStatus(),200);
-		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
+		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18nd2m3\"]}");
 		
 	}
 

@@ -101,7 +101,7 @@ public class ResourceApiService {
  *-------------------------------
  */
 	/**
-	 * GET /resource/{resourceUri}
+	 * GET /resource/{resourceUri}[?status={status}&sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
 	 * Returns list of URIs related to the rdfs:Resource URI as PLAIN TEXT or JSON
 	 * @param resourceUri
 	 * @param status
@@ -123,7 +123,7 @@ public class ResourceApiService {
     }
 
 	/**
-	 * GET /resource/{resourceUri}/events
+	 * GET /resource/{resourceUri}/events[?sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
 	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
 	 * @return Response
@@ -135,9 +135,11 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceEventsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
-    		@QueryParam("sysagents") String sysAgents, @QueryParam("from") String dateFrom, 
-    		@QueryParam("until") String dateTo) throws RMapApiException {
+    public Response apiGetRMapResourceEvents(@Context HttpHeaders headers, 
+										    		@PathParam("resourceUri") String resourceUri, 
+										    		@QueryParam("sysagents") String sysAgents, 
+										    		@QueryParam("from") String dateFrom, 
+										    		@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.EVENTS, outputType, null, sysAgents, dateFrom, dateTo);
 	    return response;	
@@ -145,7 +147,7 @@ public class ResourceApiService {
 	
 
 	/**
-	 * GET /resource/{resourceUri}/agents
+	 * GET /resource/{resourceUri}/agents[?sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
 	 * Returns list of all RMap:Agent URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
 	 * @param status
@@ -158,16 +160,18 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/agents")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceAgentsAsJson(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
-    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
-    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
+    public Response apiGetRMapResourceAgents(@Context HttpHeaders headers, 
+    												@PathParam("resourceUri") String resourceUri, 
+    												@QueryParam("sysagents") String sysAgents, 
+    												@QueryParam("from") String dateFrom, 
+    												@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.AGENTS, outputType, status, sysAgents, dateFrom, dateTo);
+		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.AGENTS, outputType, null, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
     
 	/**
-	 * GET /resource/{resourceUri}/discos
+	 * GET /resource/{resourceUri}/discos[?status={status}&sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
 	 * Returns list of all RMap:DiSCO URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
 	 * @param resourceUri
 	 * @param status
@@ -180,16 +184,19 @@ public class ResourceApiService {
     @GET
     @Path("/{resourceUri}/discos")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapResourceDiscos(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
-    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
-    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
+    public Response apiGetRMapResourceDiscos(@Context HttpHeaders headers, 
+								    		@PathParam("resourceUri") String resourceUri, 
+								    		@QueryParam("status") String status, 
+								    		@QueryParam("sysagents") String sysAgents,
+								    		@QueryParam("from") String dateFrom, 
+								    		@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
 		Response response = responseManager.getRMapResourceRelatedObjs(resourceUri, ObjType.DISCOS, outputType, status, sysAgents, dateFrom, dateTo);
 	    return response;	
     }
 
 	/**
-	 * GET /resources/{resourceUri}/triples
+	 * GET /resources/{resourceUri}/triples[?status={status}&sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
 	 * Returns list of all rdf:triples related to the rdfs:Resource URI as RDF serialization
 	 * @param resourceUri
 	 * @param status
@@ -205,9 +212,12 @@ public class ResourceApiService {
 				"application/ld+json;charset=UTF-8;", "application/n-quads;charset=UTF-8;",
 				"text/turtle;charset=UTF-8;"
 				})
-    public Response apiGetRMapResourceTriples(@Context HttpHeaders headers, @PathParam("resourceUri") String resourceUri, 
-    		@QueryParam("status") String status, @QueryParam("sysagents") String sysAgents,
-    		@QueryParam("from") String dateFrom, @QueryParam("until") String dateTo) throws RMapApiException {
+    public Response apiGetRMapResourceTriples(@Context HttpHeaders headers, 
+									    		@PathParam("resourceUri") String resourceUri, 
+									    		@QueryParam("status") String status, 
+									    		@QueryParam("sysagents") String sysAgents,
+									    		@QueryParam("from") String dateFrom, 
+									    		@QueryParam("until") String dateTo) throws RMapApiException {
     	RdfType outputType = HttpTypeMediator.getRdfResponseType(headers);
 		Response response = responseManager.getRMapResourceTriples(resourceUri, outputType, status, sysAgents, dateFrom, dateTo);
 	    return response;	

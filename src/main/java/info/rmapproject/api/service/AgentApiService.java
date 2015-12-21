@@ -1,6 +1,5 @@
 package info.rmapproject.api.service;
 
-import info.rmapproject.api.authentication.AuthUserToAgentMediator;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
@@ -8,15 +7,9 @@ import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.AgentResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
 
-import java.io.InputStream;
-import java.net.URI;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -24,10 +17,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
-
-import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.apache.cxf.jaxrs.utils.JAXRSUtils;
-import org.apache.cxf.message.Message;
 
 /**
  * 
@@ -59,26 +48,7 @@ public class AgentApiService {
 
 	//@Context 
 	//private SecurityContext userInfo;
-	
-    private URI sysAgentId = null;    
 
-    private URI getSysAgentId() throws RMapApiException {
-		try {
-			AuthUserToAgentMediator userMediator = new AuthUserToAgentMediator();
-			//String username = userInfo.getUserPrincipal().getName();
-			Message message = JAXRSUtils.getCurrentMessage();
-		    AuthorizationPolicy policy = (AuthorizationPolicy)message.get(AuthorizationPolicy.class);
-		    String username = policy.getUserName();
-	    	this.sysAgentId = userMediator.getRMapAgentForUser(username);
-		}
-		catch(Exception ex){
-			throw new RMapApiException(ex, ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED);
-		}
-    	
-		return this.sysAgentId;
-	}
-	
-	
 
 	/**
 	 * GET /agent or GET /agent?representedAgent={uri}[&creator={creatorUri}]
@@ -182,23 +152,28 @@ public class AgentApiService {
     }
    
     
-
 /*
+
  * ------------------------------
  * 
- *  	 CREATE NEW AGENT
+ *  	 CREATE/DELETE AGENT
  *  
  *-------------------------------
- */ 
+  
+    //
+     * 
+     *  No longer writing Agents through the API! All agents are now System Agents
+     *
     
-	/**
+	*//**
 	 * POST /agent/
 	 * Creates new Agent from RDF/XML, JSON-LD or TURTLE
 	 * @param agentUri
 	 * @return Response
 	 * @throws RMapApiException
-	 */
-    @POST
+	 *//*
+    
+     
     @Path("/")
     @Consumes({"application/rdf+xml;charset=UTF-8;", "application/vnd.rmap-project.agent+rdf+xml;charset=UTF-8;",
 		"application/ld+json;charset=UTF-8;", "application/vnd.rmap-project.agent+ld+json;charset=UTF-8;",
@@ -211,21 +186,21 @@ public class AgentApiService {
     }	
     
     
-	/**
+	*//**
 	 * DELETE /agent/{agentUri}
 	 * Sets status of target rmap:Agent to "tombstoned".  It will still be stored in the triplestore
 	 * but won't be visible through the API.
 	 * @param agentUri
 	 * @return Response
 	 * @throws RMapApiException
-	 */    
+	 *//*    
     @DELETE
     @Path("/{agentUri}")
     public Response apiDeleteRMapAgent(@PathParam("agentUri") String agentUri) throws RMapApiException {
     	Response response = responseManager.tombstoneRMapAgent(agentUri,getSysAgentId());
 	    return response;
     }
-    
+    */
     
     
 

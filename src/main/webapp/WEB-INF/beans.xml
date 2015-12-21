@@ -48,17 +48,13 @@
 		    <ref bean="securityInterceptor"/>
 		</jaxrs:inInterceptors>
     </jaxrs:server>
+    
+    <!-- map auth service to API -->
+    <bean id="authService" class="info.rmapproject.auth.service.AuthServiceImpl"/>
+    
 	<bean id="securityInterceptor" class="info.rmapproject.api.authentication.AuthenticationInterceptor">
-		<property name="users">
-			<map>
-				<entry key="ieee" value="ieee"/>
-				<entry key="jhu" value="jhu"/>
-				<entry key="portico" value="portico"/>
-			</map>
-		</property>
+		<property name="authService" ref="authService" />
 	</bean>   
-	
-	
 	
     <!-- 
     aspect example, in case ever want to try this...

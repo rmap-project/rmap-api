@@ -62,6 +62,7 @@ public class DiSCOApiService {
 	
     private URI sysAgentId = null;    
 
+    //TODO:this doesn't really belong here, though only DiSCO needs it at the moment... 
     private URI getSysAgentId() throws RMapApiException {
 		try {
 			AuthUserToAgentMediator userMediator = new AuthUserToAgentMediator();

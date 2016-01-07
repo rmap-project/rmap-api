@@ -21,38 +21,43 @@
     <context:annotation-config/>
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer"/>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
+		
+    <bean id="authService" class="info.rmapproject.auth.service.AuthServiceImpl"/>
+    <bean id="discoResponseManager" class="info.rmapproject.api.responsemgr.DiscoResponseManager"/>
+    <bean id="agentResponseManager" class="info.rmapproject.api.responsemgr.AgentResponseManager"/>
+    <bean id="eventResponseManager" class="info.rmapproject.api.responsemgr.EventResponseManager"/>
+    <bean id="statementResponseManager" class="info.rmapproject.api.responsemgr.StatementResponseManager"/>
+    <bean id="resourceResponseManager" class="info.rmapproject.api.responsemgr.ResourceResponseManager"/>
 	
-	<bean id="authUserToAgentMediator" class="info.rmapproject.api.authentication.AuthUserToAgentMediator"/>
-	
-	<!-- <bean id="authUserToAgentMediator" class="info.rmapproject.api.authentication.AuthUserToAgentMediator">
-		<property name="propertiesFileName" value="/rmap/apache/tomcat7/conf/rmap_apitest_userNameToSysAgent.map"/>
-	</bean>	 -->
-	
-	<bean id="defaultUsers" class="info.rmapproject.api.authentication.CreateDefaultUsers" init-method="createDefaultUsers">
-  		<constructor-arg ref="authUserToAgentMediator"/>
-  	</bean>
-  		
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
-            <bean class="info.rmapproject.api.service.DiSCOApiService"/>
-            <bean class="info.rmapproject.api.service.EventApiService"/>
-            <bean class="info.rmapproject.api.service.AgentApiService"/>
-            <bean class="info.rmapproject.api.service.StatementApiService"/>
-            <bean class="info.rmapproject.api.service.ResourceApiService"/>
+            <bean class="info.rmapproject.api.service.DiSCOApiService">
+				<property name="authService" ref="authService" />
+				<property name="discoResponseManager" ref="discoResponseManager" />
+			</bean>   
+            <bean class="info.rmapproject.api.service.EventApiService">
+				<property name="eventResponseManager" ref="eventResponseManager" />
+			</bean>   
+            <bean class="info.rmapproject.api.service.AgentApiService">
+				<property name="agentResponseManager" ref="agentResponseManager" />
+			</bean>   
+            <bean class="info.rmapproject.api.service.StatementApiService">
+				<property name="statementResponseManager" ref="statementResponseManager" />
+			</bean>   
+            <bean class="info.rmapproject.api.service.ResourceApiService">
+				<property name="resourceResponseManager" ref="resourceResponseManager" />
+			</bean>   
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
        		<bean class="info.rmapproject.api.exception.RMapApiExceptionHandler"/>
         </jaxrs:providers>
 		<jaxrs:inInterceptors>
-		    <ref bean="securityInterceptor"/>
+		    <ref bean="authenticationInterceptor"/>
 		</jaxrs:inInterceptors>
     </jaxrs:server>
     
-    <!-- map auth service to API -->
-    <bean id="authService" class="info.rmapproject.auth.service.AuthServiceImpl"/>
-    
-	<bean id="securityInterceptor" class="info.rmapproject.api.authentication.AuthenticationInterceptor">
+	<bean id="authenticationInterceptor" class="info.rmapproject.api.authentication.AuthenticationInterceptor">
 		<property name="authService" ref="authService" />
 	</bean>   
 	

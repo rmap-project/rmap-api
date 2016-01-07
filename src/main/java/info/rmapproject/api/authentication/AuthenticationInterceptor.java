@@ -1,7 +1,8 @@
 package info.rmapproject.api.authentication;
 
 import info.rmapproject.api.exception.ErrorCode;
-import info.rmapproject.auth.model.ApiKey;
+import info.rmapproject.api.exception.ErrorMessage;
+import info.rmapproject.auth.exception.RMapAuthException;
 import info.rmapproject.auth.service.AuthService;
 
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
@@ -26,7 +27,7 @@ public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message>
     public void handleMessage(Message message) {
         AuthorizationPolicy policy = message.get(AuthorizationPolicy.class);
 	    if (policy == null) {
-	        throw new RuntimeException(ErrorCode.ER_NO_USER_TOKEN_PROVIDED.toString());
+	        throw new RuntimeException(ErrorMessage.getUserText(ErrorCode.ER_NO_USER_TOKEN_PROVIDED));
 	        }
 	    
 	    String accessKey = policy.getUserName();
@@ -34,13 +35,15 @@ public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message>
 	    
 		if (accessKey==null || accessKey.length()==0
 				|| secret==null || secret.length()==0)	{
-	        throw new RuntimeException(ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED.toString());
+	        throw new RuntimeException(ErrorMessage.getUserText(ErrorCode.ER_NO_USER_TOKEN_PROVIDED));
 		}		
-	       
-		ApiKey apiKey = authService.getApiKeyByKeySecret(accessKey, secret);
-	    if (apiKey == null) {
-	        throw new RuntimeException(ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED.toString());
-	    }	    
+	    
+		try {
+			authService.validateApiKey(accessKey, secret);
+		}
+		catch (RMapAuthException e) {
+			throw new RuntimeException(ErrorMessage.getUserText(ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED), e);
+		}
     }
 		
 }

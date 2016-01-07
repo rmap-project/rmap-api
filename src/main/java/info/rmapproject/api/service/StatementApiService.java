@@ -17,6 +17,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import org.springframework.beans.factory.annotation.Required;
+
 /**
  * API service for RMap Stmts
  * @author khanson
@@ -25,22 +27,16 @@ import javax.ws.rs.core.Response;
 @Path("/stmts")
 public class StatementApiService {
 	
-	protected static StatementResponseManager responseManager = null;
+	private StatementResponseManager statementResponseManager = null;
 	
-	static{
-		try {
-			responseManager = new StatementResponseManager();
-		}
-		catch (Exception e){
-			try {
-				throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);
-			} catch (RMapApiException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+    @Required
+    public void setStatementResponseManager(StatementResponseManager statementResponseManager) throws RMapApiException {
+    	if (statementResponseManager==null) {
+			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
+    	} else {
+    		this.statementResponseManager = statementResponseManager;
 		}
 	}
-	
 	
 	/*
 	 * if ever need full path...
@@ -67,25 +63,25 @@ public class StatementApiService {
     @Produces("application/json")
     public Response apiGetServiceInfo() throws RMapApiException {
    		//TODO: for now returns same as options, but might want html response to describe API?
-    	Response response = responseManager.getStatementServiceOptions();
+    	Response response = statementResponseManager.getStatementServiceOptions();
    		return response;
     }
     
 	/**
-	 * HEAD /stmt
+	 * HEAD /stmts
      * Returns Stmt API information/link, and lists HTTP options
 	 * @return Response
 	 * @throws RMapApiException
 	 */
     @HEAD
     public Response apiGetStmtApiDetails() throws RMapApiException	{
-    	Response response = responseManager.getStatementServiceHead();
+    	Response response = statementResponseManager.getStatementServiceHead();
 	    return response;
     }
     
 
 	/**
-	 * OPTIONS /stmt
+	 * OPTIONS /stmts
      * Returns Statement API information/link, and lists HTTP options
 	 * @return Response
 	 * @throws RMapApiException
@@ -93,7 +89,7 @@ public class StatementApiService {
     @OPTIONS
     @Produces("application/json")
     public Response apiGetStmtApiDetailedOptions() throws RMapApiException	{
-    	Response response = responseManager.getStatementServiceOptions();
+    	Response response = statementResponseManager.getStatementServiceOptions();
 	    return response;
     }
         
@@ -107,13 +103,13 @@ public class StatementApiService {
  *-------------------------------
  */
 	/**
-	 * GET /stmts/{subject}/{predicate}/{object}/discos[?status={status}&sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
-	 * Returns list of RMap:DiSCO URIs that contain the statement matching the subject, predicate, object provided
+	 * GET /stmts/{subject}/{predicate}/{object}/discos[?status={status}&agents={agentsCsv}&from={dateFrom}&until={dateTo}]
+	 * Returns list of URIs for RMap:DiSCOs  that contain the statement matching the subject, predicate, object provided
      * @param subject
      * @param predicate
      * @param object
      * @param status
-     * @param sysagents
+     * @param agents
      * @param from
      * @param until
 	 * @return Response
@@ -127,30 +123,30 @@ public class StatementApiService {
 		    										@PathParam("predicate") String predicate, 
 		    										@PathParam("object") String object, 
 		    										@QueryParam("status") String status,
-		    										@QueryParam("sysagents") String sysagents,
+		    										@QueryParam("agents") String agents,
 		    										@QueryParam("from") String dateFrom,
 		    										@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getStatementRelatedDiSCOs(subject, predicate, object, status, 
-    																	sysagents, dateFrom, dateTo, outputType);
+    	Response response = statementResponseManager.getStatementRelatedDiSCOs(subject, predicate, object, status, 
+    																	agents, dateFrom, dateTo, outputType);
 	    return response;	
     }
 
 /*
- * ------------------------------
+ * -------------------------------------
  * 
- *  	  GET STMT AGENTS
+ *  	  GET STMT ASSERTING AGENTS
  *  
- *-------------------------------
+ *--------------------------------------
  */
 	/**
-	 * GET /stmts/{subject}/{predicate}/{object}/agents[?sysagents={sysagentsCsv}&from={dateFrom}&until={dateTo}]
-	 * Returns list of RMap:DiSCO URIs that contain the statement matching the subject, predicate, object provided
+	 * GET /stmts/{subject}/{predicate}/{object}/agents[?status={status}&from={dateFrom}&until={dateTo}]
+	 * Returns list of URIs for RMap:Agents that asserted the statement matching the subject, predicate, object provided
      * @param subject
      * @param predicate
      * @param object
      * @param status
-     * @param sysagents
+     * @param agents
      * @param from
      * @param until
 	 * @return Response
@@ -158,40 +154,6 @@ public class StatementApiService {
 	 */  
     @GET
     @Path("/{subject}/{predicate}/{object}/agents")
-    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapAgentsContainingStmt(@Context HttpHeaders headers, 
-    										@PathParam("subject") String subject, 
-    										@PathParam("predicate") String predicate, 
-    										@PathParam("object") String object, 
-    										@QueryParam("sysagents") String sysagents,
-    										@QueryParam("from") String dateFrom,
-    										@QueryParam("until") String dateTo) throws RMapApiException {
-    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getStatementRelatedAgents(subject, predicate, object, sysagents, dateFrom, dateTo, outputType);
-	    return response;	
-    }
-    
-    /*
-     * ------------------------------
-     * 
-     *  	  GET STMT ASSERTING AGTS
-     *  
-     *-------------------------------
-     */
-	/**
-	 * GET /stmts/{subject}/{predicate}/{object}/sysagents[?status={status}&from={dateFrom}&until={dateTo}]
-	 * Returns list of RMap:DiSCO URIs that contain the statement matching the subject, predicate, object provided
-     * @param subject
-     * @param predicate
-     * @param object
-     * @param status
-     * @param from
-     * @param until
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
-    @GET
-    @Path("/{subject}/{predicate}/{object}/sysagents")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetStmtAssertingAgents(@Context HttpHeaders headers, 
     										@PathParam("subject") String subject, 
@@ -201,7 +163,7 @@ public class StatementApiService {
     										@QueryParam("from") String dateFrom,
     										@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response response = responseManager.getStatementAssertingAgents(subject, predicate, object, status, 
+    	Response response = statementResponseManager.getStatementAssertingAgents(subject, predicate, object, status, 
     																	dateFrom, dateTo, outputType);
 	    return response;	
     }

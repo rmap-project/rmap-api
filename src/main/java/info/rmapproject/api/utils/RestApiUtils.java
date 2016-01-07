@@ -27,7 +27,6 @@ import java.util.Properties;
 public class RestApiUtils {
 	
 	private static final String BASE_URL_KEY = "baseURL";
-	private static final String DEFAULT_SYSAGENT_KEY = "rmapSysAgent";
 
     private static Properties props = new Properties();
     private static boolean isInitialized = false;
@@ -219,41 +218,7 @@ public class RestApiUtils {
 		}
 		return rmapStatus;
 	}
-	
-	
-	/*
-	 * TODO: this is here as a temporary measure to make it easy to share a system agent ID between all classes...
-	 * just until we have proper authentication.
-	 * 
-	 * REMOVE THIS!
-	 */
-	public static URI getDefaultSystemAgentURI() throws RMapApiException {
-		URI uriDefaultSysAgentURI = null;
-		try {
-			if (!isInitialized){
-				init();
-			}
-			
-			String defaultSysAgentURI = props.getProperty(DEFAULT_SYSAGENT_KEY);
-			if (defaultSysAgentURI == null || defaultSysAgentURI.length()==0)	{
-				throw new RMapApiException(ErrorCode.ER_NO_DEFAULT_SYSTEM_AGENT_SET);
-			}		
-			defaultSysAgentURI = defaultSysAgentURI.trim();
-			while (defaultSysAgentURI.endsWith("/"))	{
-				defaultSysAgentURI = defaultSysAgentURI.substring(0, defaultSysAgentURI.length()-1);	
-			}
-			uriDefaultSysAgentURI = new URI(defaultSysAgentURI);
-		}
-		catch(RMapApiException ex){
-			throw RMapApiException.wrap(ex);			
-		}
-		catch(Exception ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
-		}
 		
-		return uriDefaultSysAgentURI;
-	}
-	
 	/**
 	 * Converts a string of text passed in as the "object" through the API request to a valid RMapValue
 	 * determining whether it is a typed literal, URI etc.

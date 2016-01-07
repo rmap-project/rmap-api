@@ -189,9 +189,6 @@ public class EventResponseManager {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
-			if (objType==null)	{
-				throw new RMapApiException(ErrorCode.ER_NO_RELATED_OBJECT_TYPE_PROVIDED); 
-			}
 			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
 
 			URI uriEventUri = null;
@@ -212,14 +209,21 @@ public class EventResponseManager {
 
 			List <URI> uriList = null;
 			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
+			/**
+			 * NOT USED AT THE MOMENT
 			if (objType == ObjType.RESOURCES) {
 				uriList = rmapService.getEventRelatedResources(uriEventUri);
 			}
+			**/
 			if (objType == ObjType.DISCOS) {
 				uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
 			}
 			if (objType == ObjType.AGENTS) {
 				uriList = rmapService.getEventRelatedAgents(uriEventUri);
+			}
+			if (objType == ObjType.ALL) {
+				uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
+				uriList.addAll(rmapService.getEventRelatedAgents(uriEventUri));
 			}
 			
 			if (uriList==null)	{ 

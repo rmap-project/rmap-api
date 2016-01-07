@@ -18,7 +18,7 @@ import org.openrdf.model.ValueFactory;
  * @author khanson
  * Procedures to test StatementResponseManager
  */
-public class StatementResponseManagerTest {
+public class StatementResponseManagerTest extends ResponseManagerTest {
 	
 	protected StatementResponseManager responseManager = null;
 

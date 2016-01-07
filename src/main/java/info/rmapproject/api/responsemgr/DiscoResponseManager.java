@@ -15,7 +15,6 @@ import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
 import info.rmapproject.core.model.RMapStatus;
-import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.event.RMapEventCreation;
@@ -181,7 +180,7 @@ public class DiscoResponseManager {
 			if (viewLatestVersion)	{
 				rmapDiscoDTO = rmapService.getDiSCODTOLatestVersion(uriDiscoUri);
 				//now we are using a different disco URI
-				uriDiscoUri = rmapDiscoDTO.getRMapDiSCO().getId();
+				uriDiscoUri = rmapDiscoDTO.getRMapDiSCO().getId().getIri();
 				strDiscoUri = uriDiscoUri.toString();
 			}
 			else {;
@@ -357,12 +356,12 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}
 			
-			RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(new RMapUri(sysAgentUri), rmapDisco);
+			RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(sysAgentUri, rmapDisco);
 			if (discoEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATEDISCO_NOT_COMPLETED);
 			} 
 
-			URI uDiscoURI = rmapDisco.getId();  
+			URI uDiscoURI = rmapDisco.getId().getIri();  
 			if (uDiscoURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_DISCOID_RETURNED_NULL);
 			} 
@@ -373,7 +372,7 @@ public class DiscoResponseManager {
 
 			log.info("New DiSCO created (id=" + discoRdf.hashCode() + ") with URI " + sDiscoURI);
 			
-			URI uEventURI = discoEvent.getId();  
+			URI uEventURI = discoEvent.getId().getIri();  
 			if (uEventURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
 			} 
@@ -465,7 +464,7 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
 			
-			RMapEvent discoEvent = rmapService.updateDiSCO(new RMapUri(sysAgentUri), 
+			RMapEvent discoEvent = rmapService.updateDiSCO(sysAgentUri, 
 															uriOrigDiscoUri, 
 															newRmapDisco);
 			
@@ -473,7 +472,7 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEDISCO_NOT_COMPLETED);
 			} 
 			
-			URI uDiscoURI = newRmapDisco.getId();  
+			URI uDiscoURI = newRmapDisco.getId().getIri();  
 			if (uDiscoURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_DISCOID_RETURNED_NULL);
 			}
@@ -482,7 +481,7 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_DISCOURI_STRING_EMPTY);
 			} 
 			
-			URI uEventURI = discoEvent.getId();  
+			URI uEventURI = discoEvent.getId().getIri();  
 			if (uEventURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
 			} 
@@ -598,18 +597,18 @@ public class DiscoResponseManager {
 			
 			RMapEvent discoEvent = null;
 			if (newStatus == "TOMBSTONED")	{
-				discoEvent = (RMapEvent)rmapService.deleteDiSCO(uriDiscoUri, new RMapUri(sysAgentUri));					
+				discoEvent = (RMapEvent)rmapService.deleteDiSCO(uriDiscoUri, sysAgentUri);					
 			}
 			else if (newStatus == "INACTIVE")	{
 				//TODO:this is incorrect - currently no inactivate disco method, so this is a placeholder!
-				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(new RMapUri(sysAgentUri), uriDiscoUri);						
+				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(sysAgentUri, uriDiscoUri);						
 			}
 				
 			if (discoEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEDISCO_NOT_COMPLETED);
 			} 
 			
-			URI uEventURI = discoEvent.getId();  
+			URI uEventURI = discoEvent.getId().getIri();  
 			if (uEventURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
 			} 

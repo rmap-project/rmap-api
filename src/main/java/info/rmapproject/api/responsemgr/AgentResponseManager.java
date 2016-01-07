@@ -306,7 +306,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
 			}
 						 						
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(sysAgentUri, agentRdf, "", contentType.toString());
+			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(agentRdf, "", contentType.toString());
 			if (rmapAgent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_AGENT_FAILED);
 			}  
@@ -321,7 +321,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATEAGENT_NOT_COMPLETED);
 			} 
 
-			URI uAgentURI = rmapAgent.getId();  
+			URI uAgentURI = rmapAgent.getId().getIri();  
 			if (uAgentURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_AGENTID_RETURNED_NULL);
 			} 
@@ -330,7 +330,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_AGENTURI_STRING_EMPTY);
 			} 
 
-			URI uEventURI = agentEvent.getId();  
+			URI uEventURI = agentEvent.getId().getIri();  
 			if (uEventURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
 			} 
@@ -413,7 +413,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEAGENT_NOT_COMPLETED);
 			} 
 			
-			URI uEventURI = agentEvent.getId();  
+			URI uEventURI = agentEvent.getId().getIri();  
 			if (uEventURI==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
 			} 
@@ -553,109 +553,5 @@ public class AgentResponseManager {
     	return response;
 	}
 	
-	
-	
-	/**
-	 * Retrieves list of RMap:Agent URIs associated with the Agent URI
-	 * @param nonRmapAgentUri
-	 * @param returnType
-	 * @return HTTP Response
-	 * @throws RMapApiException
-	 */
-	public Response getRMapAgentRepresentations(String nonRmapAgentUri, String creatorUri, NonRdfType returnType) throws RMapApiException	{
-		boolean reqSuccessful = false;
-		Response response = null;
-		RMapService rmapService = null;
-		try {			
-			if (nonRmapAgentUri==null || nonRmapAgentUri.length()==0)	{
-				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
-			}	
-			//assign default value when null
-			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
-
-			URI uriAgentUri = null;
-			try {
-				nonRmapAgentUri = URLDecoder.decode(nonRmapAgentUri, "UTF-8");
-				uriAgentUri = new URI(nonRmapAgentUri);
-			}
-			catch (Exception ex)  {
-				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-			}
-			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
-			String outputString="";
-			
-			List <URI> uriList = null;
-			if (creatorUri != null){
-				URI uriCreatorUri = null;
-				try {
-					creatorUri = URLDecoder.decode(creatorUri, "UTF-8");
-					uriCreatorUri = new URI(creatorUri);
-				}
-				catch (Exception ex)  {
-					throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-				}
-				uriList = rmapService.getAgentRepresentations(uriAgentUri, uriCreatorUri);
-			}
-			else {
-				uriList= rmapService.getAgentRepresentationsAnyCreator(uriAgentUri);
-			}
-						
-			if (uriList == null){
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_RELATEDAGENTLIST_RETURNED_NULL);
-			}
-			
-			if (uriList.size() == 0) {
-				throw new RMapApiException(ErrorCode.ER_NO_RELATED_AGENTS_FOUND);				
-			}
-			
-			if (returnType == NonRdfType.PLAIN_TEXT)	{		
-				outputString = URIListHandler.uriListToPlainText(uriList);
-			}
-			else	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.AGENTS.getObjTypeLabel());		
-			}
-    		
-    		if (outputString == null || outputString.length()==0){	
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_RELATEDAGENTLIST_RETURNED_NULL);    			
-	        }		    			
-    		
-			response = Response.status(Response.Status.OK)
-						.entity(outputString.toString())
-						.location(new URI (RestApiUtils.makeAgentUrl(nonRmapAgentUri)))
-						.build(); 
-			
-			reqSuccessful=true;
-		} 
-		catch(RMapApiException ex)	{
-        	throw RMapApiException.wrap(ex);
-		}
-		catch(RMapDefectiveArgumentException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_AGENT_BAD_ARGUMENT);
-		} 
-		catch(RMapAgentNotFoundException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_AGENT_OBJECT_NOT_FOUND);
-		} 
-		catch(RMapException ex) {
-			if (ex.getCause() instanceof RMapObjectNotFoundException){
-				throw RMapApiException.wrap(ex,ErrorCode.ER_OBJECT_NOT_FOUND);  			
-			}
-			else {
-				throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);  					
-			}
-		}  
-		catch(Exception ex)	{
-        	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
-		}
-		finally{
-			if (rmapService != null) rmapService.closeConnection();
-			if (!reqSuccessful && response!=null) response.close();
-		}
-		return response;
-	}
 	
 }

@@ -13,10 +13,12 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
+import org.springframework.beans.factory.annotation.Required;
+
 
 /**
  * 
@@ -28,51 +30,16 @@ import javax.ws.rs.core.Response;
 @Path("/agents")
 public class AgentApiService {
 	
-	protected static AgentResponseManager responseManager = null;
-	static{
-		try {
-			responseManager = new AgentResponseManager();
-		}
-		catch (Exception e){
-			try {
-				throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);
-			} catch (RMapApiException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+	private AgentResponseManager agentResponseManager = null;
+
+    @Required
+    public void setAgentResponseManager(AgentResponseManager agentResponseManager) throws RMapApiException {
+    	if (agentResponseManager==null) {
+			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
+    	} else {
+    		this.agentResponseManager = agentResponseManager;
 		}
 	}
-	
-	
-	//map auth to sysagent
-
-	//@Context 
-	//private SecurityContext userInfo;
-
-
-	/**
-	 * GET /agent or GET /agent?representedAgent={uri}[&creator={creatorUri}]
-     * If no additional filters applied, returns link to Agent API information, and lists HTTP options
-     * If there are filters on the agent, applies filter.
-	 * @return Response
-	 * @throws RMapApiException
-	 */
-    @GET
-    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetServiceInfo(@Context HttpHeaders headers, 
-    								@QueryParam("representedAgent") String uri, 
-    								@QueryParam("creator") String creator) throws RMapApiException {
-    	Response response = null;
-    	if (uri!=null)	{
-        	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-       		response = responseManager.getRMapAgentRepresentations(uri, creator, outputType);    
-    	}
-    	else	{
-        	//TODO: for now returns same as options, but might want html response to describe API?
-        	response = responseManager.getAgentServiceOptions();		
-    	}    	
-    	return response;
-    }
 
 	/**
 	 * HEAD /agent
@@ -82,7 +49,7 @@ public class AgentApiService {
 	 */
     @HEAD
     public Response apiGetApiDetails() throws RMapApiException {
-    	Response response = responseManager.getAgentServiceHead();
+    	Response response = agentResponseManager.getAgentServiceHead();
 	    return response;
     }
     
@@ -95,7 +62,7 @@ public class AgentApiService {
 	 */
     @OPTIONS
     public Response apiGetApiDetailedOptions() throws RMapApiException {
-    	Response response = responseManager.getAgentServiceHead();
+    	Response response = agentResponseManager.getAgentServiceHead();
 	    return response;
     }
     
@@ -125,7 +92,7 @@ public class AgentApiService {
 				})
     public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
     	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
-    	Response response=responseManager.getRMapAgent(agentUri, returnType);
+    	Response response=agentResponseManager.getRMapAgent(agentUri, returnType);
     	return response;
     }
     
@@ -147,7 +114,7 @@ public class AgentApiService {
     @HEAD
     @Path("/{agentUri}")
     public Response apiGetAgentStatus(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response response = responseManager.getRMapAgentHeader(agentUri);
+    	Response response = agentResponseManager.getRMapAgentHeader(agentUri);
 	    return response;
     }
    
@@ -224,7 +191,7 @@ public class AgentApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapAgentEventList(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response eventList = responseManager.getRMapAgentEvents(agentUri, outputType);
+    	Response eventList = agentResponseManager.getRMapAgentEvents(agentUri, outputType);
     	return eventList;
     }
     

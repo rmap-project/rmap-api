@@ -13,12 +13,13 @@ import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ResourceResponseManagerTest {
+public class ResourceResponseManagerTest extends ResponseManagerTest {
 	
 	protected ResourceResponseManager responseManager = null;
 	@Before
 	public void setUp() throws Exception {
 		try {
+			super.setUp();
 			responseManager = new ResourceResponseManager();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());

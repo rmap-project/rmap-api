@@ -10,12 +10,13 @@ import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AgentResponseManagerTest {
+public class AgentResponseManagerTest extends ResponseManagerTest {
 
 	protected AgentResponseManager responseManager = null;
 	@Before
 	public void setUp() throws Exception {
 		try {
+			super.setUp();
 			responseManager = new AgentResponseManager();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());

@@ -4,13 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import info.rmapproject.api.authentication.AuthUserToAgentMediator;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.RestApiUtils;
-import info.rmapproject.core.model.RMapUri;
+import info.rmapproject.auth.service.AuthService;
+import info.rmapproject.auth.service.AuthServiceImpl;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
@@ -28,50 +28,8 @@ import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 
-public class DiscoResponseManagerTest {
+public class DiscoResponseManagerTest extends ResponseManagerTest {
 
-	protected String discoRDF = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
-			+ "<rdf:RDF "  
-			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
-			+ " xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""  
-			+ " xmlns:rmap=\"http://rmap-project.org/rmap/terms/\""  
-			+ " xmlns:ore=\"http://www.openarchives.org/ore/terms/\""  
-			+ " xmlns:dcterms=\"http://purl.org/dc/terms/\""  
-			+ " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""  
-			+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
-			+ " xmlns:fabio=\"http://purl.org/spar/fabio/\">"  
-			+ "<rmap:DiSCO>"  
-			+ "<dcterms:creator rdf:resource=\"http://orcid.org/0000-0000-0000-0000\"/>"
-			+ "<dc:description>"  
-			+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
-			+ "</dc:description>"  
-			+ "<ore:aggregates rdf:resource=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\"/>"  
-			+ "<ore:aggregates rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\"/>"  
-	    	+ "</rmap:DiSCO>"  
-	    	+ "<fabio:JournalArticle rdf:about=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\">"  
-	    	+ "<dc:title>Toward Scalable Systems for Big Data Analytics: A Technology Tutorial</dc:title>"  
-	    	+ "<dc:creator>Yonggang Wen</dc:creator>"  
-	    	+ "<dc:creator>Tat-Seng Chua</dc:creator>"  
-	    	+ "<dcterms:creator rdf:nodeID=\"N65580\"/>"  
-	    	+ "<dc:subject>Hadoop</dc:subject>"  
-	    	+ "<dc:subject>Big data analytics</dc:subject>"  
-	    	+ "<dc:subject>data acquisition</dc:subject>"  
-	    	+ "</fabio:JournalArticle>"  
-	    	+ "<rdf:Description rdf:about=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\">"  
-	    	+ "<dc:format>application/zip</dc:format>"  
-	    	+ "<dc:description>Zip file containing an AVI movie and a README file in Word format.</dc:description>"  
-	    	+ "<dc:hasPart rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip#big%32data%32intro.avi\"/>"  
-	    	+ "<dc:hasPart rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip#README.docx\"/>"  
-	    	+ "</rdf:Description>"  
-	    	+ "<rdf:Description rdf:about=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip#big%32data%32intro.avi\">"  
-	    	+ "<dc:format>video/x-msvideo</dc:format>"  
-	    	+ "<dc:extent>194KB</dc:extent>"  
-	    	+ "</rdf:Description>"  
-	    	+ "<rdf:Description rdf:nodeID=\"N65580\">"
-	    	+ "<foaf:name>Xuelong Li</foaf:name>"
-	    	+ "<rdf:type rdf:resource=\"http://purl.org/dc/terms/Agent\"/>"
-	    	+ "</rdf:Description>"	
-	    	+ "</rdf:RDF>";
 
 	protected String discoRDFNoCreator = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
@@ -111,8 +69,6 @@ public class DiscoResponseManagerTest {
 	    	+ "</rdf:Description>"  
 	    	+ "</rdf:RDF>";
 	
-	
-
 	protected String discoTurtleRdf = 
 			"@prefix dc: <http://purl.org/dc/elements/1.1/> ."
 			+ "@prefix frbr: <http://purl.org/vocab/frbr/core#> ."
@@ -169,6 +125,7 @@ public class DiscoResponseManagerTest {
 	@Before
 	public void setUp() throws Exception {
 		try {
+			super.setUp();
 			responseManager = new DiscoResponseManager();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -231,7 +188,7 @@ public class DiscoResponseManagerTest {
 		//createDisco
 		
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-		InputStream rdf = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
+		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
 		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
 		String discoURI = rmapDisco.getId().toString();
         assertNotNull(discoURI);
@@ -239,9 +196,8 @@ public class DiscoResponseManagerTest {
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
-		rmapService.createDiSCO(new RMapUri(RestApiUtils.getDefaultSystemAgentURI()), rmapDisco);
+		rmapService.createDiSCO(testAgentURI, rmapDisco);
 	
-		
 		try {
 			response = responseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
 		} catch (Exception e) {
@@ -263,7 +219,28 @@ public class DiscoResponseManagerTest {
 	 */
 	@Test
 	public void testGetRMapDiscoThatHasBeenUpdated() throws Exception{
+		//create 1 disco
+		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
+		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
+		String discoURI = rmapDisco.getId().toString();
+        assertNotNull(discoURI);
+        
+        //create another disco
+		InputStream rdf2 = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
+		RMapDiSCO rmapDisco2 = rdfHandler.rdf2RMapDiSCO(rdf2, RestApiUtils.getDiscoBaseUrl(), "TURTLE");
+		String discoURI2 = rmapDisco.getId().toString();
+        assertNotNull(discoURI2);
+        
+		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
+		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+		
+		//create a disco using the test agent
+		rmapService.createDiSCO(testAgentURI, rmapDisco);
 
+		//update the disco
+		rmapService.updateDiSCO(testAgentURI, new URI(discoURI), rmapDisco2);
+		
     	Response response=null;
     	RdfType returnType = null;
     	
@@ -271,11 +248,10 @@ public class DiscoResponseManagerTest {
    		if (matchingType!=null){
     		returnType=matchingType.getReturnType();
     	}
-   		
-   		String discoURI = "ark:/27927/r8rqxpynv0";
-		
+   				
 		try {
-			String encodedUri = URLEncoder.encode(discoURI, "UTF-8");
+			//now get the updated DiSCO
+			String encodedUri = URLEncoder.encode(discoURI2, "UTF-8");
 			response = responseManager.getRMapDiSCO(encodedUri,returnType);
 		} catch (Exception e) {
 			e.printStackTrace();			
@@ -339,8 +315,8 @@ public class DiscoResponseManagerTest {
 			//create new ORMapAgent
 			//createAgentforTest();
 
-			AuthUserToAgentMediator userToAgentObj = new AuthUserToAgentMediator();
-			URI uriSystemAgent = userToAgentObj.getRMapAgentForUser("portico");
+			AuthService authService = new AuthServiceImpl();
+			URI uriSystemAgent = authService.getAgentUriByKeySecret("rmaptest", "rmaptest");
 			
 			InputStream stream = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
 			response = responseManager.createRMapDiSCO(stream, RdfType.TURTLE, uriSystemAgent);
@@ -365,10 +341,10 @@ public class DiscoResponseManagerTest {
 			//create new ORMapAgent
 			//createAgentforTest();
 
-			AuthUserToAgentMediator userToAgentObj = new AuthUserToAgentMediator();
-			URI uriSystemAgent = userToAgentObj.getRMapAgentForUser("portico");
+			AuthService authService = new AuthServiceImpl();
+			URI uriSystemAgent = authService.getAgentUriByKeySecret("rmaptest", "rmaptest");
 			
-			InputStream stream = new ByteArrayInputStream(discoRDF.getBytes(StandardCharsets.UTF_8));
+			InputStream stream = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
 			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, uriSystemAgent);
 			
 		} catch (Exception e) {
@@ -389,8 +365,8 @@ public class DiscoResponseManagerTest {
 		Response response = null;
 		boolean correctErrorThrown = false;
 		try {
-			AuthUserToAgentMediator userToAgentObj = new AuthUserToAgentMediator();
-			URI uriSystemAgent = userToAgentObj.getRMapAgentForUser("portico");
+			AuthService authService = new AuthServiceImpl();
+			URI uriSystemAgent = authService.getAgentUriByKeySecret("rmaptest", "rmaptest");
 			
 			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
 			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, uriSystemAgent);

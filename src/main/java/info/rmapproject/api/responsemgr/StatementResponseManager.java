@@ -5,7 +5,7 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapException;
@@ -171,19 +171,19 @@ public class StatementResponseManager {
 			
 
 			subject = URLDecoder.decode(subject, "UTF-8");
-			subject = RestApiUtils.removeUriAngleBrackets(subject);
+			subject = Utils.removeUriAngleBrackets(subject);
 			URI rmapSubject = new URI(subject);
 
 			predicate = URLDecoder.decode(predicate, "UTF-8");
-			predicate = RestApiUtils.removeUriAngleBrackets(predicate);
+			predicate = Utils.removeUriAngleBrackets(predicate);
 			URI rmapPredicate = new URI(predicate);
 
 			object = URLDecoder.decode(object, "UTF-8");
-			RMapValue rmapObject = RestApiUtils.convertObjectStringToRMapValue(object);
-			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-			List <URI> systemAgentList = RestApiUtils.convertUriCsvToUriList(systemAgents);
-			Date dDateFrom = RestApiUtils.convertStringDateToDate(dateFrom);
-			Date dDateTo = RestApiUtils.convertStringDateToDate(dateTo);
+			RMapValue rmapObject = Utils.convertObjectStringToRMapValue(object);
+			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
+			List <URI> systemAgentList = Utils.convertUriCsvToUriList(systemAgents);
+			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
+			Date dDateTo = Utils.convertStringDateToDate(dateTo);
 						
 			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){
@@ -281,10 +281,10 @@ public class StatementResponseManager {
 			
 			URI rmapSubject = new URI(subject);
 			URI rmapPredicate = new URI(predicate);
-			RMapValue rmapObject = RestApiUtils.convertObjectStringToRMapValue(object);
-			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-			Date dDateFrom = RestApiUtils.convertStringDateToDate(dateFrom);
-			Date dDateTo = RestApiUtils.convertStringDateToDate(dateTo);
+			RMapValue rmapObject = Utils.convertObjectStringToRMapValue(object);
+			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
+			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
+			Date dDateTo = Utils.convertStringDateToDate(dateTo);
 						
 			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){

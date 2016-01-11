@@ -10,6 +10,8 @@ import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 import org.junit.Before;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class ResponseManagerTest {
 
@@ -19,7 +21,9 @@ public class ResponseManagerTest {
 	protected Value NAME;
 	protected RMapService rmapService;
 	protected java.net.URI testAgentURI; //used to pass back into rmapService since all of these use java.net.URI
-
+	protected ApplicationContext context;
+	protected static final String TEST_SPRINGCONTEXT_PATH = "testbeans.xml";
+	
 	protected String genericDiscoRdf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
@@ -69,9 +73,9 @@ public class ResponseManagerTest {
 
 	@Before
 	public void setUp() throws Exception {
+		this.context = new ClassPathXmlApplicationContext(TEST_SPRINGCONTEXT_PATH);
 		this.rmapService=RMapServiceFactoryIOC.getFactory().createService();
 		this.testAgentURI = createTestAgent();
-		
 	}
 
 	protected java.net.URI createTestAgent() {
@@ -90,7 +94,7 @@ public class ResponseManagerTest {
 				
 				RMapAgent agent = new ORMapAgent(AGENT_URI, IDPROVIDER_URI, AUTH_ID, NAME);
 				@SuppressWarnings("unused")
-				RMapEvent event = rmapService.createAgent(agent.getId().getIri(), agent);
+				RMapEvent event = rmapService.createAgent(agent, agent.getId().getIri());
 				agentUri=agent.getId().getIri();
 				
 				if (rmapService.isAgentId(agentUri)){

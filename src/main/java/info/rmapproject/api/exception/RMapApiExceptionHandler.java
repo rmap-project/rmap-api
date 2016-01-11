@@ -17,16 +17,27 @@ public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException
     @Override
     public Response toResponse(RMapApiException exception)
     {
+    	Status errType = null;
+    	String exMsg = null;
+    	String rmapApiMsg = null;
+    	
     	ErrorCode errorCode = exception.getErrorCode();
-    	Status errType = errorCode.getStatus();
-    	String rmapApiMsg = ErrorMessage.getUserText(errorCode);
+    	if (errorCode != null){
+	    	errType = errorCode.getStatus();
+	    	rmapApiMsg = errorCode.getMessage();
+	    	exMsg = exception.getMessage();
+    	}
+
+    	if (errType == null)	{
+    		errType = Status.INTERNAL_SERVER_ERROR;
+    	}
     	if (rmapApiMsg == null)	{
     		rmapApiMsg = "";
     	}
-    	String exMsg = exception.getMessage();
     	if (exMsg == null)	{
     		exMsg = "";
     	}
+	
     	String rootCause = ExceptionUtils.getRootCauseMessage(exception);
     	if (rootCause == null)	{
     		rootCause = "";

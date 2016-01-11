@@ -15,14 +15,15 @@
 	http://www.springframework.org/schema/aop  
 	http://www.springframework.org/schema/aop/spring-aop.xsd 
 	 -->
-    
-  <import resource="classpath:META-INF/cxf/cxf.xml"/>
-    <context:property-placeholder/>
     <context:annotation-config/>
+	<context:component-scan base-package="info.rmapproject.api" />
+    
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+	
+    <context:property-placeholder/>
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer"/>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
 		
-    <bean id="authService" class="info.rmapproject.auth.service.AuthServiceImpl"/>
     <bean id="discoResponseManager" class="info.rmapproject.api.responsemgr.DiscoResponseManager"/>
     <bean id="agentResponseManager" class="info.rmapproject.api.responsemgr.AgentResponseManager"/>
     <bean id="eventResponseManager" class="info.rmapproject.api.responsemgr.EventResponseManager"/>
@@ -31,22 +32,11 @@
 	
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
-            <bean class="info.rmapproject.api.service.DiSCOApiService">
-				<property name="authService" ref="authService" />
-				<property name="discoResponseManager" ref="discoResponseManager" />
-			</bean>   
-            <bean class="info.rmapproject.api.service.EventApiService">
-				<property name="eventResponseManager" ref="eventResponseManager" />
-			</bean>   
-            <bean class="info.rmapproject.api.service.AgentApiService">
-				<property name="agentResponseManager" ref="agentResponseManager" />
-			</bean>   
-            <bean class="info.rmapproject.api.service.StatementApiService">
-				<property name="statementResponseManager" ref="statementResponseManager" />
-			</bean>   
-            <bean class="info.rmapproject.api.service.ResourceApiService">
-				<property name="resourceResponseManager" ref="resourceResponseManager" />
-			</bean>   
+            <bean class="info.rmapproject.api.service.DiSCOApiService"/>   
+            <bean class="info.rmapproject.api.service.EventApiService"/>   
+            <bean class="info.rmapproject.api.service.AgentApiService"/>   
+            <bean class="info.rmapproject.api.service.StatementApiService"/>   
+            <bean class="info.rmapproject.api.service.ResourceApiService"/>   
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>
@@ -57,9 +47,8 @@
 		</jaxrs:inInterceptors>
     </jaxrs:server>
     
-	<bean id="authenticationInterceptor" class="info.rmapproject.api.authentication.AuthenticationInterceptor">
-		<property name="authService" ref="authService" />
-	</bean>   
+	<bean id="authenticationInterceptor" class="info.rmapproject.api.auth.AuthenticationInterceptor"/>   
+	<bean id="apiUserService" class="info.rmapproject.api.auth.ApiUserServiceImpl"/>  
 	
     <!-- 
     aspect example, in case ever want to try this...

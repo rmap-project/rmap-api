@@ -12,12 +12,12 @@ import org.junit.Test;
 
 public class AgentResponseManagerTest extends ResponseManagerTest {
 
-	protected AgentResponseManager responseManager = null;
+	protected AgentResponseManager agentResponseManager;
 	@Before
 	public void setUp() throws Exception {
 		try {
 			super.setUp();
-			responseManager = new AgentResponseManager();
+			agentResponseManager = (AgentResponseManager)context.getBean("agentResponseManager", AgentResponseManager.class);   
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();
@@ -26,14 +26,14 @@ public class AgentResponseManagerTest extends ResponseManagerTest {
 
 	@Test
 	public void testAgentResponseManager() {
-		assertTrue (responseManager instanceof AgentResponseManager);
+		assertTrue (agentResponseManager instanceof AgentResponseManager);
 	}
 
 	@Test
 	public void testGetAgentServiceOptions() {
 		Response response = null;
 		try {
-			response = responseManager.getAgentServiceOptions();
+			response = agentResponseManager.getAgentServiceOptions();
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -47,7 +47,7 @@ public class AgentResponseManagerTest extends ResponseManagerTest {
 	public void testGetAgentServiceHead() {
 		Response response = null;
 		try {
-			response = responseManager.getAgentServiceHead();
+			response = agentResponseManager.getAgentServiceHead();
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

@@ -7,7 +7,7 @@ import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
-import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapEventNotFoundException;
 import info.rmapproject.core.exception.RMapException;
@@ -145,7 +145,7 @@ public class EventResponseManager {
 
 			response = Response.status(Response.Status.OK)
 						.entity(eventOutput.toString())
-						.location(new URI(RestApiUtils.makeEventUrl(strEventUri)))
+						.location(new URI(Utils.makeEventUrl(strEventUri)))
         				.type(HttpTypeMediator.getResponseRdfMediaType("event", returnType)) //TODO move version number to a property?
 						.build();
 			
@@ -240,7 +240,7 @@ public class EventResponseManager {
     		if (outputString.length()>0){			    			
 				response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())
-							.location(new URI (RestApiUtils.makeEventUrl(strEventUri)))
+							.location(new URI (Utils.makeEventUrl(strEventUri)))
 							.build();    			
 	        }
 			

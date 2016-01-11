@@ -5,7 +5,7 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapException;
@@ -129,10 +129,10 @@ public class ResourceResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-			List <URI> systemAgentList = RestApiUtils.convertUriCsvToUriList(sysAgents);
-			Date dDateFrom = RestApiUtils.convertStringDateToDate(dateFrom);
-			Date dDateTo = RestApiUtils.convertStringDateToDate(dateTo);
+			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
+			List <URI> systemAgentList = Utils.convertUriCsvToUriList(sysAgents);
+			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
+			Date dDateTo = Utils.convertStringDateToDate(dateTo);
 			
 			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){
@@ -228,10 +228,10 @@ public class ResourceResponseManager {
 			
 			List <RMapTriple> stmtList = null;
 
-			RMapStatus rmapStatus = RestApiUtils.convertToRMapStatus(status);
-			List <URI> systemAgentList = RestApiUtils.convertUriCsvToUriList(sysAgents);
-			Date dDateFrom = RestApiUtils.convertStringDateToDate(dateFrom);
-			Date dDateTo = RestApiUtils.convertStringDateToDate(dateTo);
+			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
+			List <URI> systemAgentList = Utils.convertUriCsvToUriList(sysAgents);
+			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
+			Date dDateTo = Utils.convertStringDateToDate(dateTo);
 			
 			stmtList = rmapService.getResourceRelatedTriples(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 			 

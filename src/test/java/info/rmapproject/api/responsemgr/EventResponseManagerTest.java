@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.RestApiUtils;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.core.model.RMapUri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEventCreation;
@@ -27,12 +27,12 @@ import org.junit.Test;
 
 public class EventResponseManagerTest extends ResponseManagerTest {
 
-	protected EventResponseManager responseManager = null;
+	protected EventResponseManager eventResponseManager = null;
 	@Before
 	public void setUp() throws Exception {
 		try {
 			super.setUp();
-			responseManager = new EventResponseManager();
+			eventResponseManager = (EventResponseManager)context.getBean("eventResponseManager", EventResponseManager.class);   
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();
@@ -41,14 +41,14 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 
 	@Test
 	public void testEventResponseManager() {
-		assertTrue (responseManager instanceof EventResponseManager);
+		assertTrue (eventResponseManager instanceof EventResponseManager);
 	}
 	
 	@Test
 	public void testGetEventServiceOptions() {
 		Response response = null;
 		try {
-			response = responseManager.getEventServiceOptions();
+			response = eventResponseManager.getEventServiceOptions();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
@@ -62,7 +62,7 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 	public void testGetEventServiceHead() {
 		Response response = null;
 		try {
-			response = responseManager.getEventServiceHead();
+			response = eventResponseManager.getEventServiceHead();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
@@ -79,7 +79,7 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 		try {			
 			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
 			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			
 			//TODO: System agent param is a default setting until we have proper auth handling.
@@ -102,7 +102,7 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 		//getRMapStatement
 		Response response = null;
 		try {
-			response = responseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),RdfType.RDFXML);
+			response = eventResponseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),RdfType.RDFXML);
 			//response = responseManager.getRMapEvent("ark%3A%2F27927%2Ftf9yhn14ef","RDFXML");
 		} catch (Exception e) {
 			e.printStackTrace();			

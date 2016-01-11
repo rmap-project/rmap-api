@@ -5,11 +5,10 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
 /**
- * 
- * @author khanson
  * Creates HTTP responses for DiSCO REST API requests
  * Note: Code derived from: https://northconcepts.com/downloads/file/blog/exceptions/NorthConcepts-Exceptions.zip 
  * Therefore it should be stated that: The source code is licensed under the terms of the Apache License, Version 2.0.
+ * @author khanson
  */
 public class RMapApiException extends Exception {
 

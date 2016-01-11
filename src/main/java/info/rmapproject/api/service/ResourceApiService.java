@@ -19,7 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * API service for rdfs:Resources in RMap
@@ -30,8 +30,8 @@ import org.springframework.beans.factory.annotation.Required;
 public class ResourceApiService {
 
 	private ResourceResponseManager resourceResponseManager = null;
-		
-    @Required
+
+    @Autowired
     public void setResourceResponseManager(ResourceResponseManager resourceResponseManager) throws RMapApiException {
     	if (resourceResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			

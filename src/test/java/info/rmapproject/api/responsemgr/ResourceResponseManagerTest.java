@@ -4,8 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.RdfType;
 
 import javax.ws.rs.core.Response;
@@ -15,12 +15,12 @@ import org.junit.Test;
 
 public class ResourceResponseManagerTest extends ResponseManagerTest {
 	
-	protected ResourceResponseManager responseManager = null;
+	protected ResourceResponseManager resourceResponseManager = null;
 	@Before
 	public void setUp() throws Exception {
 		try {
 			super.setUp();
-			responseManager = new ResourceResponseManager();
+			resourceResponseManager = (ResourceResponseManager)context.getBean("resourceResponseManager", ResourceResponseManager.class);   
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();
@@ -30,7 +30,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 
 	@Test
 	public void testResourceResponseManager() {
-		assertTrue (responseManager instanceof ResourceResponseManager);
+		assertTrue (resourceResponseManager instanceof ResourceResponseManager);
 	}
 
 	
@@ -38,7 +38,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	public void testGetResourceServiceOptions() {
 		Response response = null;
 		try {
-			response = responseManager.getResourceServiceOptions();
+			response = resourceResponseManager.getResourceServiceOptions();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
@@ -52,7 +52,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	public void testGetResourceServiceHead() {
 		Response response = null;
 		try {
-			response = responseManager.getResourceServiceHead();
+			response = resourceResponseManager.getResourceServiceHead();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
@@ -66,7 +66,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.ALL, NonRdfType.JSON, null, null, null, null);
+			response = resourceResponseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.ALL, NonRdfType.JSON, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -85,7 +85,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	public void testGetRMapResourceRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.DISCOS, NonRdfType.JSON, null, null, null, null);
+			response = resourceResponseManager.getRMapResourceRelatedObjs("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", ObjType.DISCOS, NonRdfType.JSON, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -105,8 +105,8 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 		Response responseActive = null;
 		Response responseInactive = null;
 		try {
-			responseActive = responseManager.getRMapResourceRelatedObjs("ark:/27927/pgg3r5df1cp", ObjType.DISCOS, NonRdfType.JSON, "active", null, null, null);
-			responseInactive = responseManager.getRMapResourceRelatedObjs("ark:/27927/pgg3r5df1cp", ObjType.DISCOS, NonRdfType.JSON, "inactive", null, null, null);
+			responseActive = resourceResponseManager.getRMapResourceRelatedObjs("ark:/27927/pgg3r5df1cp", ObjType.DISCOS, NonRdfType.JSON, "active", null, null, null);
+			responseInactive = resourceResponseManager.getRMapResourceRelatedObjs("ark:/27927/pgg3r5df1cp", ObjType.DISCOS, NonRdfType.JSON, "inactive", null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -131,7 +131,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	public void getRMapResourceRdfStmts() {
 		Response response = null;
 		try {
-			response = responseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", RdfType.RDFXML, null, null, null, null);
+			response = resourceResponseManager.getRMapResourceTriples("http%3A%2F%2Fdx.doi.org%2F10.1109%2FInPar.2012.6339604", RdfType.RDFXML, null, null, null, null);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());

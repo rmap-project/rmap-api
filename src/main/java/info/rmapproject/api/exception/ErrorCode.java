@@ -1,5 +1,9 @@
 package info.rmapproject.api.exception;
 
+import info.rmapproject.auth.util.Constants;
+
+import java.util.Properties;
+
 import javax.ws.rs.core.Response.Status;
 
 /**
@@ -76,7 +80,8 @@ public enum ErrorCode {
 	ER_NO_RMAPSYSTEMAGENT (Status.INTERNAL_SERVER_ERROR, 5001017),
 	ER_COULDNT_RETRIEVE_DISCO_VERSION_LINKS (Status.INTERNAL_SERVER_ERROR, 5001018),
 	ER_FAILED_TO_INIT_AUTHMOD (Status.INTERNAL_SERVER_ERROR, 5001019),
-
+	ER_FAILED_TO_INIT_API_USER_SERVICE (Status.INTERNAL_SERVER_ERROR, 5001020),
+	
 	//5002*** Internal Server Errors due to uncaught error in Core RMap Service
 	ER_CORE_READ_AGENT_RETURNED_NULL (Status.INTERNAL_SERVER_ERROR,5002001),
 	ER_CORE_READ_DISCO_RETURNED_NULL (Status.INTERNAL_SERVER_ERROR,5002002),
@@ -108,6 +113,12 @@ public enum ErrorCode {
 	ER_CORE_CANT_CREATE_STMT_RDF (Status.INTERNAL_SERVER_ERROR, 5002028),
 	ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDOBJS (Status.INTERNAL_SERVER_ERROR, 5002029),
 	ER_CORE_COULDNT_RETRIEVE_STMT_ASSERTINGAGTS (Status.INTERNAL_SERVER_ERROR, 5002030),
+	ER_COULD_NOT_RETRIEVE_AUTHPOLICY (Status.INTERNAL_SERVER_ERROR,5002031),
+	
+	//5003*** Internal Server Errors due to uncaught error in Auth RMap Service
+	ER_USER_HAS_NO_AGENT (Status.INTERNAL_SERVER_ERROR,5003001),
+	ER_USER_AGENT_NOT_FORMED_IN_DB (Status.INTERNAL_SERVER_ERROR,5003002),
+	
 	
 	//5009*** Generic Internal Server Errors
 	ER_CORE_GENERIC_RMAP_EXCEPTION (Status.INTERNAL_SERVER_ERROR,5009000),
@@ -128,5 +139,59 @@ public enum ErrorCode {
 	public Status getStatus()  {
 		return status;
 	}
+	
+	private static Properties properties;
+	private String message;
+	
+    private void init() {
+    	String key = this.getStatus().getStatusCode() + "_" + this.toString();
+		try {	
+	        if (properties == null) {
+	            properties = new Properties();
+	            properties.load(ErrorCode.class.getResourceAsStream(Constants.ERROR_MSGS_PROPS_FILEPATH));
+	        }
+	        message = (String) properties.get(key);
+		} 
+		catch(Exception e){
+			message = getDefaultText(this);
+			if (message == null){
+				message = "";
+			}
+		}   
+    }
+    	
+	/**
+	 * @return String
+	 * Returns the message that corresponds to the error code.
+	 */
+	public String getMessage() {
+        if (this.message == null) {
+            init();
+        }
+        return message;
+	}
+
+	/**
+	 * @param errorCode
+	 * @return String 
+	 * If all else fails, a simple default error is returned in English.
+	 */
+	private static String getDefaultText(ErrorCode errorCode){
+		String defaultText = "";
+		switch (errorCode.getStatus()) {
+		case GONE:  defaultText = "The requested item has been deleted.";
+        	break;
+		case NOT_FOUND:  defaultText = "The requested item cannot be found.";
+    		break;
+		case BAD_REQUEST:  defaultText = "The request was not formatted correctly. Please check the request and try again.";
+			break;
+		case INTERNAL_SERVER_ERROR:  defaultText = "A system error occurred.";
+    		break;
+        default: defaultText = "An error occurred.";
+        	break;	
+		}
+		return defaultText;
+	}
+	
 }
 

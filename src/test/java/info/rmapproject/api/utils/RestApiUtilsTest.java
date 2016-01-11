@@ -16,35 +16,35 @@ public class RestApiUtilsTest {
 
 	@Test
 	public void testGetBaseUrl() throws RMapApiException {
-		String baseURL = RestApiUtils.getBaseUrl();
+		String baseURL = Utils.getBaseUrl();
 		assertFalse(baseURL.endsWith("/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetStmtBaseUrl() throws RMapApiException {
-		String baseURL = RestApiUtils.getStmtBaseUrl();
+		String baseURL = Utils.getStmtBaseUrl();
 		assertFalse(baseURL.endsWith("/stmt/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetDiscoBaseUrl() throws RMapApiException {
-		String baseURL = RestApiUtils.getDiscoBaseUrl();
+		String baseURL = Utils.getDiscoBaseUrl();
 		assertFalse(baseURL.endsWith("/disco/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetAgentBaseUrl() throws RMapApiException {
-		String baseURL = RestApiUtils.getAgentBaseUrl();
+		String baseURL = Utils.getAgentBaseUrl();
 		assertFalse(baseURL.endsWith("/agent/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
 
 	@Test
 	public void testGetResourceBaseUrl() throws RMapApiException {
-		String baseURL = RestApiUtils.getResourceBaseUrl();
+		String baseURL = Utils.getResourceBaseUrl();
 		assertFalse(baseURL.endsWith("/resource/"));
 		assertTrue(baseURL.startsWith("http"));		
 	}
@@ -55,16 +55,16 @@ public class RestApiUtilsTest {
 		String objectWithType = "\"2015-09-01\"^^http://www.w3.org/2001/XMLSchema#date";
 		String objectWithLanguage = "\"This is a literal\"@en";
 		
-		RMapValue object = RestApiUtils.convertObjectStringToRMapValue(objectJustLiteral);
+		RMapValue object = Utils.convertObjectStringToRMapValue(objectJustLiteral);
 		RMapLiteral litObj = (RMapLiteral)object;
 		assertTrue(litObj.getValue().equals("This is a literal"));
 		
-		object = RestApiUtils.convertObjectStringToRMapValue(objectWithType);
+		object = Utils.convertObjectStringToRMapValue(objectWithType);
 		litObj = (RMapLiteral)object;
 		assertTrue(litObj.getValue().equals("2015-09-01"));
 		assertTrue(litObj.getDatatype().toString().equals("http://www.w3.org/2001/XMLSchema#date"));
 
-		object = RestApiUtils.convertObjectStringToRMapValue(objectWithLanguage);
+		object = Utils.convertObjectStringToRMapValue(objectWithLanguage);
 		litObj = (RMapLiteral)object;
 		assertTrue(litObj.getValue().equals("This is a literal"));
 		assertTrue(litObj.getLanguage().equals("en"));
@@ -73,13 +73,13 @@ public class RestApiUtilsTest {
 	@Test
 	public void testConvertUriCsvToUriList() throws RMapApiException {
 		String uriCsv = "ark:/1234/1234, ark:/5678/5678, ";
-		List<java.net.URI> uriList = RestApiUtils.convertUriCsvToUriList(uriCsv);
+		List<java.net.URI> uriList = Utils.convertUriCsvToUriList(uriCsv);
 		assertTrue(uriList.size()==2);
 	}
 
 	@Test
 	public void convertStringDateToDate() throws RMapApiException {
-		Date dDate = RestApiUtils.convertStringDateToDate("20150604");
+		Date dDate = Utils.convertStringDateToDate("20150604");
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(dDate);
 		int month = cal.get(Calendar.MONTH);
@@ -88,4 +88,5 @@ public class RestApiUtilsTest {
 		assertTrue(year==2015);
 	}
 	
+
 }

@@ -24,7 +24,7 @@ import java.util.Properties;
  * @author khanson
  *
  */
-public class RestApiUtils {
+public class Utils {
 	
 	private static final String BASE_URL_KEY = "baseURL";
 
@@ -39,7 +39,7 @@ public class RestApiUtils {
 		InputStream input = null;
 		String propertiesFile = "/rmap_api.properties";
 		try {	
-			input = RestApiUtils.class.getResourceAsStream(propertiesFile);
+			input = Utils.class.getResourceAsStream(propertiesFile);
 			if (input==null)	{
 				throw new RMapApiException(ErrorCode.ER_RMAP_API_PROPERTIES_FILENOTFOUND);
 			}
@@ -361,5 +361,6 @@ public class RestApiUtils {
 		}
 		return sUri;
 	}
+
 	
 }

@@ -6,10 +6,8 @@ import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.DiscoResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.auth.service.AuthService;
 
 import java.io.InputStream;
-import java.net.URI;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,10 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import org.apache.cxf.configuration.security.AuthorizationPolicy;
-import org.apache.cxf.jaxrs.utils.JAXRSUtils;
-import org.apache.cxf.message.Message;
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -41,18 +36,8 @@ import org.springframework.beans.factory.annotation.Required;
 public class DiSCOApiService {
 
 	private DiscoResponseManager discoResponseManager;	
-	private AuthService authService;
-    
-    @Required
-    public void setAuthService(AuthService authService) throws RMapApiException {
-    	if (authService==null) {
-			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_AUTHMOD);			
-    	} else {
-            this.authService = authService;
-		}
-    }
-    
-    @Required
+
+    @Autowired
     public void setDiscoResponseManager(DiscoResponseManager discoResponseManager) throws RMapApiException {
     	if (discoResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
@@ -60,20 +45,7 @@ public class DiSCOApiService {
     		this.discoResponseManager = discoResponseManager;
 		}
 	}
-			
-    private URI getSysAgentId() throws RMapApiException {
-    	URI sysAgentId = null; 
-		try {
-			Message message = JAXRSUtils.getCurrentMessage();
-			//String username = userInfo.getUserPrincipal().getName();
-		    AuthorizationPolicy policy = (AuthorizationPolicy)message.get(AuthorizationPolicy.class);
-	    	sysAgentId = authService.getAgentUriByKeySecret(policy.getUserName(),policy.getPassword());
-		}
-		catch(Exception ex){
-			throw new RMapApiException(ex, ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED);
-		}
-		return sysAgentId;
-	}
+
 		
 	
 /*
@@ -232,7 +204,7 @@ public class DiSCOApiService {
 		})
     public Response apiCreateRMapDiSCO(@Context HttpHeaders headers, InputStream discoRdf) throws RMapApiException {
     	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
-    	Response createResponse = discoResponseManager.createRMapDiSCO(discoRdf, requestFormat, getSysAgentId());
+    	Response createResponse = discoResponseManager.createRMapDiSCO(discoRdf, requestFormat);
 		return createResponse;
     }	
 
@@ -262,7 +234,7 @@ public class DiSCOApiService {
     										@PathParam("discoid") String origDiscoId, 
     										InputStream discoRdf) throws RMapApiException {
     	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
-    	Response updateResponse = discoResponseManager.updateRMapDiSCO(origDiscoId, discoRdf, requestFormat, getSysAgentId());
+    	Response updateResponse = discoResponseManager.updateRMapDiSCO(origDiscoId, discoRdf, requestFormat);
 		return updateResponse;
     }
 
@@ -310,7 +282,7 @@ public class DiSCOApiService {
     @DELETE
     @Path("/{discoUri}")
     public Response apiDeleteRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = discoResponseManager.tombstoneRMapDiSCO(discoUri,getSysAgentId());
+    	Response response = discoResponseManager.tombstoneRMapDiSCO(discoUri);
 	    return response;
     }
 
@@ -325,7 +297,7 @@ public class DiSCOApiService {
     @POST
     @Path("/{discoUri}/inactivate")
     public Response apiInactivateRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = discoResponseManager.inactivateRMapDiSCO(discoUri, getSysAgentId());
+    	Response response = discoResponseManager.inactivateRMapDiSCO(discoUri);
 	    return response;
     }
     

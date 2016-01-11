@@ -17,7 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
 /**
@@ -30,9 +30,9 @@ import org.springframework.beans.factory.annotation.Required;
 @Path("/agents")
 public class AgentApiService {
 	
-	private AgentResponseManager agentResponseManager = null;
+	private AgentResponseManager agentResponseManager;
 
-    @Required
+    @Autowired
     public void setAgentResponseManager(AgentResponseManager agentResponseManager) throws RMapApiException {
     	if (agentResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			

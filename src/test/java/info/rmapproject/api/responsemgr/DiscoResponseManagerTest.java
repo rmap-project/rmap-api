@@ -8,9 +8,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.RestApiUtils;
-import info.rmapproject.auth.service.AuthService;
-import info.rmapproject.auth.service.AuthServiceImpl;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
@@ -29,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class DiscoResponseManagerTest extends ResponseManagerTest {
-
 
 	protected String discoRDFNoCreator = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
@@ -118,15 +115,16 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			+ "  dcterms:creator <http://datacite.org> ;"
 			+ "  ore:aggregates <http://dx.doi.org/10.5281/zenodo.13962> .";
 	
-	protected DiscoResponseManager responseManager = null;
+	protected DiscoResponseManager discoResponseManager;
+	
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
-		try {
+		try { 
 			super.setUp();
-			responseManager = new DiscoResponseManager();
+    		discoResponseManager = (DiscoResponseManager)context.getBean("discoResponseManager", DiscoResponseManager.class);   
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception thrown " + e.getMessage());
@@ -136,7 +134,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 
 	@Test
 	public void testDiSCOResponseManager() {
-		assertTrue (responseManager instanceof DiscoResponseManager);
+		assertTrue (discoResponseManager instanceof DiscoResponseManager);
 	}
 
 	
@@ -144,7 +142,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	public void testGetDiSCOServiceHead() {
 		Response response = null;
 		try {
-			response = responseManager.getDiSCOServiceHead();
+			response = discoResponseManager.getDiSCOServiceHead();
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -158,7 +156,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	public void testGetDiSCOServiceOptions() {
 		Response response = null;
 		try {
-			response = responseManager.getDiSCOServiceOptions();
+			response = discoResponseManager.getDiSCOServiceOptions();
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();			
@@ -189,7 +187,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
 		String discoURI = rmapDisco.getId().toString();
         assertNotNull(discoURI);
 		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
@@ -199,7 +197,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		rmapService.createDiSCO(testAgentURI, rmapDisco);
 	
 		try {
-			response = responseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
+			response = discoResponseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -222,13 +220,13 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		//create 1 disco
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RestApiUtils.getDiscoBaseUrl(), "RDFXML");
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
 		String discoURI = rmapDisco.getId().toString();
         assertNotNull(discoURI);
         
         //create another disco
 		InputStream rdf2 = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco2 = rdfHandler.rdf2RMapDiSCO(rdf2, RestApiUtils.getDiscoBaseUrl(), "TURTLE");
+		RMapDiSCO rmapDisco2 = rdfHandler.rdf2RMapDiSCO(rdf2, Utils.getDiscoBaseUrl(), "TURTLE");
 		String discoURI2 = rmapDisco.getId().toString();
         assertNotNull(discoURI2);
         
@@ -252,7 +250,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		try {
 			//now get the updated DiSCO
 			String encodedUri = URLEncoder.encode(discoURI2, "UTF-8");
-			response = responseManager.getRMapDiSCO(encodedUri,returnType);
+			response = discoResponseManager.getRMapDiSCO(encodedUri,returnType);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -289,7 +287,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
    		
 		try {
 			String encodedUri = URLEncoder.encode(discoURI, "UTF-8");
-			response = responseManager.getRMapDiSCO(encodedUri,returnType);
+			response = discoResponseManager.getRMapDiSCO(encodedUri,returnType);
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_DISCO_OBJECT_NOT_FOUND);
 			e.printStackTrace();			
@@ -315,11 +313,11 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			//create new ORMapAgent
 			//createAgentforTest();
 
-			AuthService authService = new AuthServiceImpl();
-			URI uriSystemAgent = authService.getAgentUriByKeySecret("rmaptest", "rmaptest");
-			
+			//MockHttpSession httpsession = new MockHttpSession();
+			//httpsession.setAttribute(name, value);
+						
 			InputStream stream = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.TURTLE, uriSystemAgent);
+			response = discoResponseManager.createRMapDiSCO(stream, RdfType.TURTLE);
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -331,8 +329,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		assertEquals(201, response.getStatus());
 
 	}
-	
-	
+
 
 	@Test
 	public void testCreateRdfXmlDisco() {
@@ -340,12 +337,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		try {
 			//create new ORMapAgent
 			//createAgentforTest();
-
-			AuthService authService = new AuthServiceImpl();
-			URI uriSystemAgent = authService.getAgentUriByKeySecret("rmaptest", "rmaptest");
 			
 			InputStream stream = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, uriSystemAgent);
+			response = discoResponseManager.createRMapDiSCO(stream, RdfType.RDFXML);
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -364,12 +358,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		@SuppressWarnings("unused")
 		Response response = null;
 		boolean correctErrorThrown = false;
-		try {
-			AuthService authService = new AuthServiceImpl();
-			URI uriSystemAgent = authService.getAgentUriByKeySecret("rmaptest", "rmaptest");
-			
+		try {		
 			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
-			response = responseManager.createRMapDiSCO(stream, RdfType.RDFXML, uriSystemAgent);
+			response = discoResponseManager.createRMapDiSCO(stream, RdfType.RDFXML);
 			
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
@@ -386,6 +377,11 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		}
 		
 	}
+	
+	
+	
+	
+	
 
 
 }

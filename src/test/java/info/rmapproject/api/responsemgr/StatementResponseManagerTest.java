@@ -5,53 +5,41 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.core.exception.RMapException;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
-import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestoreFactoryIOC;
 
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.model.ValueFactory;
 /**
  * @author khanson
  * Procedures to test StatementResponseManager
  */
 public class StatementResponseManagerTest extends ResponseManagerTest {
 	
-	protected StatementResponseManager responseManager = null;
-
-	protected SesameTriplestore ts = null;
-	ValueFactory vf = null;
+	protected StatementResponseManager statementResponseManager = null;
 	
 	@Before
 	public void setUp() throws Exception {
 		try {
-			responseManager = new StatementResponseManager();
+			super.setUp();
+			statementResponseManager = (StatementResponseManager)context.getBean("statementResponseManager", StatementResponseManager.class);   
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception thrown " + e.getMessage());
-		}
-		try {
-			ts = SesameTriplestoreFactoryIOC.getFactory().createTriplestore();
-			vf = ts.getValueFactory();
-		} catch (Exception e) {
-			throw new RMapException("Unable to create Sesame TripleStore: ", e);
 		}
 		
 	}
 
 	@Test
 	public void testStatementResponseManager() {
-		assertTrue (responseManager instanceof StatementResponseManager);
+		assertTrue (statementResponseManager instanceof StatementResponseManager);
 	}
 	
 	@Test
 	public void testGetStatementServiceOptions() {
 		Response response = null;
 		try {
-			response = responseManager.getStatementServiceOptions();
+			response = statementResponseManager.getStatementServiceOptions();
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -65,7 +53,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	public void testGetStatementServiceHead() {
 		Response response = null;
 		try {
-			response = responseManager.getStatementServiceHead();
+			response = statementResponseManager.getStatementServiceHead();
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -79,7 +67,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	public void testGetStatementRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = responseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
+			response = statementResponseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
 															"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
 															"http://purl.org/dc/dcmitype/Text", "all", null, null, null, NonRdfType.JSON);
 		} catch (Exception e) {
@@ -95,7 +83,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	public void testGetStatementRelatedAgents() {
 		Response response = null;
 		try {
-			response = responseManager.getStatementRelatedAgents("http://isni.org/isni/000000010941358X", 
+			response = statementResponseManager.getStatementRelatedAgents("http://isni.org/isni/000000010941358X", 
 															"http://xmlns.com/foaf/0.1/name", 
 															"\"IEEE\"", null, null, null, NonRdfType.JSON);
 		} catch (Exception e) {
@@ -110,7 +98,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	public void testGetStatementAssertingAgents() {
 		Response response = null;
 		try {
-			response = responseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
+			response = statementResponseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
 																	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
 																	"http://purl.org/dc/dcmitype/Text", "all", null, null, NonRdfType.JSON);
 		} catch (Exception e) {

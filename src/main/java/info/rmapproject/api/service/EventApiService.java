@@ -18,7 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
-import org.springframework.beans.factory.annotation.Required;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * API service for RMap Events
@@ -30,7 +30,7 @@ public class EventApiService {
 
 	private EventResponseManager eventResponseManager = null;
 	
-    @Required
+    @Autowired
     public void setEventResponseManager(EventResponseManager eventResponseManager) throws RMapApiException {
     	if (eventResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			

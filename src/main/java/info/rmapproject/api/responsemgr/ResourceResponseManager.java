@@ -148,13 +148,13 @@ public class ResourceResponseManager {
 					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 	                break;
 	            case AGENTS:
-					uriList = rmapService.getResourceAssertingAgents(uriResourceUri, systemAgentList, dDateFrom, dDateTo);
+					uriList = rmapService.getResourceAssertingAgents(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 	                break;
 	            case EVENTS:
 					uriList = rmapService.getResourceRelatedEvents(uriResourceUri, systemAgentList, dDateFrom, dDateTo);
 	                break;
 	            default:
-					uriList = rmapService.getResourceRelatedAll(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
+					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, rmapStatus, systemAgentList, dDateFrom, dDateTo);
 	                break;
 			}
 			 

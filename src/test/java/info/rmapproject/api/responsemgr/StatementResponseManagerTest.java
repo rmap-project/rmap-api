@@ -79,20 +79,6 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 		
 	}
 	
-	@Test
-	public void testGetStatementRelatedAgents() {
-		Response response = null;
-		try {
-			response = statementResponseManager.getStatementRelatedAgents("http://isni.org/isni/000000010941358X", 
-															"http://xmlns.com/foaf/0.1/name", 
-															"\"IEEE\"", null, null, null, NonRdfType.JSON);
-		} catch (Exception e) {
-			e.printStackTrace();	
-		}
-		assertNotNull(response);
-		assertEquals(response.getStatus(),200);
-		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18nd2p4\"]}");
-	}
 	
 	@Test
 	public void testGetStatementAssertingAgents() {
@@ -106,7 +92,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 		}
 		assertNotNull(response);
 		assertEquals(response.getStatus(),200);
-		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18nd2m3\"]}");
+		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
 		
 	}
 

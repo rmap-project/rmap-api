@@ -7,8 +7,8 @@ import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.api.utils.Utils;
 import info.rmapproject.api.utils.URIListHandler;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.core.exception.RMapAgentNotFoundException;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
@@ -17,7 +17,6 @@ import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
 import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.agent.RMapAgent;
-import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.event.RMapEventCreation;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
@@ -372,104 +371,6 @@ public class AgentResponseManager {
 	return response;  
 	}
 	
-
-	/**
-	 * Sets status of RMap:Agent to tombstoned. 
-	 * @param agentUri
-	 * @param newStatus
-	 * @return Response
-	 * @throws RMapApiException
-	 */
-	public Response tombstoneRMapAgent(String agentUri, URI sysAgentUri) throws RMapApiException {
-		boolean reqSuccessful = false;
-		Response response = null;
-		RMapService rmapService = null;
-		try	{		
-			if (agentUri==null || agentUri.length()==0)	{
-				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
-			}	
-			if (sysAgentUri == null){
-				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED);
-			}
-			
-			URI uriAgentUri = null;
-			try {
-				agentUri = URLDecoder.decode(agentUri, "UTF-8");
-				uriAgentUri = new URI(agentUri);
-			}
-			catch (Exception ex)  {
-				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-			}
-			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
-			RMapEvent agentEvent = null;
-			agentEvent = (RMapEvent)rmapService.deleteAgent(sysAgentUri, uriAgentUri);					
-				
-			if (agentEvent == null) {
-				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEAGENT_NOT_COMPLETED);
-			} 
-			
-			URI uEventURI = agentEvent.getId().getIri();  
-			if (uEventURI==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
-			} 
-			String sEventURI = uEventURI.toString();  
-			if (sEventURI.length() == 0){
-				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
-			} 
-
-			String newEventURL = Utils.makeEventUrl(sEventURI); 
-			String origAgentUrl = Utils.makeAgentUrl(agentUri); 
-			String linkRel = "";
-
-			//TODO: EVENT_TYPE_TOMBSTONE a place holder - need to consider what this should be.
-			linkRel = "<" + newEventURL + ">" + ";rel=\"" + RMAP.EVENT_TYPE_TOMBSTONE + "\"";
-						
-			response = Response.status(Response.Status.OK)
-					.location(new URI(origAgentUrl)) 
-					.header("Link",linkRel)    //switch this to link()
-					.build();   
-
-			reqSuccessful = true;
-    	
-		}
-		catch(RMapApiException ex)	{
-			throw RMapApiException.wrap(ex);
-		}  
-		catch(RMapDefectiveArgumentException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_AGENT_BAD_ARGUMENT);
-		} 
-		catch(RMapAgentNotFoundException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_AGENT_OBJECT_NOT_FOUND);
-		} 
-		catch(RMapException ex) { 
-			if (ex.getCause() instanceof RMapDeletedObjectException){
-				throw RMapApiException.wrap(ex,ErrorCode.ER_OBJECT_DELETED);  			
-			}
-			else if (ex.getCause() instanceof RMapTombstonedObjectException){
-				throw RMapApiException.wrap(ex,ErrorCode.ER_OBJECT_TOMBSTONED);  			
-			}
-			else if (ex.getCause() instanceof RMapObjectNotFoundException){
-				throw RMapApiException.wrap(ex,ErrorCode.ER_OBJECT_NOT_FOUND);  			
-			}
-			else {
-				throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);  					
-			}
-		}  
-		catch(Exception ex)	{
-			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
-		}
-		finally{
-			if (rmapService != null) rmapService.closeConnection();
-			if (!reqSuccessful && response!=null) response.close();
-		}
-	return response;		
-		
-	}
 	
 
 	/**

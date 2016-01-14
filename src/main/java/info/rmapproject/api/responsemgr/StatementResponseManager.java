@@ -5,8 +5,8 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.api.utils.Utils;
 import info.rmapproject.api.utils.URIListHandler;
+import info.rmapproject.api.utils.Utils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
@@ -95,27 +95,7 @@ public class StatementResponseManager {
 		}
 		return response; 
 	}
-	
-	
-	/**
-	 * Retrieves RMap Agents related to subject/predicate/object provided and forms an HTTP response.
-	 * @param subject
-	 * @param predicate
-	 * @param object
-	 * @param status
-	 * @param systemAgents (comma separated)
-	 * @param dateFrom
-	 * @param dateTo
-	 * @param returnType
-	 * @return HTTP Response
-	 * @throws RMapApiException
-	 */	
-	public Response getStatementRelatedAgents(String subject, String predicate, String object, 
-												String systemAgents, String dateFrom, String dateTo, 
-												NonRdfType returnType) throws RMapApiException	{
-		return this.getStatementRelatedObjs(subject, predicate, object, null, systemAgents, dateFrom, dateTo, returnType, ObjType.AGENTS);
-	}	
-		
+			
 	/**
 	 * Retrieves RMap DiSCOs related to subject/predicate/object provided and forms an HTTP response.
 	 * @param subject
@@ -130,29 +110,9 @@ public class StatementResponseManager {
 	 * @throws RMapApiException
 	 */	
 	public Response getStatementRelatedDiSCOs(String subject, String predicate, 
-												String object, String status, 
-												String systemAgents, String dateFrom, 
-												String dateTo, NonRdfType returnType) throws RMapApiException	{
-		return this.getStatementRelatedObjs(subject, predicate, object, status, systemAgents, dateFrom, dateTo, returnType, ObjType.DISCOS);
-	}	
-	
-	/**
-	 * Retrieves RMap Objects related to subject/predicate/object provided and forms an HTTP response.
-	 * @param subject
-	 * @param predicate
-	 * @param object
-	 * @param status
-	 * @param systemAgents (comma separated)
-	 * @param dateFrom
-	 * @param dateTo
-	 * @return HTTP Response
-	 * @throws RMapApiException
-	 */	
-	public Response getStatementRelatedObjs(String subject, String predicate, 
 											String object, String status, 
 											String systemAgents, String dateFrom, 
-											String dateTo, NonRdfType returnType, 
-											ObjType objectType) throws RMapApiException	{
+											String dateTo, NonRdfType returnType) throws RMapApiException	{
 		Response response = null;
 		RMapService rmapService = null;
 		try {
@@ -167,7 +127,6 @@ public class StatementResponseManager {
 			}
 			if (returnType==null) {returnType = DEFAULT_NONRDF_TYPE;}
 			if (status==null) {status = DEFAULT_STATUS_FILTER;}
-			if (objectType == null)	{objectType = ObjType.ALL;}
 			
 
 			subject = URLDecoder.decode(subject, "UTF-8");
@@ -190,18 +149,11 @@ public class StatementResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}
 						
-			List<URI> matchingObjects = new ArrayList<URI>();
-			
-			if (objectType.equals(ObjType.DISCOS)) {
-				matchingObjects = rmapService.getStatementRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, 
+			List<URI> matchingObjects = rmapService.getStatementRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, 
 																		rmapStatus, systemAgentList, dDateFrom, dDateTo);
-			}
-			else if (objectType.equals(ObjType.AGENTS)) {
-				matchingObjects = rmapService.getStatementRelatedAgents(rmapSubject, rmapPredicate, rmapObject, 
-																		systemAgentList, dDateFrom, dDateTo);				
-			}
+
 			if (matchingObjects == null){
-				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDOBJS);
+				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDDISCOS);
 			}
 			
 			if (matchingObjects.size()==0){
@@ -213,7 +165,7 @@ public class StatementResponseManager {
 				outputString= URIListHandler.uriListToPlainText(matchingObjects);
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(matchingObjects, objectType.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(matchingObjects, ObjType.DISCOS.getObjTypeLabel());		
 			}
 			response = Response.status(Response.Status.OK)
 						.entity(outputString)

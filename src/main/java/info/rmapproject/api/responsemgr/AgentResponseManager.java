@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
@@ -378,10 +379,15 @@ public class AgentResponseManager {
 	 * the results as a JSON or Plain Text list.
 	 * @param agentUri
 	 * @param returnType
+	 * @param dateFrom
+	 * @param dateTo
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapAgentEvents(String agentUri, NonRdfType returnType) throws RMapApiException {
+	public Response getRMapAgentEvents(String agentUri, 
+			NonRdfType returnType, 
+			String dateFrom,
+			String dateTo) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
 		RMapService rmapService = null;
@@ -408,7 +414,11 @@ public class AgentResponseManager {
 			}
 			
 			String outputString="";
-			List <URI> uriList = rmapService.getAgentEvents(uriAgentUri);						
+
+			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
+			Date dDateTo = Utils.convertStringDateToDate(dateTo);
+			List <URI> uriList = rmapService.getAgentEventsInitiated(uriAgentUri, dDateFrom, dDateTo);	
+			
 			if (uriList==null || uriList.size()==0)	{ 
 				//if the object is found, should always have at least one event
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
@@ -419,6 +429,102 @@ public class AgentResponseManager {
 			}
 			else	{
 				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());		
+			}
+    		
+    		response = Response.status(Response.Status.OK)
+							.entity(outputString.toString())
+							.location(new URI (Utils.makeAgentUrl(agentUri)))
+							.build();
+    		
+    		reqSuccessful=true;
+	        
+		}
+    	catch(RMapApiException ex) { 
+    		throw RMapApiException.wrap(ex);
+    	}  
+    	catch(RMapAgentNotFoundException ex) {
+    		throw RMapApiException.wrap(ex, ErrorCode.ER_AGENT_OBJECT_NOT_FOUND);
+    	}
+    	catch(RMapObjectNotFoundException ex) {
+    		throw RMapApiException.wrap(ex, ErrorCode.ER_OBJECT_NOT_FOUND);
+    	}
+		catch(RMapDefectiveArgumentException ex){
+			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_AGENT_BAD_ARGUMENT);
+		}
+    	catch(RMapException ex) { 
+    		throw RMapApiException.wrap(ex, ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
+    	}
+		catch(Exception ex)	{
+    		throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
+		}
+		finally{
+			if (rmapService != null) rmapService.closeConnection();
+			if (!reqSuccessful && response!=null) response.close();
+		}
+    	return response;
+	}
+	
+
+	
+
+	/**
+	 * Retrieves list of RMap:DiSCO URIs associated with the RMap:Agent URI provided and returns 
+	 * the results as a JSON or Plain Text list.
+	 * @param agentUri
+	 * @param returnType
+	 * @param status
+	 * @param dateFrom
+	 * @param dateTo
+	 * @return Response
+	 * @throws RMapApiException
+	 */
+	public Response getRMapAgentDiSCOs(String agentUri, 
+			NonRdfType returnType, 
+			String status,
+			String dateFrom,
+			String dateTo) throws RMapApiException {
+		boolean reqSuccessful = false;
+		Response response = null;
+		RMapService rmapService = null;
+		try {
+			//assign default value when null
+			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
+			
+			if (agentUri==null || agentUri.length()==0)	{
+				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
+			}	
+			
+			URI uriAgentUri = null;
+			try {
+				agentUri = URLDecoder.decode(agentUri, "UTF-8");
+				uriAgentUri = new URI(agentUri);
+			}
+			catch (Exception ex)  {
+				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+			}
+			
+			rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			if (rmapService ==null){
+				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+			}
+			
+			String outputString="";
+			
+			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
+			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
+			Date dDateTo = Utils.convertStringDateToDate(dateTo);
+			List <URI> uriList = rmapService.getAgentDiSCOs(uriAgentUri, rmapStatus, dDateFrom, dDateTo);		
+			
+			if (uriList==null || uriList.size()==0)	{ 
+				//if the object is found, should always have at least one event
+				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
+			}	
+									
+			if (returnType==NonRdfType.PLAIN_TEXT)	{		
+				outputString= URIListHandler.uriListToPlainText(uriList);
+			}
+			else	{
+				outputString= URIListHandler.uriListToJson(uriList, ObjType.DISCOS.getObjTypeLabel());		
 			}
     		
     		response = Response.status(Response.Status.OK)

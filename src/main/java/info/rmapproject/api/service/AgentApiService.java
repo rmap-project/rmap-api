@@ -13,6 +13,7 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
@@ -174,7 +175,7 @@ public class AgentApiService {
 /*
  * ------------------------------
  * 
- *	  GET RELATED EVENT LIST
+ *	  GET RELATED OBJECT LISTS
  *  
  *-------------------------------
  */
@@ -189,10 +190,46 @@ public class AgentApiService {
     @GET
     @Path("/{agentUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
-    public Response apiGetRMapAgentEventList(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
+    public Response apiGetRMapAgentEventList(
+    		@Context HttpHeaders headers, 
+    		@PathParam("agentUri") String agentUri, 
+    		@QueryParam("from") String dateFrom, 
+    		@QueryParam("until") String dateTo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response eventList = agentResponseManager.getRMapAgentEvents(agentUri, outputType);
+    	Response eventList = 
+    			agentResponseManager.getRMapAgentEvents(agentUri, 
+    													outputType, 
+														dateFrom,
+														dateTo);
     	return eventList;
     }
+    
+   
+	/**
+	 * GET /agent/{agentUri}/discos
+	 * Returns list of URIs for RMap:DiSCOs that were created by the Agent URI as JSON or PLAINTEXT
+	 * @param agentUri
+	 * @return Response
+	 * @throws RMapApiException
+	 */    
+    @GET
+    @Path("/{agentUri}/discos")
+    @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
+    public Response apiGetRMapAgentDiSCOList(
+    		@Context HttpHeaders headers, 
+    		@PathParam("agentUri") String agentUri, 
+    		@QueryParam("status") String status, 
+    		@QueryParam("from") String dateFrom, 
+    		@QueryParam("until") String dateTo) throws RMapApiException {
+    	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
+    	Response discoList = 
+    			agentResponseManager.getRMapAgentDiSCOs(agentUri, 
+    													outputType, 
+    													status,
+    													dateFrom,
+    													dateTo);
+    	return discoList;
+    }
+    
     
 }

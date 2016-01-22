@@ -8,10 +8,7 @@ import info.rmapproject.auth.model.ApiKey;
 import info.rmapproject.auth.model.User;
 import info.rmapproject.auth.service.RMapAuthService;
 import info.rmapproject.auth.service.RMapAuthServiceFactory;
-import info.rmapproject.core.exception.RMapDefectiveArgumentException;
-import info.rmapproject.core.exception.RMapException;
-import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.model.event.RMapEvent;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -71,56 +68,31 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	@Override
 	public URI getSystemAgentUriForEvent(String key, String secret) throws RMapApiException {
 		URI sysAgentUri = null;
-		RMapService rmapService = null;
 		
 		try {
 			RMapAuthService authService = RMapAuthServiceFactory.createService();
 			ApiKey apiKey = authService.getApiKeyByKeySecret(key, secret);
 			User user = authService.getUserById(apiKey.getUserId());
 			
-			//check the hasRMapAgent boolean - true if has agent
-			if (!user.getHasRMapAgent()) {
-				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);				
+			if (user.hasRMapAgent()){
+				//there is an agent id already, pass it back!
+				sysAgentUri = new URI(user.getRmapAgentUri());
 			}
-
-			//check there is a URI assigned to the User
-			String agentUri = user.getRmapAgentUri();
-			if (agentUri==null || agentUri.length()==0){
-				throw new RMapApiException(ErrorCode.ER_USER_AGENT_NOT_FORMED_IN_DB);
+			else if (user.isDoRMapAgentSync()) {
+				//there is no agent id, but the record is flagged for synchronization - create the agent!
+				RMapEvent event = authService.createOrUpdateAgentFromUser(user);	
+				sysAgentUri = event.getAssociatedAgent().getIri();
+			}		
+			else {
+				//there is no agent id and no flag to create one
+				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);
 			}
-			
-			//make sure that agent URI is a valid URI
-			sysAgentUri = new URI(agentUri);
-			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			
-			//if agent isnt in the triplestore, create it!
-			if (!rmapService.isAgentId(sysAgentUri)){ 
-
-				//create the agent in the triplestore
-				String agentAuthId = user.getAuthKeyUri();
-				String primaryIdProvider = user.getPrimaryIdProvider();
-				String name = user.getName();
-				
-				//check the other elements are populated
-				if (agentAuthId==null || agentAuthId.length()==0
-						|| primaryIdProvider==null || primaryIdProvider.length()==0){
-					throw new RMapApiException(ErrorCode.ER_USER_AGENT_NOT_FORMED_IN_DB);
-				}
-				
-				rmapService.createAgent(sysAgentUri, name, new URI(primaryIdProvider), new URI(agentAuthId), sysAgentUri);
 					
-			}
-			
-		} catch (URISyntaxException uriEx) {
-			throw RMapApiException.wrap(uriEx, ErrorCode.ER_USER_AGENT_NOT_FORMED_IN_DB);
-		} catch (RMapException | RMapDefectiveArgumentException e) {
-			throw RMapApiException.wrap(e);
-		} finally {
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
-		}
+		} catch (RMapAuthException ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_USER_AGENT_COULD_NOT_BE_RETRIEVED);
+		}  catch (URISyntaxException ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_INVALID_AGENTID_FOR_USER);
+		} 
 		
 		return sysAgentUri;
 	}

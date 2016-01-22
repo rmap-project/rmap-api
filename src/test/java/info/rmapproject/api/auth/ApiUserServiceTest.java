@@ -22,6 +22,8 @@ public class ApiUserServiceTest {
 	private static final String TEST_PASS_NOAGENT = "usernoagent";
 	private static final String TEST_USER_WITHAGENT = "userwithagent";
 	private static final String TEST_PASS_WITHAGENT = "userwithagent";
+	private static final String TEST_USER_TESTSYNC = "usertestsync";
+	private static final String TEST_PASS_TESTSYNC = "usertestsync";
 	
 	@Before
 	public void setUp() throws Exception {
@@ -60,7 +62,16 @@ public class ApiUserServiceTest {
 			fail("sysAgent not retrieved");
 		}		
 	}
-	
+
+	@Test
+	public void getSystemAgentUriForEventTestSyncAgent() {
+		try {
+			URI sysAgent = apiUserService.getSystemAgentUriForEvent(TEST_USER_TESTSYNC, TEST_PASS_TESTSYNC);
+			assertTrue(sysAgent.toString().length()>0);
+		} catch (RMapApiException e) {
+			fail("sysAgent not retrieved");
+		}		
+	}
 	
 	
 

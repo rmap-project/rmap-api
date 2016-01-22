@@ -182,9 +182,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
     		returnType=matchingType.getReturnType();
     	}
 
-		
 		//createDisco
-		
 		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
 		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
@@ -193,8 +191,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
-		//TODO: System agent param is fudged... need to correct this code when proper authentication handling available.
-		rmapService.createDiSCO(testAgentURI, rmapDisco);
+		rmapService.createDiSCO(super.testAgentURI, rmapDisco);
 	
 		try {
 			response = discoResponseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
@@ -234,10 +231,10 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//create a disco using the test agent
-		rmapService.createDiSCO(testAgentURI, rmapDisco);
+		rmapService.createDiSCO(super.testAgentURI, rmapDisco);
 
 		//update the disco
-		rmapService.updateDiSCO(testAgentURI, new URI(discoURI), rmapDisco2);
+		rmapService.updateDiSCO(super.testAgentURI, new URI(discoURI), rmapDisco2);
 		
     	Response response=null;
     	RdfType returnType = null;

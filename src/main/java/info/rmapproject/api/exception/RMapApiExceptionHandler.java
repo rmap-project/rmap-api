@@ -17,6 +17,9 @@ public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException
     @Override
     public Response toResponse(RMapApiException exception)
     {
+    	//to build up the error message
+    	StringBuilder errMsg = new StringBuilder();
+    	
     	Status errType = null;
     	String exMsg = null;
     	String rmapApiMsg = null;
@@ -27,23 +30,36 @@ public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException
 	    	rmapApiMsg = errorCode.getMessage();
 	    	exMsg = exception.getMessage();
     	}
-
+    	
+    	//set default error status as 500
     	if (errType == null)	{
     		errType = Status.INTERNAL_SERVER_ERROR;
     	}
-    	if (rmapApiMsg == null)	{
-    		rmapApiMsg = "";
+    	
+    	//append message associated with RMap API error code
+    	if (rmapApiMsg != null && rmapApiMsg.length()>0)	{
+    		errMsg.append(rmapApiMsg);
     	}
-    	if (exMsg == null)	{
-    		exMsg = "";
+    	
+    	//append system message (typically relevant where non-RMapApiException thrown)
+    	if (exMsg != null && exMsg.length()>0)	{
+    		if (errMsg.length()>0){
+    			errMsg.append("; ");
+    		}
+    		errMsg.append(exMsg);
     	}
 	
+    	//Append root cause message
     	String rootCause = ExceptionUtils.getRootCauseMessage(exception);
-    	if (rootCause == null)	{
-    		rootCause = "";
+    	if (rootCause != null && rootCause.length()>0)	{
+    		if (errMsg.length()>0){
+    			errMsg.append("; ");
+    		}
+    		errMsg.append(rootCause);
     	}
-    	Response response = Response.status(errType).type("text/plain").entity(rmapApiMsg + " : " + exMsg + " : " + rootCause).build(); 
-        log.fatal(rmapApiMsg + "; " + exMsg, exception);
+	
+    	Response response = Response.status(errType).type("text/plain").entity(errMsg.toString()).build(); 
+        log.fatal(errMsg.toString(), exception);
     	return response;
     }
 }

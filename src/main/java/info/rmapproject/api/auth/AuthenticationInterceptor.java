@@ -2,7 +2,11 @@ package info.rmapproject.api.auth;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
+import info.rmapproject.api.exception.RMapApiExceptionHandler;
 
+import javax.ws.rs.core.Response;
+
+import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
@@ -26,26 +30,26 @@ public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message>
     }
 
     public void handleMessage(Message message) {
-    
-	    String accessKey = null;
-	    String secret = null;
 	    
-	    try {
-		    accessKey = apiUserService.getAccessKey();
-		    secret = apiUserService.getSecret();
-	    } catch (RMapApiException e){
-	        throw new RuntimeException(ErrorCode.ER_COULD_NOT_RETRIEVE_AUTHPOLICY.getMessage());	    	
-	    }
+	    try {    
+	    	AuthorizationPolicy policy = apiUserService.getCurrentAuthPolicy();
+	    	String accessKey = policy.getUserName();
+	    	String secret = policy.getPassword();
 	    
-		if (accessKey==null || accessKey.length()==0
-				|| secret==null || secret.length()==0)	{
-	        throw new RuntimeException(ErrorCode.ER_NO_USER_TOKEN_PROVIDED.getMessage());
-		}		
-		try {
+			if (accessKey==null || accessKey.length()==0
+					|| secret==null || secret.length()==0)	{
+		    	throw new RMapApiException(ErrorCode.ER_NO_USER_TOKEN_PROVIDED);
+			}		
+		
 			apiUserService.validateKey(accessKey, secret);
-		} catch (RMapApiException e) {
-			throw new RuntimeException(e.getErrorCode().getMessage(), e);
-		}
+		
+	    } catch (RMapApiException ex){ 
+	    	//generate a response to intercept default message
+	    	RMapApiExceptionHandler exceptionhandler = new RMapApiExceptionHandler();
+	    	Response response = exceptionhandler.toResponse(ex);
+	    	message.getExchange().put(Response.class, response);   	
+	    }
+		
     }
 		
 }

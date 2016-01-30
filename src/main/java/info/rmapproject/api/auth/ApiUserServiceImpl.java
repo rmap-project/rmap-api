@@ -17,22 +17,19 @@ import org.apache.cxf.jaxrs.utils.JAXRSUtils;
 import org.apache.cxf.message.Message;
 
 public class ApiUserServiceImpl implements ApiUserService {
-
-	private AuthorizationPolicy authorizationPolicy;
 		
 	/* (non-Javadoc)
 	 * @see info.rmapproject.api.auth.ApiUserServiceInt#getCurrentAuthPolicy()
 	 */
 	@Override
 	public AuthorizationPolicy getCurrentAuthPolicy() throws RMapApiException {
-		if (this.authorizationPolicy == null) {
-			Message message = JAXRSUtils.getCurrentMessage();
-			this.authorizationPolicy = (AuthorizationPolicy)message.get(AuthorizationPolicy.class);
-		    if (this.authorizationPolicy == null) {
-		        throw new RMapApiException(ErrorCode.ER_COULD_NOT_RETRIEVE_AUTHPOLICY);
-		        }
-		}
-	    return this.authorizationPolicy;
+		AuthorizationPolicy authorizationPolicy = null;
+		Message message = JAXRSUtils.getCurrentMessage();
+		authorizationPolicy = (AuthorizationPolicy)message.get(AuthorizationPolicy.class);
+	    if (authorizationPolicy == null) {
+	        throw new RMapApiException(ErrorCode.ER_COULD_NOT_RETRIEVE_AUTHPOLICY);
+	        }
+	    return authorizationPolicy;
 	}
 	
 	/* (non-Javadoc)
@@ -58,8 +55,9 @@ public class ApiUserServiceImpl implements ApiUserService {
 	 * @see info.rmapproject.api.auth.ApiUserServiceInt#getSystemAgentUriForEvent()
 	 */
 	public URI getSystemAgentUriForEvent() throws RMapApiException {
-		String key = getAccessKey();
-		String secret = getSecret();
+	    AuthorizationPolicy policy = getCurrentAuthPolicy();
+		String key = policy.getUserName();
+		String secret = policy.getPassword();
 		return getSystemAgentUriForEvent(key, secret);
 	}
 	

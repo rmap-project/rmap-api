@@ -38,6 +38,7 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	 */
 	@Override
 	public String getAccessKey() throws RMapApiException {
+		//NOTE: if need both key and secret, better to retrieve AuthPolicy to prevent multiple calls to retrieve the Policy.
 	    AuthorizationPolicy policy = getCurrentAuthPolicy();
 	    return policy.getUserName();
 	}
@@ -47,6 +48,7 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	 */
 	@Override
 	public String getSecret() throws RMapApiException {
+		//NOTE: if need both key and secret, better to retrieve AuthPolicy to prevent multiple calls to retrieve the Policy.
 	    AuthorizationPolicy policy = getCurrentAuthPolicy();
 	    return policy.getPassword();
 	}

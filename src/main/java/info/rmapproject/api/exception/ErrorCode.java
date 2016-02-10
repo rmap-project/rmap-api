@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response.Status;
  * Custom error codes for RMap API
  */
 public enum ErrorCode {		
+	
 	//400**** Bad Request
 	ER_NO_OBJECT_URI_PROVIDED (Status.BAD_REQUEST,4001001),
 	ER_NO_ACCEPT_TYPE_PROVIDED (Status.BAD_REQUEST,4001002),
@@ -52,6 +53,9 @@ public enum ErrorCode {
 	
 	//406**** Format Not Acceptable
 	ER_CANNOT_ACCEPT_FORMAT_PROVIDED (Status.NOT_ACCEPTABLE,4061001),
+	
+	//409**** Conflict
+	ER_NOT_LATEST_DISCOVERS (Status.CONFLICT, 4091001),
 	
 	//410**** Gone (deleted or tombstoned object)
 	ER_DISCO_DELETED (Status.GONE,4101001), 
@@ -114,6 +118,7 @@ public enum ErrorCode {
 	ER_CORE_CANT_CREATE_STMT_RDF (Status.INTERNAL_SERVER_ERROR, 5002028),
 	ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDDISCOS (Status.INTERNAL_SERVER_ERROR, 5002029),
 	ER_CORE_COULDNT_RETRIEVE_STMT_ASSERTINGAGTS (Status.INTERNAL_SERVER_ERROR, 5002030),
+	ER_CORE_UPDATING_INACTIVE_DISCO (Status.INTERNAL_SERVER_ERROR, 5002031),
 	
 	//5003*** Internal Server Errors originating in Auth RMap Service
 	ER_USER_AGENT_COULD_NOT_BE_RETRIEVED (Status.INTERNAL_SERVER_ERROR,5003001),

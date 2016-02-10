@@ -1,5 +1,9 @@
 package info.rmapproject.api.exception;
 
+import java.net.URI;
+
+import info.rmapproject.api.utils.Utils;
+
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -40,26 +44,48 @@ public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException
     	if (rmapApiMsg != null && rmapApiMsg.length()>0)	{
     		errMsg.append(rmapApiMsg);
     	}
+	
+    	String rootCause = ExceptionUtils.getRootCauseMessage(exception);
     	
     	//append system message (typically relevant where non-RMapApiException thrown)
-    	if (exMsg != null && exMsg.length()>0)	{
+    	//only if rootCause isn't same message!
+    	if (exMsg != null && exMsg.length()>0 && !rootCause.contains(exMsg))	{
     		if (errMsg.length()>0){
     			errMsg.append("; ");
     		}
     		errMsg.append(exMsg);
     	}
-	
+
     	//Append root cause message
-    	String rootCause = ExceptionUtils.getRootCauseMessage(exception);
     	if (rootCause != null && rootCause.length()>0)	{
     		if (errMsg.length()>0){
     			errMsg.append("; ");
     		}
     		errMsg.append(rootCause);
+    	}    	
+    	
+    	Response response = null;
+    	if (errType==Status.CONFLICT){
+    		//extract redirect URL
+    		try {
+				String discoUrl = exMsg;
+				discoUrl = discoUrl.substring(discoUrl.lastIndexOf("<") + 1, discoUrl.lastIndexOf(">"));
+				discoUrl = Utils.makeDiscoUrl(discoUrl);
+	    		response = Response.status(errType)
+		    						.link(new URI(discoUrl), "latest-version") 
+		    						.type("text/plain")
+		    						.entity(errMsg.toString()).build(); 
+			} catch (Exception e) {
+				// continue... we are already handling an error!
+			}   		
+    	}
+
+    	if (response==null){
+    		//no redirect URL
+    		response = Response.status(errType).type("text/plain").entity(errMsg.toString()).build(); 
     	}
 	
-    	Response response = Response.status(errType).type("text/plain").entity(errMsg.toString()).build(); 
-        log.fatal(errMsg.toString(), exception);
+    	log.fatal(errMsg.toString(), exception);
     	return response;
     }
 }

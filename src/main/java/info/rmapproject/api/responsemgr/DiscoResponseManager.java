@@ -13,6 +13,8 @@ import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapDeletedObjectException;
 import info.rmapproject.core.exception.RMapDiSCONotFoundException;
 import info.rmapproject.core.exception.RMapException;
+import info.rmapproject.core.exception.RMapInactiveVersionException;
+import info.rmapproject.core.exception.RMapNotLatestVersionException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
 import info.rmapproject.core.model.RMapStatus;
@@ -518,6 +520,12 @@ public class DiscoResponseManager {
 		} 
 		catch(RMapDiSCONotFoundException ex) {
 			throw RMapApiException.wrap(ex,ErrorCode.ER_DISCO_OBJECT_NOT_FOUND);
+		} 
+		catch(RMapInactiveVersionException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_CORE_UPDATING_INACTIVE_DISCO);
+		}
+		catch(RMapNotLatestVersionException ex) {
+			throw RMapApiException.wrap(ex,ErrorCode.ER_NOT_LATEST_DISCOVERS);
 		} 
 		catch(RMapException ex) { 
 			if (ex.getCause() instanceof RMapDeletedObjectException){

@@ -3,29 +3,29 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.ObjType;
+import info.rmapproject.api.utils.Constants;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.Utils;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
-import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.RMapValue;
+import info.rmapproject.core.model.request.RMapSearchParams;
 import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.utils.Terms;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 
 import org.openrdf.model.vocabulary.DC;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
@@ -35,11 +35,21 @@ import org.openrdf.model.vocabulary.DC;
  */
 public class StatementResponseManager {
 
-	public StatementResponseManager() {
-	}		
+	private final RMapService rmapService;
 	
-	private static final String DEFAULT_STATUS_FILTER ="all";
-	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
+	/**
+	 * Constructor autowires the RMapService 
+	 * @param rmapService
+	 * @throws RMapApiException
+	 */
+	@Autowired
+	public StatementResponseManager(RMapService rmapService) throws RMapApiException {
+		if (rmapService ==null){
+			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_RMAP_SERVICE);
+		}
+		this.rmapService = rmapService;
+	}
+	
 	
 	/**
 	 * Displays Statement Service Options
@@ -101,20 +111,14 @@ public class StatementResponseManager {
 	 * @param subject
 	 * @param predicate
 	 * @param object
-	 * @param status
-	 * @param systemAgents (comma separated)
-	 * @param dateFrom
-	 * @param dateTo
 	 * @param returnType
+	 * @param params
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
 	public Response getStatementRelatedDiSCOs(String subject, String predicate, 
-											String object, String status, 
-											String systemAgents, String dateFrom, 
-											String dateTo, NonRdfType returnType) throws RMapApiException	{
+											String object, NonRdfType returnType, RMapSearchParams params) throws RMapApiException	{
 		Response response = null;
-		RMapService rmapService = null;
 		try {
 			if (subject==null || subject.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_SUBJECT_PROVIDED); 
@@ -125,10 +129,8 @@ public class StatementResponseManager {
 			if (object==null || object.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_OBJECT_PROVIDED); 
 			}
-			if (returnType==null) {returnType = DEFAULT_NONRDF_TYPE;}
-			if (status==null) {status = DEFAULT_STATUS_FILTER;}
+			if (returnType==null) {returnType = Constants.DEFAULT_NONRDF_TYPE;}
 			
-
 			subject = URLDecoder.decode(subject, "UTF-8");
 			subject = Utils.removeUriAngleBrackets(subject);
 			URI rmapSubject = new URI(subject);
@@ -139,18 +141,8 @@ public class StatementResponseManager {
 
 			object = URLDecoder.decode(object, "UTF-8");
 			RMapValue rmapObject = Utils.convertObjectStringToRMapValue(object);
-			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
-			List <URI> systemAgentList = Utils.convertUriCsvToUriList(systemAgents);
-			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
-			Date dDateTo = Utils.convertStringDateToDate(dateTo);
 						
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-						
-			List<URI> matchingObjects = rmapService.getStatementRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, 
-																		rmapStatus, systemAgentList, dDateFrom, dDateTo);
+			List<URI> matchingObjects = rmapService.getStatementRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, params);
 
 			if (matchingObjects == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_RELATEDDISCOS);
@@ -165,7 +157,7 @@ public class StatementResponseManager {
 				outputString= URIListHandler.uriListToPlainText(matchingObjects);
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(matchingObjects, ObjType.DISCOS.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_DISCO_PATH);		
 			}
 			response = Response.status(Response.Status.OK)
 						.entity(outputString)
@@ -206,14 +198,14 @@ public class StatementResponseManager {
 	 * @param subject
 	 * @param predicate
 	 * @param object
-	 * @param status
+	 * @param returnType
+	 * @param params
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStatementAssertingAgents(String subject, String predicate, String object, String status, 
-				String dateFrom, String dateTo, NonRdfType returnType) throws RMapApiException	{
+	public Response getStatementAssertingAgents(String subject, String predicate, String object, NonRdfType returnType, RMapSearchParams params) 
+			throws RMapApiException	{
 		Response response = null;
-		RMapService rmapService = null;
 		try {
 			if (subject==null || subject.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_SUBJECT_PROVIDED); 
@@ -224,8 +216,7 @@ public class StatementResponseManager {
 			if (object==null || object.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_OBJECT_PROVIDED); 
 			}
-			if (status==null) {status = DEFAULT_STATUS_FILTER;}
-			if (returnType==null) {returnType = DEFAULT_NONRDF_TYPE;}
+			if (returnType==null) {returnType = Constants.DEFAULT_NONRDF_TYPE;}
 			
 			subject = URLDecoder.decode(subject, "UTF-8");
 			predicate = URLDecoder.decode(predicate, "UTF-8");
@@ -234,17 +225,8 @@ public class StatementResponseManager {
 			URI rmapSubject = new URI(subject);
 			URI rmapPredicate = new URI(predicate);
 			RMapValue rmapObject = Utils.convertObjectStringToRMapValue(object);
-			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
-			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
-			Date dDateTo = Utils.convertStringDateToDate(dateTo);
-						
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
 			List<URI> matchingObjects = new ArrayList<URI>();
-			matchingObjects = rmapService.getStatementAssertingAgents(rmapSubject, rmapPredicate, rmapObject, rmapStatus, dDateFrom, dDateTo);
+			matchingObjects = rmapService.getStatementAssertingAgents(rmapSubject, rmapPredicate, rmapObject, params);
 			if (matchingObjects == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_ASSERTINGAGTS);
 			}
@@ -254,7 +236,7 @@ public class StatementResponseManager {
 				outputString= URIListHandler.uriListToPlainText(matchingObjects);
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(matchingObjects, ObjType.AGENTS.getObjTypeLabel());	
+				outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_AGENT_PATH);	
 			}
 			response = Response.status(Response.Status.OK)
 						.entity(outputString)

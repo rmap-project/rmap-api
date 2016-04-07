@@ -1,6 +1,7 @@
 package info.rmapproject.api.lists;
 
 import static org.junit.Assert.*;
+import info.rmapproject.core.rdfhandler.RDFType;
 
 import org.junit.Test;
 
@@ -20,8 +21,8 @@ public class RdfMediaTypeTest {
 	public void testGet() {
 		RdfMediaType type = RdfMediaType.get("text/turtle");
 		assertEquals(type, RdfMediaType.TEXT_TURTLE);	
-		RdfType returnType = type.getReturnType();
-		assertEquals(returnType, RdfType.TURTLE);
+		RDFType returnType = type.getReturnType();
+		assertEquals(returnType, RDFType.TURTLE);
 	}
 
 }

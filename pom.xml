@@ -15,12 +15,12 @@
 		<dependency>
 			<groupId>info.rmapproject</groupId>
 			<artifactId>rmap-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>info.rmapproject</groupId>
 			<artifactId>rmap-auth</artifactId>
-			<version>0.1</version>
+			<version>0.1</version>	
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -90,26 +90,6 @@
             <version>${org.springframework-version}</version>
         </dependency>
         
-		<dependency>
-		    <groupId>com.github.jsonld-java</groupId>
-		    <artifactId>jsonld-java</artifactId>
-		    <version>0.3</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.github.jsonld-java</groupId>
-		    <artifactId>jsonld-java-sesame</artifactId>
-		    <version>0.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjrt</artifactId>
-			<version>1.7.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<version>1.7.0</version>
-		</dependency>
 	</dependencies>
 	<build>
 		<finalName>rmap-api-0.1</finalName>

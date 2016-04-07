@@ -19,6 +19,8 @@
 	<context:component-scan base-package="info.rmapproject.api" />
     
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath*:spring-rmapcore-context.xml" />
+    <import resource="classpath*:spring-rmapauth-context.xml" />
 	
     <context:property-placeholder/>
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer"/>
@@ -46,28 +48,16 @@
 		    <ref bean="authenticationInterceptor"/>
 		</jaxrs:inInterceptors>
     </jaxrs:server>
-    
+    		
+	<!-- can set these, or let core take care of these.
+    <bean id="rmapService" class="info.rmapproject.core.rmapservice.impl.openrdf.ORMapService"/>
+    <bean id="rmapIdService" class="info.rmapproject.core.idservice.ArkIdService"/>
+    <bean id="rdfHandler" class="info.rmapproject.core.rdfhandler.impl.openrdf.RioRDFHandler"/>
+	<bean id="triplestore" class="info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameSailMemoryTriplestore"/> -->
+		
 	<bean id="authenticationInterceptor" class="info.rmapproject.api.auth.AuthenticationInterceptor"/>   
 	<bean id="apiUserService" class="info.rmapproject.api.auth.ApiUserServiceImpl"/>  
-	
-    <!-- 
-    aspect example, in case ever want to try this...
-	<aop:config>
-		<aop:aspect id="loggingAspect" ref="logging">
-			<aop:before method="log" pointcut="execution(* info.rmapproject.api.service.*.api*(..))"/>
-		</aop:aspect>
-	</aop:config>  
-   <bean id="logging" 
-         class="info.rmapproject.api.logging.LoggingAspect"/> -->
-   <!--   
-   <aop:config>
-   		<aop:aspect id="sysAgentAspect" ref="checkSysAgent">
-   			<aop:before method="verifyRMapSystemAgent" 
-   				pointcut="execution(* info.rmap.api.responsemgr.DiscoResponseManager.*(..))"/>
-   		</aop:aspect>
-   </aop:config>
-   <bean id="checkSysAgent" class="info.rmapproject.api.authentication.SystemAgentAspect"/>
-   --> 
+
 	
 </beans>
 

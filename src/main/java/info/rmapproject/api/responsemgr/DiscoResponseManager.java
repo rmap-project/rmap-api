@@ -1,11 +1,11 @@
 package info.rmapproject.api.responsemgr;
 
+
 import info.rmapproject.api.auth.ApiUserService;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.ObjType;
-import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.Constants;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.Utils;
@@ -21,13 +21,14 @@ import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.event.RMapEventCreation;
+import info.rmapproject.core.model.request.RMapRequestAgent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
+import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.rmapservice.RMapDiSCODTO;
 import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.RMAP;
+import info.rmapproject.core.utils.Terms;
+import info.rmapproject.core.vocabulary.impl.openrdf.PROV;
+import info.rmapproject.core.vocabulary.impl.openrdf.RMAP;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -50,14 +51,30 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 
-public class DiscoResponseManager {
+public class DiscoResponseManager extends ResponseManager {
 
-    @Autowired
-	private ApiUserService apiUserService;
-	
+    
 	private final Logger log = LogManager.getLogger(this.getClass()); 
-	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
-	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
+	
+	private final ApiUserService apiUserService;
+	
+	/**
+	 * Constructor autowires the RMapService, RDFHandler, ApiUserService
+	 * @param rmapService
+	 * @param rdfHandler
+	 * @throws RMapApiException
+	 */
+	@Autowired
+	public DiscoResponseManager(RMapService rmapService, 
+								RDFHandler rdfHandler,
+								ApiUserService apiUserService) throws RMapApiException {
+		super(rmapService, rdfHandler);
+		if (apiUserService ==null){
+			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_USER_SERVICE);
+		}
+		this.apiUserService = apiUserService;
+	}
+    
 
 
 	/**
@@ -123,7 +140,7 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapDiSCO(String strDiscoUri, RdfType returnType) throws RMapApiException	{
+	public Response getRMapDiSCO(String strDiscoUri, RDFType returnType) throws RMapApiException	{
 		Response response = getRMapDiSCO(strDiscoUri, returnType, false);
 		return response;
 	}
@@ -136,7 +153,7 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getLatestRMapDiSCOVersion(String strDiscoUri, RdfType returnType) throws RMapApiException	{
+	public Response getLatestRMapDiSCOVersion(String strDiscoUri, RDFType returnType) throws RMapApiException	{
 		Response response = getRMapDiSCO(strDiscoUri, returnType, true);
 		return response;
 	}
@@ -145,15 +162,14 @@ public class DiscoResponseManager {
 	/**
 	 * Using URI Provided, retrieves either the latest version or requested version of an RMap DiSCO 
 	 * in RDF format specified and forms an HTTP response.
-	 * @param strDiscoUri
+	 * @param strDiscoUri 
 	 * @param acceptType
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	private Response getRMapDiSCO(String strDiscoUri, RdfType returnType, Boolean viewLatestVersion) throws RMapApiException	{
+	private Response getRMapDiSCO(String strDiscoUri, RDFType returnType, Boolean viewLatestVersion) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {			
 						
 			log.info("DiSCO " + strDiscoUri + " requested.");
@@ -161,7 +177,7 @@ public class DiscoResponseManager {
 			if (strDiscoUri==null || strDiscoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}		
-			if (returnType==null) {returnType = DEFAULT_RDF_TYPE;}
+			if (returnType==null) {returnType = Constants.DEFAULT_RDF_TYPE;}
 			if (viewLatestVersion==null){viewLatestVersion=false;}
 
 			URI uriDiscoUri = null;
@@ -172,13 +188,8 @@ public class DiscoResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
 				
-			RMapDiSCODTO rmapDiscoDTO = null;
+			RMapDiSCODTO rmapDiscoDTO;
 
 			if (viewLatestVersion)	{
 				rmapDiscoDTO = rmapService.getDiSCODTOLatestVersion(uriDiscoUri);
@@ -196,13 +207,8 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_READ_DISCO_RETURNED_NULL);
 			}
 
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-
 			//OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, returnType.getRdfType());
-			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDiscoDTO.getRMapDiSCO(), returnType.getRdfType());
+			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDiscoDTO.getRMapDiSCO(), returnType);
 			if (discoOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}		
@@ -266,7 +272,6 @@ public class DiscoResponseManager {
 	public Response getRMapDiSCOHeader(String strDiscoUri) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService =null;
 		try {			
 			if (strDiscoUri==null || strDiscoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -278,11 +283,6 @@ public class DiscoResponseManager {
 			}
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-			}
-			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
 			}
 				
 			RMapDiSCODTO rmapDiscoDTO = null;
@@ -327,10 +327,9 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response createRMapDiSCO(InputStream discoRdf, RdfType contentType) throws RMapApiException {
+	public Response createRMapDiSCO(InputStream discoRdf, RDFType contentType) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try	{ 
 
 			log.info("New DiSCO create request initiated (id=" + discoRdf.hashCode() + ")");
@@ -342,27 +341,15 @@ public class DiscoResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_CONTENT_TYPE_PROVIDED);
 			}
 						
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, "", contentType.getRdfType());
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, contentType, Constants.BASE_URL);
 			if (rmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
 
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
 			//Get the current user to associate with the DiSCO creation
-			URI sysAgentUri = apiUserService.getSystemAgentUriForEvent();
-			if (sysAgentUri==null) {
-				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);				
-			}
+			RMapRequestAgent reqAgent = apiUserService.getCurrentRequestAgent();
 			
-			RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(sysAgentUri, rmapDisco);
+			RMapEventCreation discoEvent = (RMapEventCreation)rmapService.createDiSCO(rmapDisco, reqAgent);
 			if (discoEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_CREATEDISCO_NOT_COMPLETED);
 			} 
@@ -429,10 +416,9 @@ public class DiscoResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, RdfType contentType) throws RMapApiException {
+	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, RDFType contentType) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try	{		
 			if (origDiscoUri==null || origDiscoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -443,11 +429,6 @@ public class DiscoResponseManager {
 			if (contentType == null){
 				throw new RMapApiException(ErrorCode.ER_NO_CONTENT_TYPE_PROVIDED);
 			}
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}	
 			
 			URI uriOrigDiscoUri = null;
 			try {
@@ -457,22 +438,15 @@ public class DiscoResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, "", contentType.getRdfType());
+
+			RMapDiSCO newRmapDisco = rdfHandler.rdf2RMapDiSCO(discoRdf, contentType, Constants.BASE_URL);
 			if (newRmapDisco == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_DISCO_FAILED);
 			}  
 
 			//Get the current user to associate with the DiSCO update event
-			URI sysAgentUri = apiUserService.getSystemAgentUriForEvent();
-			if (sysAgentUri==null) {
-				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);				
-			}
-			RMapEvent discoEvent = rmapService.updateDiSCO(sysAgentUri, uriOrigDiscoUri, newRmapDisco);
+			RMapRequestAgent reqAgent = apiUserService.getCurrentRequestAgent();
+			RMapEvent discoEvent = rmapService.updateDiSCO(uriOrigDiscoUri, newRmapDisco, reqAgent);
 			
 			if (discoEvent == null) {
 				throw new RMapApiException(ErrorCode.ER_CORE_UPDATEDISCO_NOT_COMPLETED);
@@ -583,7 +557,6 @@ public class DiscoResponseManager {
 	private Response changeRMapDiSCOStatus(String discoUri, String newStatus) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 
 		try	{		
 			if (discoUri==null || discoUri.length()==0)	{
@@ -599,24 +572,13 @@ public class DiscoResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}	
-			
-			//Get the current user to associate with the DiSCO update
-			URI sysAgentUri = apiUserService.getSystemAgentUriForEvent();
-			if (sysAgentUri==null) {
-				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);				
-			}
-			
+			RMapRequestAgent reqAgent = apiUserService.getCurrentRequestAgent();
 			RMapEvent discoEvent = null;
 			if (newStatus == "TOMBSTONED")	{
-				discoEvent = (RMapEvent)rmapService.deleteDiSCO(uriDiscoUri, sysAgentUri);					
+				discoEvent = (RMapEvent)rmapService.deleteDiSCO(uriDiscoUri, reqAgent);					
 			}
 			else if (newStatus == "INACTIVE")	{
-				//TODO:this is incorrect - currently no inactivate disco method, so this is a placeholder!
-				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(sysAgentUri, uriDiscoUri);						
+				discoEvent = (RMapEvent)rmapService.inactivateDiSCO(uriDiscoUri, reqAgent);						
 			}
 				
 			if (discoEvent == null) {
@@ -637,12 +599,10 @@ public class DiscoResponseManager {
 			String linkRel = "";
 			
 			if (newStatus == "TOMBSTONED")	{
-				//TODO: EVENT_TYPE_TOMBSTONE a place holder - need to consider what this should be.
-				linkRel = "<" + newEventURL + ">" + ";rel=\"" + RMAP.EVENT_TYPE_TOMBSTONE + "\"";
+				linkRel = "<" + newEventURL + ">" + ";rel=\"" + RMAP.TOMBSTONE + "\"";
 			}
 			else if (newStatus == "INACTIVE")	{
-				//TODO: EVENT_TYPE_INACTIVATION a place holder - need to consider what this should be.
-				linkRel = "<" + newEventURL + ">" + ";rel=\"" + RMAP.EVENT_TYPE_INACTIVATION + "\"";
+				linkRel = "<" + newEventURL + ">" + ";rel=\"" + RMAP.INACTIVATION + "\"";
 			}
 			
 			response = Response.status(Response.Status.OK)
@@ -702,10 +662,9 @@ public class DiscoResponseManager {
 
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {
 			//assign default values when null
-			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
+			if (returnType==null)	{returnType=Constants.DEFAULT_NONRDF_TYPE;}
 			if (retAgentVersionsOnly==null)	{retAgentVersionsOnly=false;}
 			
 			//check discoUri param for null
@@ -724,11 +683,6 @@ public class DiscoResponseManager {
 			
 			String outputString="";
 			List <URI> uriList = null;
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
 			
 			if (retAgentVersionsOnly)	{
 				uriList = rmapService.getDiSCOAllAgentVersions(uriDiscoUri);				
@@ -746,7 +700,7 @@ public class DiscoResponseManager {
 				outputString= URIListHandler.uriListToPlainText(uriList);	
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.DISCOS.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(uriList, Terms.RMAP_DISCO_PATH);		
 			}
 
 		    			
@@ -796,10 +750,9 @@ public class DiscoResponseManager {
 
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {
 			//assign default value when null
-			if (returnType==null) {returnType = DEFAULT_NONRDF_TYPE;}
+			if (returnType==null) {returnType = Constants.DEFAULT_NONRDF_TYPE;}
 			
 			if (discoUri==null || discoUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -813,11 +766,6 @@ public class DiscoResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
 			
 			String outputString="";
 			List <URI> uriList = rmapService.getDiSCOEvents(uriDiscoUri);						
@@ -830,7 +778,7 @@ public class DiscoResponseManager {
 				outputString= URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(uriList, Terms.RMAP_EVENT_PATH);		
 			}
     		
     		response = Response.status(Response.Status.OK)
@@ -879,22 +827,16 @@ public class DiscoResponseManager {
 	private String buildGetDiscoLinks(RMapDiSCODTO rmapDiSCODTO) throws RMapApiException, RMapException, RMapDefectiveArgumentException {
 		StringBuilder links = new StringBuilder("");
 		//TODO: refactor this - too much repetition... but version code may be changing, so leave for now.
-		RMapService rmapService = null;
 		try{
 			
 			String strDiscoUri = rmapDiSCODTO.getRMapDiSCO().getId().toString();
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
 	
 			//get the DiSCO status link
 			RMapStatus status = rmapDiSCODTO.getStatus();
 			if (status==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
 			}
-			links.append("<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"");
+			links.append("<" + Terms.RMAP_NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + Terms.RMAP_HASSTATUS_PATH + "\"");
 	
 			//get DiSCO version links
 			try {

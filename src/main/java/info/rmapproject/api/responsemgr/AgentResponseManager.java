@@ -4,8 +4,7 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.ObjType;
-import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.Constants;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.Utils;
@@ -17,24 +16,23 @@ import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.exception.RMapTombstonedObjectException;
 import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.agent.RMapAgent;
-import info.rmapproject.core.model.event.RMapEventCreation;
+import info.rmapproject.core.model.request.RMapSearchParams;
 import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
+import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.PROV;
-import info.rmapproject.core.rmapservice.impl.openrdf.vocabulary.RMAP;
+import info.rmapproject.core.utils.Terms;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.UriInfo;
 
 import org.openrdf.model.vocabulary.DC;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
@@ -43,13 +41,19 @@ import org.openrdf.model.vocabulary.DC;
  *
  */
 
-public class AgentResponseManager {
-
-	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
-	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
+public class AgentResponseManager extends ResponseManager {
+		
+	/**
+	 * Constructor autowires the RMapService and RDFHandler
+	 * @param rmapService
+	 * @param rdfHandler
+	 * @throws RMapApiException
+	 */
+	@Autowired
+	public AgentResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
+		super(rmapService, rdfHandler);
+	}
 	
-	public AgentResponseManager() {
-	}		
 	
 	/**
 	 * Displays Agent Service Options
@@ -110,15 +114,14 @@ public class AgentResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapAgent(String strAgentUri, RdfType returnType) throws RMapApiException	{
+	public Response getRMapAgent(String strAgentUri, RDFType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {			
 			if (strAgentUri==null || strAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}		
-			if (returnType==null)	{returnType=DEFAULT_RDF_TYPE;}
+			if (returnType==null)	{returnType=Constants.DEFAULT_RDF_TYPE;}
 
 			URI uriAgentId = null;
 			try {
@@ -129,9 +132,8 @@ public class AgentResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 					
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
 			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
+				throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_RMAP_SERVICE);
 			}
 			
     		RMapAgent rmapAgent = rmapService.readAgent(uriAgentId);
@@ -139,12 +141,7 @@ public class AgentResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_READ_AGENT_RETURNED_NULL);
 			}
 			
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-			
-    		OutputStream agentOutput = rdfHandler.agent2Rdf(rmapAgent, returnType.toString());
+    		OutputStream agentOutput = rdfHandler.agent2Rdf(rmapAgent, returnType);
 			if (agentOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}	
@@ -153,7 +150,7 @@ public class AgentResponseManager {
     		if (status==null){
     			throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
     		}
-    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+    		String linkRel = "<" + status.getPath().toString() + ">" + ";rel=\"" + Terms.RMAP_HASSTATUS_PATH + "\"";
 
 		    response = Response.status(Response.Status.OK)
 						.entity(agentOutput.toString())
@@ -210,7 +207,6 @@ public class AgentResponseManager {
 	public Response getRMapAgentHeader(String strAgentUri) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {			
 			if (strAgentUri==null || strAgentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
@@ -225,16 +221,11 @@ public class AgentResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
     		RMapStatus status = rmapService.getAgentStatus(uriAgentId);
     		if (status==null){
     			throw new RMapApiException(ErrorCode.ER_CORE_GET_STATUS_RETURNED_NULL);
     		}
-    		String linkRel = "<" + RMAP.NAMESPACE + status.toString().toLowerCase() + ">" + ";rel=\"" + RMAP.HAS_STATUS + "\"";
+    		String linkRel = "<" + status.getPath().toString() + ">" + ";rel=\"" + Terms.RMAP_HASSTATUS_PATH + "\"";
 
 		    response = Response.status(Response.Status.OK)
 						.location(new URI(Utils.makeAgentUrl(strAgentUri)))
@@ -277,127 +268,28 @@ public class AgentResponseManager {
 		return response;
     }
 	
-	
-
-	
-	/**
-	 * Creates new RMap:Agent from valid client-provided RDF.
-	 * @param agentRdf
-	 * @return Response
-	 * @throws RMapApiException
-	 */
-	public Response createRMapAgent(InputStream agentRdf, RdfType contentType, URI sysAgentUri) throws RMapApiException {
-		boolean reqSuccessful = false;
-		Response response = null;
-		RMapService rmapService = null;
-		try	{
-			if (agentRdf == null || agentRdf.toString().length()==0){
-				throw new RMapApiException(ErrorCode.ER_NO_AGENT_RDF_PROVIDED);
-			} 
-			if (contentType == null){
-				throw new RMapApiException(ErrorCode.ER_NO_CONTENT_TYPE_PROVIDED);
-			}
-			if (sysAgentUri == null){
-				throw new RMapApiException(ErrorCode.ER_NO_SYSTEMAGENT_PROVIDED);
-			}
-			
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-						 						
-			RMapAgent rmapAgent = rdfHandler.rdf2RMapAgent(agentRdf, "", contentType.toString());
-			if (rmapAgent == null) {
-				throw new RMapApiException(ErrorCode.ER_CORE_RDF_TO_AGENT_FAILED);
-			}  
-			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-						
-			RMapEventCreation agentEvent = (RMapEventCreation)rmapService.createAgent(rmapAgent, sysAgentUri);
-			if (agentEvent == null) {
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATEAGENT_NOT_COMPLETED);
-			} 
-
-			URI uAgentURI = rmapAgent.getId().getIri();  
-			if (uAgentURI==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_AGENTID_RETURNED_NULL);
-			} 
-			String sAgentURI = uAgentURI.toString();  
-			if (sAgentURI.length() == 0){
-				throw new RMapApiException(ErrorCode.ER_CORE_AGENTURI_STRING_EMPTY);
-			} 
-
-			URI uEventURI = agentEvent.getId().getIri();  
-			if (uEventURI==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTID_RETURNED_NULL);
-			} 
-			String sEventURI = uEventURI.toString();  
-			if (sEventURI.length() == 0){
-				throw new RMapApiException(ErrorCode.ER_CORE_EVENTURI_STRING_EMPTY);
-			} 
-
-			String newEventURL = Utils.makeEventUrl(sEventURI); 
-			String newAgentUrl = Utils.makeAgentUrl(sAgentURI); 
-
-			String linkRel = "<" + newEventURL + ">" + ";rel=\"" + PROV.WASGENERATEDBY + "\"";
-
-			response = Response.status(Response.Status.CREATED)
-					.entity(sAgentURI)
-					.location(new URI(newAgentUrl)) //switch this to location()
-					.header("Link",linkRel)    //switch this to link()
-					.build();  
-			
-			reqSuccessful = true;
-					
-		}
-		catch(RMapApiException ex)	{
-			throw RMapApiException.wrap(ex);
-		}  
-		catch(RMapDefectiveArgumentException ex) {
-			throw RMapApiException.wrap(ex,ErrorCode.ER_GET_AGENT_BAD_ARGUMENT);
-		} 
-		catch(RMapException ex) { 
-			throw RMapApiException.wrap(ex,ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);  			
-		}  
-		catch(Exception ex)	{
-			throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
-		}
-		finally{
-			if (rmapService != null) rmapService.closeConnection();
-			if (!reqSuccessful && response!=null) response.close();
-		}
-	return response;  
-	}
-	
-	
 
 	/**
 	 * Retrieves list of RMap:Event URIs associated with the RMap:Agent URI provided and returns 
 	 * the results as a JSON or Plain Text list.
 	 * @param agentUri
 	 * @param returnType
-	 * @param dateFrom
-	 * @param dateTo
+	 * @param uriInfo
+	 * @param origReqQuery
 	 * @return Response
 	 * @throws RMapApiException
 	 */
 	public Response getRMapAgentEvents(String agentUri, 
-			NonRdfType returnType, 
-			String dateFrom,
-			String dateTo) throws RMapApiException {
+										NonRdfType returnType, 
+										UriInfo uriInfo) throws RMapApiException {
+		
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
-		try {
-			//assign default value when null
-			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
-			
+		try {			
 			if (agentUri==null || agentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}	
+			if (returnType==null)	{returnType=Constants.DEFAULT_NONRDF_TYPE;}
 			
 			URI uriAgentUri = null;
 			try {
@@ -408,34 +300,37 @@ public class AgentResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
+			RMapSearchParams params = super.generateSearchParamObj(uriInfo);
 			
-			String outputString="";
-
-			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
-			Date dDateTo = Utils.convertStringDateToDate(dateTo);
-			List <URI> uriList = rmapService.getAgentEventsInitiated(uriAgentUri, dDateFrom, dDateTo);	
+			Integer currPage = params.getPage();
+			Integer limit=params.getLimit();
+			//we are going to get one extra record to see if we need a "next"
+			params.setLimit(limit+1);
+						 			
+			List <URI> uriList = rmapService.getAgentEventsInitiated(uriAgentUri, params);	
 			
 			if (uriList==null || uriList.size()==0)	{ 
 				//if the object is found, should always have at least one event
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
-									
+
+			String outputString="";		
 			if (returnType==NonRdfType.PLAIN_TEXT)	{		
 				outputString= URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.EVENTS.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(uriList, Terms.RMAP_EVENT_PATH);		
 			}
-    		
-    		response = Response.status(Response.Status.OK)
-							.entity(outputString.toString())
-							.location(new URI (Utils.makeAgentUrl(agentUri)))
-							.build();
-    		
+    					
+			ResponseBuilder responseBldr = Response.status(Response.Status.OK)
+											.entity(outputString.toString())
+											.location(new URI (Utils.makeAgentUrl(agentUri)));
+			if (uriList.size()>limit || currPage>1) {
+				String pageLinks = super.generatePaginationLinks(Utils.makeAgentUrl(agentUri), uriInfo, currPage, uriList.size()>limit);
+				responseBldr.header("Link",pageLinks);
+			}
+			response = responseBldr.build();	
+			    		
     		reqSuccessful=true;
 	        
 		}
@@ -464,35 +359,24 @@ public class AgentResponseManager {
     	return response;
 	}
 	
-
-	
-
 	/**
 	 * Retrieves list of RMap:DiSCO URIs associated with the RMap:Agent URI provided and returns 
 	 * the results as a JSON or Plain Text list.
 	 * @param agentUri
 	 * @param returnType
-	 * @param status
-	 * @param dateFrom
-	 * @param dateTo
+	 * @param params
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getRMapAgentDiSCOs(String agentUri, 
-			NonRdfType returnType, 
-			String status,
-			String dateFrom,
-			String dateTo) throws RMapApiException {
+	public Response getRMapAgentDiSCOs(String agentUri, NonRdfType returnType, UriInfo uriInfo) throws RMapApiException {
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {
-			//assign default value when null
-			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
-			
 			if (agentUri==null || agentUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}	
+			//assign default value when null
+			if (returnType==null) {returnType=Constants.DEFAULT_NONRDF_TYPE;}
 			
 			URI uriAgentUri = null;
 			try {
@@ -502,35 +386,36 @@ public class AgentResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
-			String outputString="";
-			
-			RMapStatus rmapStatus = Utils.convertToRMapStatus(status);
-			Date dDateFrom = Utils.convertStringDateToDate(dateFrom);
-			Date dDateTo = Utils.convertStringDateToDate(dateTo);
-			List <URI> uriList = rmapService.getAgentDiSCOs(uriAgentUri, rmapStatus, dDateFrom, dDateTo);		
+
+			RMapSearchParams params = super.generateSearchParamObj(uriInfo);
+			Integer currPage = params.getPage();
+			Integer limit=params.getLimit();
+			//we are going to get one extra record to see if we need a "next"
+			params.setLimit(limit+1);
+	
+			List <URI> uriList = rmapService.getAgentDiSCOs(uriAgentUri, params);		
 			
 			if (uriList==null || uriList.size()==0)	{ 
 				//if the object is found, should always have at least one event
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
 			}	
-									
+
+			String outputString="";
 			if (returnType==NonRdfType.PLAIN_TEXT)	{		
 				outputString= URIListHandler.uriListToPlainText(uriList);
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(uriList, ObjType.DISCOS.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(uriList, Terms.RMAP_DISCO_PATH);		
 			}
     		
-    		response = Response.status(Response.Status.OK)
-							.entity(outputString.toString())
-							.location(new URI (Utils.makeAgentUrl(agentUri)))
-							.build();
+			ResponseBuilder responseBldr = Response.status(Response.Status.OK)
+											.entity(outputString.toString())
+											.location(new URI (Utils.makeAgentUrl(agentUri)));
+			if (uriList.size()>limit || currPage>1) {
+				String pageLinks = super.generatePaginationLinks(Utils.makeAgentUrl(agentUri), uriInfo, currPage, uriList.size()>limit);
+				responseBldr.header("Link",pageLinks);
+			}
+			response = responseBldr.build();	
     		
     		reqSuccessful=true;
 	        

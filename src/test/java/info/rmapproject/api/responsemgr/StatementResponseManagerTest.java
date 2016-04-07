@@ -5,24 +5,35 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.core.model.RMapStatus;
+import info.rmapproject.core.model.disco.RMapDiSCO;
+import info.rmapproject.core.model.request.RMapSearchParams;
+import info.rmapproject.core.rdfhandler.RDFType;
+import info.rmapproject.core.utils.Terms;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 /**
  * @author khanson
  * Procedures to test StatementResponseManager
  */
+
 public class StatementResponseManagerTest extends ResponseManagerTest {
-	
-	protected StatementResponseManager statementResponseManager = null;
+	@Autowired
+	protected StatementResponseManager statementResponseManager;
 	
 	@Before
 	public void setUp() throws Exception {
 		try {
-			super.setUp();
-			statementResponseManager = (StatementResponseManager)context.getBean("statementResponseManager", StatementResponseManager.class);   
+			super.setUp();			
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception thrown " + e.getMessage());
@@ -67,15 +78,30 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	public void testGetStatementRelatedDiSCOs() {
 		Response response = null;
 		try {
-			response = statementResponseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
+			//createDisco
+			InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
+			String discoURI = rmapDisco.getId().toString();
+	        assertNotNull(discoURI);
+			rmapService.createDiSCO(rmapDisco, super.reqAgent);
+			
+			RMapSearchParams params = new RMapSearchParams();
+			params.setStatusCode(RMapStatus.ACTIVE);
+			
+			//get disco as related to statement
+			response = statementResponseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/ACCESS.2014.2332453", 
 															"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
-															"http://purl.org/dc/dcmitype/Text", "all", null, null, null, NonRdfType.JSON);
+															"http://purl.org/spar/fabio/JournalArticle", NonRdfType.JSON, params);
+
+			assertNotNull(response);
+			assertEquals(response.getStatus(),200);
+			assertEquals(response.getEntity(),"{\"" + Terms.RMAP_DISCO_PATH + "\":[\"" + discoURI + "\"]}");
+			
+			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
+			
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}
-		assertNotNull(response);
-		assertEquals(response.getStatus(),200);
-		assertEquals(response.getEntity(),"{\"rmap:DiSCO\":[\"ark:/22573/rmd18m7nn5\"]}");
 		
 	}
 	
@@ -83,17 +109,29 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	@Test
 	public void testGetStatementAssertingAgents() {
 		Response response = null;
-		try {
-			response = statementResponseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/TPEL.2012.2200506", 
-																	"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
-																	"http://purl.org/dc/dcmitype/Text", "all", null, null, NonRdfType.JSON);
+		try {			
+			//createDisco
+			InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
+			String discoURI = rmapDisco.getId().toString();
+	        assertNotNull(discoURI);
+			rmapService.createDiSCO(rmapDisco, super.reqAgent);
+
+			RMapSearchParams params = new RMapSearchParams();
+			params.setStatusCode(RMapStatus.ACTIVE);
+			
+			response = 
+					statementResponseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/ACCESS.2014.2332453", 
+														"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
+														"http://purl.org/spar/fabio/JournalArticle", NonRdfType.JSON, params);
+			assertNotNull(response);
+			assertEquals(response.getStatus(),200);
+			assertEquals(response.getEntity(),"{\""+ Terms.RMAP_AGENT_PATH + "\":[\"" + super.testAgentURI + "\"]}");
+			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}
-		assertNotNull(response);
-		assertEquals(response.getStatus(),200);
-		assertEquals(response.getEntity(),"{\"rmap:Agent\":[\"ark:/22573/rmd18m7mj4\"]}");
-		
+
 	}
 
 }

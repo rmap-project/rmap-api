@@ -3,9 +3,9 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.RdfType;
 import info.rmapproject.api.responsemgr.DiscoResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
+import info.rmapproject.core.rdfhandler.RDFType;
 
 import java.io.InputStream;
 
@@ -41,9 +41,8 @@ public class DiSCOApiService {
     public void setDiscoResponseManager(DiscoResponseManager discoResponseManager) throws RMapApiException {
     	if (discoResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
-    	} else {
-    		this.discoResponseManager = discoResponseManager;
-		}
+    	}
+   		this.discoResponseManager = discoResponseManager;
 	}
 
 		
@@ -122,7 +121,7 @@ public class DiSCOApiService {
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
     public Response apiGetRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
-    	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
+    	RDFType returnType = HttpTypeMediator.getRdfResponseType(headers);
     	Response response=discoResponseManager.getRMapDiSCO(discoUri, returnType);
     	return response;
     }
@@ -151,7 +150,7 @@ public class DiSCOApiService {
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 				})
     public Response apiGetLatestRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
-    	RdfType returnType = HttpTypeMediator.getRdfResponseType(headers);
+    	RDFType returnType = HttpTypeMediator.getRdfResponseType(headers);
     	Response response=discoResponseManager.getLatestRMapDiSCOVersion(discoUri, returnType);
     	return response;
     }
@@ -203,7 +202,7 @@ public class DiSCOApiService {
 		"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.disco+turtle;charset=UTF-8;"
 		})
     public Response apiCreateRMapDiSCO(@Context HttpHeaders headers, InputStream discoRdf) throws RMapApiException {
-    	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
+    	RDFType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
     	Response createResponse = discoResponseManager.createRMapDiSCO(discoRdf, requestFormat);
 		return createResponse;
     }	
@@ -233,7 +232,7 @@ public class DiSCOApiService {
     public Response apiUpdateRMapDiSCO(@Context HttpHeaders headers, 
     										@PathParam("discoid") String origDiscoId, 
     										InputStream discoRdf) throws RMapApiException {
-    	RdfType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
+    	RDFType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
     	Response updateResponse = discoResponseManager.updateRMapDiSCO(origDiscoId, discoRdf, requestFormat);
 		return updateResponse;
     }

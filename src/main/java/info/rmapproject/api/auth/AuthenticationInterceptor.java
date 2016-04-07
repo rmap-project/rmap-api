@@ -12,10 +12,21 @@ import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Intercepts interactions with the API to authenticate the user and 
+ * verify they are authorized to access the API
+ * @author khanson
+ *
+ */
 public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message> {
 
 	private ApiUserService apiUserService;
 
+	/**
+	 * Autowired from Spring configuration - sets apiUserService class.
+	 * @param apiUserService
+	 * @throws RMapApiException
+	 */
     @Autowired
     public void setApiUserService(ApiUserService apiUserService) throws RMapApiException {
     	if (apiUserService==null) {
@@ -29,6 +40,10 @@ public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message>
         super(Phase.RECEIVE);
     }
 
+
+    /**
+     * Gets basic authentication information from request and validates key
+     */
     public void handleMessage(Message message) {
 	    
 	    try {    

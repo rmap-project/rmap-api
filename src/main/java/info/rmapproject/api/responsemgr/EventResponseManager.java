@@ -2,9 +2,8 @@ package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.api.lists.ObjType;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.api.utils.Constants;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
 import info.rmapproject.api.utils.Utils;
@@ -12,11 +11,11 @@ import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapEventNotFoundException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
+import info.rmapproject.core.model.RMapObjectType;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
+import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
 
 import java.io.OutputStream;
 import java.net.URI;
@@ -26,6 +25,7 @@ import java.util.List;
 import javax.ws.rs.core.Response;
 
 import org.openrdf.model.vocabulary.DC;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 
@@ -33,13 +33,19 @@ import org.openrdf.model.vocabulary.DC;
  * @author khanson
  *
  */
-public class EventResponseManager {
-
-	public EventResponseManager() {
-	}		
-
-	private static final RdfType DEFAULT_RDF_TYPE = RdfType.TURTLE;
-	private static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
+public class EventResponseManager extends ResponseManager {
+	
+	/**
+	 * Constructor autowires the RMapService and RDFHandler
+	 * @param rmapService
+	 * @param rdfHandler
+	 * @throws RMapApiException
+	 */
+	@Autowired
+	public EventResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
+		super(rmapService, rdfHandler);
+	}
+	
 	
 	/**
 	 * Displays Event Service Options
@@ -104,15 +110,14 @@ public class EventResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapEvent(String strEventUri, RdfType returnType) throws RMapApiException	{
+	public Response getRMapEvent(String strEventUri, RDFType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}	
-			if (returnType==null)	{returnType=DEFAULT_RDF_TYPE;}
+			if (returnType==null)	{returnType=Constants.DEFAULT_RDF_TYPE;}
 			
 			URI uriEventUri = null;
 			try {
@@ -123,22 +128,12 @@ public class EventResponseManager {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
 			
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
-			
     		RMapEvent rmapEvent = rmapService.readEvent(uriEventUri);
 			if (rmapEvent ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_READ_EVENT_RETURNED_NULL);
 			}
 			
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
-			if (rdfHandler ==null){
-				throw new RMapApiException(ErrorCode.ER_CORE_CREATE_RDFHANDLER_RETURNED_NULL);
-			}
-			
-    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, returnType.toString());
+    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, returnType);
 			if (eventOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}	
@@ -181,15 +176,14 @@ public class EventResponseManager {
 	 * @param returnType
 	 * @return Response
 	 */
-	public Response getRMapEventRelatedObjs(String strEventUri, ObjType objType, NonRdfType returnType) throws RMapApiException	{
+	public Response getRMapEventRelatedObjs(String strEventUri, RMapObjectType objType, NonRdfType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
-		RMapService rmapService = null;
 		try {
 			if (strEventUri==null || strEventUri.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_OBJECT_URI_PROVIDED); 
 			}
-			if (returnType==null)	{returnType=DEFAULT_NONRDF_TYPE;}
+			if (returnType==null)	{returnType=Constants.DEFAULT_NONRDF_TYPE;}
 
 			URI uriEventUri = null;
 			try {
@@ -199,33 +193,34 @@ public class EventResponseManager {
 			catch (Exception ex)  {
 				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
 			}
-
-			rmapService = RMapServiceFactoryIOC.getFactory().createService();
-			if (rmapService ==null){
-				throw new RMapApiException(ErrorCode.ER_CREATE_RMAP_SERVICE_RETURNED_NULL);
-			}
 			
 			String outputString="";
 
 			List <URI> uriList = null;
-			//TODO: put these jsonTypes in here for now, but need to settle on what these should be and poss enum them.
 			/**
 			 * NOT USED AT THE MOMENT
 			if (objType == ObjType.RESOURCES) {
 				uriList = rmapService.getEventRelatedResources(uriEventUri);
 			}
-			**/
-			if (objType == ObjType.DISCOS) {
-				uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
+			**/			
+			switch (objType) {
+				case DISCO: 	
+					uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
+					break;
+				case AGENT: 	
+					uriList = rmapService.getEventRelatedAgents(uriEventUri);
+					break;
+				case OBJECT: 	
+					uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
+					uriList.addAll(rmapService.getEventRelatedAgents(uriEventUri));
+					break;
+				default:
+					uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
+					uriList.addAll(rmapService.getEventRelatedAgents(uriEventUri));
+					break;
 			}
-			if (objType == ObjType.AGENTS) {
-				uriList = rmapService.getEventRelatedAgents(uriEventUri);
-			}
-			if (objType == ObjType.ALL) {
-				uriList = rmapService.getEventRelatedDiSCOS(uriEventUri);
-				uriList.addAll(rmapService.getEventRelatedAgents(uriEventUri));
-			}
-			
+
+								
 			if (uriList==null)	{ 
 				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTRELATEDLIST_EMPTY); 
 			}	
@@ -234,7 +229,7 @@ public class EventResponseManager {
 				outputString= URIListHandler.uriListToPlainText(uriList);	
 			}
 			else	{
-				outputString= URIListHandler.uriListToJson(uriList, objType.getObjTypeLabel());		
+				outputString= URIListHandler.uriListToJson(uriList, objType.getPath().toString());		
 			}
     		
     		if (outputString.length()>0){			    			

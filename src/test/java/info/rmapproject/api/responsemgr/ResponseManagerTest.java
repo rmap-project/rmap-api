@@ -4,26 +4,44 @@ import info.rmapproject.core.model.agent.RMapAgent;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.impl.openrdf.ORAdapter;
 import info.rmapproject.core.model.impl.openrdf.ORMapAgent;
+import info.rmapproject.core.model.request.RMapRequestAgent;
+import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameTriplestore;
 
 import org.junit.Before;
-import org.openrdf.model.URI;
+import org.junit.runner.RunWith;
+import org.openrdf.model.IRI;
 import org.openrdf.model.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+@RunWith( SpringJUnit4ClassRunner.class )
+@ContextConfiguration({ "classpath:/spring-rmapapi-context.xml" })
 public class ResponseManagerTest {
 
-	protected URI AGENT_URI;
-	protected URI IDPROVIDER_URI;
-	protected URI AUTH_ID;
+	protected IRI AGENT_URI;
+	protected IRI IDPROVIDER_URI;
+	protected IRI AUTH_ID;
 	protected Value NAME;
+	
+	@Autowired
 	protected RMapService rmapService;
+
+	@Autowired
+	protected RDFHandler rdfHandler;
+	
+	@Autowired
+	protected SesameTriplestore triplestore;
+	
+	protected ORAdapter typeAdapter;	
 	protected java.net.URI testAgentURI; //used to pass back into rmapService since all of these use java.net.URI
 	protected ApplicationContext context;
-	protected static final String TEST_SPRINGCONTEXT_PATH = "testbeans.xml";
-	
+
+	protected RMapRequestAgent reqAgent; 
+		
 	protected String genericDiscoRdf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
@@ -71,18 +89,19 @@ public class ResponseManagerTest {
 		super();
 	}
 
+	
 	@Before
 	public void setUp() throws Exception {
-		this.context = new ClassPathXmlApplicationContext(TEST_SPRINGCONTEXT_PATH);
-		this.rmapService=RMapServiceFactoryIOC.getFactory().createService();
+		typeAdapter = new ORAdapter(triplestore);
 		this.testAgentURI = createTestAgent();
+        reqAgent = new RMapRequestAgent(testAgentURI);
 	}
 
 	protected java.net.URI createTestAgent() {
-		AGENT_URI = ORAdapter.getValueFactory().createURI("ark:/22573/rmaptestagent");
-		IDPROVIDER_URI = ORAdapter.getValueFactory().createURI("http://orcid.org/");
-		AUTH_ID = ORAdapter.getValueFactory().createURI("http://rmap-project.org/identities/rmaptestauthid");
-		NAME = ORAdapter.getValueFactory().createLiteral("RMap test Agent");
+		AGENT_URI = typeAdapter.getValueFactory().createIRI("ark:/22573/rmaptestagent");
+		IDPROVIDER_URI = typeAdapter.getValueFactory().createIRI("http://orcid.org/");
+		AUTH_ID = typeAdapter.getValueFactory().createIRI("http://rmap-project.org/identities/rmaptestauthid");
+		NAME = typeAdapter.getValueFactory().createLiteral("RMap test Agent");
 	
 		java.net.URI agentUri = null ;
 		
@@ -93,10 +112,12 @@ public class ResponseManagerTest {
 			if (!rmapService.isAgentId(agentUri)){
 				
 				RMapAgent agent = new ORMapAgent(AGENT_URI, IDPROVIDER_URI, AUTH_ID, NAME);
-				@SuppressWarnings("unused")
-				RMapEvent event = rmapService.createAgent(agent, agent.getId().getIri());
+
 				agentUri=agent.getId().getIri();
 				
+				RMapRequestAgent reqAgt = new RMapRequestAgent(agentUri);
+				@SuppressWarnings("unused")
+				RMapEvent event = rmapService.createAgent(agent, reqAgt);
 				if (rmapService.isAgentId(agentUri)){
 					System.out.println("Test Agent successfully created!  URI is ark:/29297/rmaptestagent");
 				}

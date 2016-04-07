@@ -9,19 +9,16 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class AgentResponseManagerTest extends ResponseManagerTest {
 
+	@Autowired
 	protected AgentResponseManager agentResponseManager;
+	
 	@Before
 	public void setUp() throws Exception {
-		try {
-			super.setUp();
-			agentResponseManager = (AgentResponseManager)context.getBean("agentResponseManager", AgentResponseManager.class);   
-		} catch (Exception e) {
-			fail("Exception thrown " + e.getMessage());
-			e.printStackTrace();
-		}
+
 	}
 
 	@Test
@@ -57,14 +54,16 @@ public class AgentResponseManagerTest extends ResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 
+	/*
 	@Test
 	public void testGetRMapAgent() {
 		fail("Not yet implemented");
-	}
+	}*/
 
+	/*
 	@Test
 	public void testCreateRMapAgent() {
 		fail("Not yet implemented");
-	}
+	}*/
 
 }

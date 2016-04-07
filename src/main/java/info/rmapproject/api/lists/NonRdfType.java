@@ -6,6 +6,11 @@ import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 
+/**
+ * HTTP response content types supported for non-RDF API calls
+ * @author khanson
+ *
+ */
 public enum NonRdfType {
 	JSON(MediaType.APPLICATION_JSON), 
 	PLAIN_TEXT(MediaType.TEXT_PLAIN);

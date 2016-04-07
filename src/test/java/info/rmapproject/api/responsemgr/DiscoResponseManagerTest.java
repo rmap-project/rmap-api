@@ -7,17 +7,15 @@ import static org.junit.Assert.fail;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.RdfMediaType;
-import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.Utils;
+import info.rmapproject.core.exception.RMapDefectiveArgumentException;
+import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.model.disco.RMapDiSCO;
-import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
-import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.rdfhandler.RDFType;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -25,9 +23,11 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 public class DiscoResponseManagerTest extends ResponseManagerTest {
-
+	
 	protected String discoRDFNoCreator = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
@@ -115,6 +115,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			+ "  dcterms:creator <http://datacite.org> ;"
 			+ "  ore:aggregates <http://dx.doi.org/10.5281/zenodo.13962> .";
 	
+	@Autowired
 	protected DiscoResponseManager discoResponseManager;
 	
 	/**
@@ -123,8 +124,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	@Before
 	public void setUp() throws Exception {
 		try { 
-			super.setUp();
-    		discoResponseManager = (DiscoResponseManager)context.getBean("discoResponseManager", DiscoResponseManager.class);   
+			super.setUp(); 
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Exception thrown " + e.getMessage());
@@ -175,7 +175,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	public void testGetRMapDisco() throws Exception{
 
     	Response response=null;
-    	RdfType returnType = null;
+    	RDFType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
    		if (matchingType!=null){
@@ -183,15 +183,12 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
     	}
 
 		//createDisco
-		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
 		String discoURI = rmapDisco.getId().toString();
         assertNotNull(discoURI);
 		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
-		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
-		
-		rmapService.createDiSCO(super.testAgentURI, rmapDisco);
+		rmapService.createDiSCO(rmapDisco, super.reqAgent);
 	
 		try {
 			response = discoResponseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
@@ -206,6 +203,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		//assertTrue(location.contains("disco"));
 		assertTrue(body.contains("DiSCO"));
 		assertEquals(200, response.getStatus());
+		rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
 	}
 	
 
@@ -215,29 +213,27 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	@Test
 	public void testGetRMapDiscoThatHasBeenUpdated() throws Exception{
 		//create 1 disco
-		RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
+		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
 		String discoURI = rmapDisco.getId().toString();
         assertNotNull(discoURI);
         
         //create another disco
 		InputStream rdf2 = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
-		RMapDiSCO rmapDisco2 = rdfHandler.rdf2RMapDiSCO(rdf2, Utils.getDiscoBaseUrl(), "TURTLE");
+		RMapDiSCO rmapDisco2 = rdfHandler.rdf2RMapDiSCO(rdf2, RDFType.TURTLE, "");
 		String discoURI2 = rmapDisco.getId().toString();
         assertNotNull(discoURI2);
         
 		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
-		RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
 		
 		//create a disco using the test agent
-		rmapService.createDiSCO(super.testAgentURI, rmapDisco);
+		rmapService.createDiSCO(rmapDisco, super.reqAgent);
 
 		//update the disco
-		rmapService.updateDiSCO(super.testAgentURI, new URI(discoURI), rmapDisco2);
+		rmapService.updateDiSCO(new URI(discoURI), rmapDisco2, super.reqAgent);
 		
     	Response response=null;
-    	RdfType returnType = null;
+    	RDFType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
    		if (matchingType!=null){
@@ -259,6 +255,8 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		//assertTrue(location.contains("disco"));
 		assertTrue(body.contains("DiSCO"));
 		assertEquals(200, response.getStatus());
+		rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
+		rmapService.deleteDiSCO(new URI(discoURI2), super.reqAgent);
 	}
 	
 
@@ -272,7 +270,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 
     	@SuppressWarnings("unused")
 		Response response=null;
-    	RdfType returnType = null;
+    	RDFType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
    		if (matchingType!=null){
@@ -307,14 +305,11 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	public void testCreateTurtleDisco() {
 		Response response = null;
 		try {
-			//create new ORMapAgent
-			//createAgentforTest();
-
 			//MockHttpSession httpsession = new MockHttpSession();
 			//httpsession.setAttribute(name, value);
 						
 			InputStream stream = new ByteArrayInputStream(discoTurtleRdf.getBytes(StandardCharsets.UTF_8));
-			response = discoResponseManager.createRMapDiSCO(stream, RdfType.TURTLE);
+			response = discoResponseManager.createRMapDiSCO(stream, RDFType.TURTLE);
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -324,7 +319,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	
 		assertNotNull(response);
 		assertEquals(201, response.getStatus());
-
+		
 	}
 
 
@@ -336,7 +331,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			//createAgentforTest();
 			
 			InputStream stream = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-			response = discoResponseManager.createRMapDiSCO(stream, RdfType.RDFXML);
+			response = discoResponseManager.createRMapDiSCO(stream, RDFType.RDFXML);
 			
 		} catch (Exception e) {
 			System.out.print(e.getMessage());
@@ -346,6 +341,16 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	
 		assertNotNull(response);
 		assertEquals(201, response.getStatus());
+		assertNotNull(response.getEntity());
+		
+
+		try {
+			rmapService.deleteDiSCO(new URI(response.getEntity().toString()), super.reqAgent);
+		} catch (RMapException | RMapDefectiveArgumentException
+				| URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 	
@@ -357,7 +362,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		boolean correctErrorThrown = false;
 		try {		
 			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
-			response = discoResponseManager.createRMapDiSCO(stream, RdfType.RDFXML);
+			response = discoResponseManager.createRMapDiSCO(stream, RDFType.RDFXML);
 			
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);

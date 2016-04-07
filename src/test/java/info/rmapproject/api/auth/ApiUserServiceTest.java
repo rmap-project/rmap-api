@@ -9,13 +9,16 @@ import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+@RunWith( SpringJUnit4ClassRunner.class )
+@ContextConfiguration({ "classpath*:/spring-*-context.xml" })
 public class ApiUserServiceTest {
-	
-	private ApplicationContext context;
-	private static final String TEST_SPRINGCONTEXT_PATH = "testbeans.xml";
+		
+	@Autowired
 	private ApiUserService apiUserService;	
 	
 	private static final String TEST_USER_NOAGENT = "usernoagent";
@@ -27,14 +30,12 @@ public class ApiUserServiceTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		this.context = new ClassPathXmlApplicationContext(TEST_SPRINGCONTEXT_PATH);
-		apiUserService = (ApiUserService)context.getBean("apiUserService", ApiUserService.class);   
 	}
 	
 	@Test
 	public void getSystemAgentUriForEventTest() {
 		try {
-			URI sysAgent = apiUserService.getSystemAgentUriForEvent();
+			URI sysAgent = apiUserService.getCurrentSystemAgentUri();
 			assertTrue(sysAgent.toString().equals("ark:/22573/rmaptestagent"));
 		} catch (RMapApiException e) {
 			fail("sysAgent not retrieved");
@@ -46,7 +47,7 @@ public class ApiUserServiceTest {
 	public void getSystemAgentUriForEventTestNoAgent() {
 		try {
 			@SuppressWarnings("unused")
-			URI sysAgent = apiUserService.getSystemAgentUriForEvent(TEST_USER_NOAGENT,TEST_PASS_NOAGENT);
+			URI sysAgent = apiUserService.getSystemAgentUri(TEST_USER_NOAGENT,TEST_PASS_NOAGENT);
 			fail("An exception should have been thrown");
 		} catch (RMapApiException e) {
 			assertTrue(e.getErrorCode().equals(ErrorCode.ER_USER_HAS_NO_AGENT));
@@ -56,7 +57,7 @@ public class ApiUserServiceTest {
 	@Test
 	public void getSystemAgentUriForEventTestWithAgent() {
 		try {
-			URI sysAgent = apiUserService.getSystemAgentUriForEvent(TEST_USER_WITHAGENT, TEST_PASS_WITHAGENT);
+			URI sysAgent = apiUserService.getSystemAgentUri(TEST_USER_WITHAGENT, TEST_PASS_WITHAGENT);
 			assertTrue(sysAgent.toString().equals("ark:/22573/userwithagent"));
 		} catch (RMapApiException e) {
 			fail("sysAgent not retrieved");
@@ -66,10 +67,31 @@ public class ApiUserServiceTest {
 	@Test
 	public void getSystemAgentUriForEventTestSyncAgent() {
 		try {
-			URI sysAgent = apiUserService.getSystemAgentUriForEvent(TEST_USER_TESTSYNC, TEST_PASS_TESTSYNC);
+			URI sysAgent = apiUserService.getSystemAgentUri(TEST_USER_TESTSYNC, TEST_PASS_TESTSYNC);
 			assertTrue(sysAgent.toString().length()>0);
 		} catch (RMapApiException e) {
 			fail("sysAgent not retrieved");
+		}		
+	}
+	
+	
+	@Test
+	public void getKeyUriForEventTest() {
+		try {
+			URI apiKeyUri = apiUserService.getApiKeyForEvent();
+			assertTrue(apiKeyUri.toString().equals("ark:/29297/fakermaptestkey"));
+		} catch (RMapApiException e) {
+			fail("key not retrieved");
+		}
+		
+	}
+
+	@Test
+	public void testValidateUser() {
+		try {
+			apiUserService.validateKey("jhu", "jhu");
+		} catch (RMapApiException e) {
+			fail("validation failed");
 		}		
 	}
 	

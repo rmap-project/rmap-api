@@ -4,7 +4,7 @@ import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfMediaType;
-import info.rmapproject.api.lists.RdfType;
+import info.rmapproject.core.rdfhandler.RDFType;
 
 import java.util.List;
 
@@ -51,8 +51,8 @@ public class HttpTypeMediator {
 	 * @return RdfType
 	 * @throws RMapApiException
 	 */
-	public static RdfType getRdfResponseType(HttpHeaders headers) throws RMapApiException	{
-		RdfType returnType = null;
+	public static RDFType getRdfResponseType(HttpHeaders headers) throws RMapApiException	{
+		RDFType returnType = null;
 		try {
 			List<MediaType> acceptTypes=headers.getAcceptableMediaTypes();
 			for (MediaType acceptType : acceptTypes)	{
@@ -64,7 +64,7 @@ public class HttpTypeMediator {
 			}
 			
 			if (returnType==null){
-				returnType=RdfType.TURTLE; //default response type
+				returnType=RDFType.TURTLE; //default response type
 			} 
 		} catch (Exception ex){
 			throw RMapApiException.wrap(ex,ErrorCode.ER_COULD_NOT_MAP_ACCEPT_PARAMETER_TO_TYPE);
@@ -79,8 +79,8 @@ public class HttpTypeMediator {
 	 * @return RdfType
 	 * @throws RMapApiException
 	 */
-	public static RdfType getRdfTypeOfRequest(HttpHeaders headers) throws RMapApiException	{
-		RdfType requestType = null;
+	public static RDFType getRdfTypeOfRequest(HttpHeaders headers) throws RMapApiException	{
+		RDFType requestType = null;
 		try {
 			MediaType contentType = headers.getMediaType();
 			RdfMediaType matchingType = null;
@@ -107,14 +107,12 @@ public class HttpTypeMediator {
 	 * @param rdfType
 	 * @return
 	 */
-	public static String getResponseRdfMediaType(String rmapType, RdfType rdfType){
+	public static String getResponseRdfMediaType(String rmapType, RDFType rdfType){
 		String mediatype;
 		
         switch (rdfType) {
             case JSONLD: mediatype = "application/vnd.rmap-project." + rmapType + "+ld+json; version=" + MEDIATYPE_VERSION;
                      break;
-            case RDFNQUADS: mediatype = "application/vnd.rmap-project." + rmapType + "+n-quads; version=" + MEDIATYPE_VERSION;
-            	break;
             case RDFXML: mediatype = "application/vnd.rmap-project." + rmapType + "+rdf+xml; version=" + MEDIATYPE_VERSION;
             	break;
             case TURTLE: mediatype = "text/vnd.rmap-project." + rmapType + "+turtle; version=" + MEDIATYPE_VERSION;

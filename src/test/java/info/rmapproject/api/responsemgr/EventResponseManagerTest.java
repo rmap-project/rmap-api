@@ -4,19 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import info.rmapproject.api.lists.RdfType;
-import info.rmapproject.api.utils.Utils;
-import info.rmapproject.core.model.RMapUri;
+import info.rmapproject.core.model.RMapIri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEventCreation;
-import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFHandlerFactoryIOC;
-import info.rmapproject.core.rmapservice.RMapService;
-import info.rmapproject.core.rmapservice.RMapServiceFactoryIOC;
+import info.rmapproject.core.rdfhandler.RDFType;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -24,15 +18,17 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class EventResponseManagerTest extends ResponseManagerTest {
 
-	protected EventResponseManager eventResponseManager = null;
+	@Autowired
+	protected EventResponseManager eventResponseManager;
+	
 	@Before
 	public void setUp() throws Exception {
 		try {
 			super.setUp();
-			eventResponseManager = (EventResponseManager)context.getBean("eventResponseManager", EventResponseManager.class);   
 		} catch (Exception e) {
 			fail("Exception thrown " + e.getMessage());
 			e.printStackTrace();
@@ -76,50 +72,47 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 	public void testGetRMapEvent() {
 		//create RMapStatement
 		RMapEventCreation event = null;
+		RMapIri discoIri;
 		try {			
-			RDFHandler rdfHandler = RDFHandlerFactoryIOC.getFactory().createRDFHandler();
 			InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
-			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, Utils.getDiscoBaseUrl(), "RDFXML");
-			RMapService rmapService = RMapServiceFactoryIOC.getFactory().createService();
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
 			
+			discoIri = rmapDisco.getId();
 			//TODO: System agent param is a default setting until we have proper auth handling.
-			event = (RMapEventCreation) rmapService.createDiSCO(new URI(AGENT_URI.toString()), rmapDisco);
+			event = (RMapEventCreation) rmapService.createDiSCO(rmapDisco, super.reqAgent);
 			
-		}
-		catch (Exception ex){
-			ex.printStackTrace();	
-			fail("Failed to create DiSCO. Exception thrown " + ex.getMessage());
-		}
-		
-		RMapUri eventUri = event.getId();
-		
-		assertNotNull(eventUri);
-		
-		String sEventUri = eventUri.toString();
-		assertTrue(sEventUri.length()>0);
-		assertTrue(sEventUri.contains("ark:"));
-		
-		//getRMapStatement
-		Response response = null;
-		try {
-			response = eventResponseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),RdfType.RDFXML);
+			RMapIri eventUri = event.getId();
+			
+			assertNotNull(eventUri);
+			
+			String sEventUri = eventUri.toString();
+			assertTrue(sEventUri.length()>0);
+			assertTrue(sEventUri.contains("ark:"));
+			
+			//getRMapStatement
+			Response response = null;
+			response = eventResponseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),RDFType.RDFXML);
 			//response = responseManager.getRMapEvent("ark%3A%2F27927%2Ftf9yhn14ef","RDFXML");
+	
+			assertNotNull(response);
+			//String location = response.getLocation().toString();
+			String body = response.getEntity().toString();
+			//assertTrue(location.contains("event"));
+			
+			assertTrue(body.contains("<eventTargetType xmlns=\"http://rmap-project.org/rmap/terms/\" rdf:resource=\"http://rmap-project.org/rmap/terms/DiSCO\"/>"));
+			assertEquals(200, response.getStatus());
+			
+			rmapService.deleteDiSCO(discoIri.getIri(), super.reqAgent);
+
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
 		}
-
-		assertNotNull(response);
-		//String location = response.getLocation().toString();
-		String body = response.getEntity().toString();
-		//assertTrue(location.contains("event"));
-		assertTrue(body.contains("<eventTargetType xmlns=\"http://rmap-project.org/rmap/terms/\">http://rmap-project.org/rmap/terms/1.0/DiSCO</eventTargetType>"));
-		assertEquals(200, response.getStatus());
 	}
 
-	@Test
+	/*@Test
 	public void testGetRMapEventRelatedObjs() {
 		fail("Not yet implemented");
-	}
+	}*/
 
 }

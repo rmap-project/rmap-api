@@ -24,18 +24,18 @@ public enum RdfMediaType {
 		this.exchangeFormat = exchangeFormat;
 	}
 
-	public String getAcceptType()  {
+	public String getMimeType()  {
 		return mimeType;
 	}
 
-	public RDFType getReturnType()  {
+	public RDFType getRdfType()  {
 		return exchangeFormat;
 	}
 
     public static RdfMediaType get(String mimeType) { 
     	Map<String, RdfMediaType> lookup = new HashMap<String, RdfMediaType>();
         for(RdfMediaType mt : EnumSet.allOf(RdfMediaType.class)) {
-            lookup.put(mt.getAcceptType(), mt);
+            lookup.put(mt.getMimeType(), mt);
         }
         return lookup.get(mimeType); 
     }

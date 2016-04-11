@@ -5,11 +5,6 @@ import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.responsemgr.StatementResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.core.exception.RMapDefectiveArgumentException;
-import info.rmapproject.core.model.request.RMapSearchParams;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -17,10 +12,11 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -126,27 +122,10 @@ public class StatementApiService {
 		    										@PathParam("subject") String subject, 
 		    										@PathParam("predicate") String predicate, 
 		    										@PathParam("object") String object, 
-		    										@QueryParam("status") String status,
-		    										@QueryParam("agents") String agents,
-		    										@QueryParam("from") String dateFrom,
-		    										@QueryParam("until") String dateUntil,
-		    										@QueryParam("page") String page,
-		    										@QueryParam("limit") String limit) throws RMapApiException {
+	    											@Context UriInfo uriInfo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	
-		RMapSearchParams params;
-		try {
-			agents = URLDecoder.decode(agents, "UTF-8"); //first make sure agents aren't encoded
-			params = new RMapSearchParams(dateFrom, dateUntil, status, agents, limit, page);
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw RMapApiException.wrap(ex, ErrorCode.ER_CANNOT_DECODE_URL);
-		}
-		catch (RMapDefectiveArgumentException ex) {
-			throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
-		}
-    	
-    	Response response = statementResponseManager.getStatementRelatedDiSCOs(subject, predicate, object, outputType, params);
+    	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    	Response response = statementResponseManager.getStatementRelatedDiSCOs(subject, predicate, object, outputType, queryParams);
 	    return response;	
     }
 
@@ -157,19 +136,17 @@ public class StatementApiService {
  *  
  *--------------------------------------
  */
-	/**
-	 * GET /stmts/{subject}/{predicate}/{object}/agents[?status={status}&from={dateFrom}&until={dateTo}]
+    /**
+     * GET /stmts/{subject}/{predicate}/{object}/agents[?status={status}&from={dateFrom}&until={dateTo}]
 	 * Returns list of URIs for RMap:Agents that asserted the statement matching the subject, predicate, object provided
+     * @param headers
      * @param subject
      * @param predicate
      * @param object
-     * @param status
-     * @param agents
-     * @param from
-     * @param until
-	 * @return Response
-	 * @throws RMapApiException
-	 */  
+     * @param uriInfo
+     * @return
+     * @throws RMapApiException
+     */
     @GET
     @Path("/{subject}/{predicate}/{object}/agents")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
@@ -177,27 +154,10 @@ public class StatementApiService {
     										@PathParam("subject") String subject, 
     										@PathParam("predicate") String predicate, 
     										@PathParam("object") String object, 
-    										@QueryParam("agents") String agents,
-    										@QueryParam("status") String status,
-    										@QueryParam("from") String dateFrom,
-    										@QueryParam("until") String dateUntil,
-    										@QueryParam("page") String page,
-    										@QueryParam("limit") String limit) throws RMapApiException {
+											@Context UriInfo uriInfo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	
-		RMapSearchParams params;
-		try {
-			agents = URLDecoder.decode(agents, "UTF-8"); //first make sure agents aren't encoded
-			params = new RMapSearchParams(dateFrom, dateUntil, status, agents, limit, page);
-		}
-		catch (UnsupportedEncodingException ex) {
-			throw RMapApiException.wrap(ex, ErrorCode.ER_CANNOT_DECODE_URL);
-		}
-		catch (RMapDefectiveArgumentException ex) {
-			throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
-		}    	
-    	
-    	Response response = statementResponseManager.getStatementAssertingAgents(subject, predicate, object, outputType, params);
+    	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    	Response response = statementResponseManager.getStatementAssertingAgents(subject, predicate, object, outputType, queryParams);
 	    return response;	
     }
        

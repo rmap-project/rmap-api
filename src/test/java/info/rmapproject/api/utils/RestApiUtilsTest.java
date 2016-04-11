@@ -3,8 +3,6 @@ package info.rmapproject.api.utils;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.core.model.RMapLiteral;
-import info.rmapproject.core.model.RMapValue;
 
 import org.junit.Test;
 
@@ -45,26 +43,6 @@ public class RestApiUtilsTest {
 		assertTrue(baseURL.startsWith("http"));		
 	}
 	
-	@Test 
-	public void testConvertObjectStringToRMapValue() throws RMapApiException {
-		String objectJustLiteral = "\"This is a literal\"";
-		String objectWithType = "\"2015-09-01\"^^http://www.w3.org/2001/XMLSchema#date";
-		String objectWithLanguage = "\"This is a literal\"@en";
-		
-		RMapValue object = Utils.convertObjectStringToRMapValue(objectJustLiteral);
-		RMapLiteral litObj = (RMapLiteral)object;
-		assertTrue(litObj.getValue().equals("This is a literal"));
-		
-		object = Utils.convertObjectStringToRMapValue(objectWithType);
-		litObj = (RMapLiteral)object;
-		assertTrue(litObj.getValue().equals("2015-09-01"));
-		assertTrue(litObj.getDatatype().toString().equals("http://www.w3.org/2001/XMLSchema#date"));
-
-		object = Utils.convertObjectStringToRMapValue(objectWithLanguage);
-		litObj = (RMapLiteral)object;
-		assertTrue(litObj.getValue().equals("This is a literal"));
-		assertTrue(litObj.getLanguage().equals("en"));
-	}
 		
 
 }

@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
@@ -87,11 +89,15 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 			
 			RMapSearchParams params = new RMapSearchParams();
 			params.setStatusCode(RMapStatus.ACTIVE);
+
+
+			MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<String, String>();
+			queryParams.add("page", "1");
 			
 			//get disco as related to statement
 			response = statementResponseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/ACCESS.2014.2332453", 
 															"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
-															"http://purl.org/spar/fabio/JournalArticle", NonRdfType.JSON, params);
+															"http://purl.org/spar/fabio/JournalArticle", NonRdfType.JSON, queryParams);
 
 			assertNotNull(response);
 			assertEquals(response.getStatus(),200);
@@ -117,13 +123,11 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 	        assertNotNull(discoURI);
 			rmapService.createDiSCO(rmapDisco, super.reqAgent);
 
-			RMapSearchParams params = new RMapSearchParams();
-			params.setStatusCode(RMapStatus.ACTIVE);
-			
+			MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<String, String>();
 			response = 
 					statementResponseManager.getStatementAssertingAgents("http://dx.doi.org/10.1109/ACCESS.2014.2332453", 
 														"http://www.w3.org/1999/02/22-rdf-syntax-ns#type", 
-														"http://purl.org/spar/fabio/JournalArticle", NonRdfType.JSON, params);
+														"http://purl.org/spar/fabio/JournalArticle", NonRdfType.JSON, queryParams);
 			assertNotNull(response);
 			assertEquals(response.getStatus(),200);
 			assertEquals(response.getEntity(),"{\""+ Terms.RMAP_AGENT_PATH + "\":[\"" + super.testAgentURI + "\"]}");

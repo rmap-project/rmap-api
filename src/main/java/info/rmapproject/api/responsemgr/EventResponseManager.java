@@ -3,6 +3,7 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.utils.Constants;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
@@ -14,7 +15,6 @@ import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.RMapObjectType;
 import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.rdfhandler.RDFHandler;
-import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.rmapservice.RMapService;
 
 import java.io.OutputStream;
@@ -110,7 +110,7 @@ public class EventResponseManager extends ResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapEvent(String strEventUri, RDFType returnType) throws RMapApiException	{
+	public Response getRMapEvent(String strEventUri, RdfMediaType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {
@@ -133,7 +133,7 @@ public class EventResponseManager extends ResponseManager {
 				throw new RMapApiException(ErrorCode.ER_CORE_READ_EVENT_RETURNED_NULL);
 			}
 			
-    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, returnType);
+    		OutputStream eventOutput = rdfHandler.event2Rdf(rmapEvent, returnType.getRdfType());
 			if (eventOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}	
@@ -141,7 +141,7 @@ public class EventResponseManager extends ResponseManager {
 			response = Response.status(Response.Status.OK)
 						.entity(eventOutput.toString())
 						.location(new URI(Utils.makeEventUrl(strEventUri)))
-        				.type(HttpTypeMediator.getResponseRdfMediaType("event", returnType)) //TODO move version number to a property?
+        				.type(HttpTypeMediator.getResponseRMapMediaType("event", returnType.getRdfType())) //TODO move version number to constants
 						.build();
 			
 			reqSuccessful = true;

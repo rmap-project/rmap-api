@@ -5,6 +5,7 @@ import info.rmapproject.api.auth.ApiUserService;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.utils.Constants;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.api.utils.URIListHandler;
@@ -140,7 +141,7 @@ public class DiscoResponseManager extends ResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	public Response getRMapDiSCO(String strDiscoUri, RDFType returnType) throws RMapApiException	{
+	public Response getRMapDiSCO(String strDiscoUri, RdfMediaType returnType) throws RMapApiException	{
 		Response response = getRMapDiSCO(strDiscoUri, returnType, false);
 		return response;
 	}
@@ -153,7 +154,7 @@ public class DiscoResponseManager extends ResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */
-	public Response getLatestRMapDiSCOVersion(String strDiscoUri, RDFType returnType) throws RMapApiException	{
+	public Response getLatestRMapDiSCOVersion(String strDiscoUri, RdfMediaType returnType) throws RMapApiException	{
 		Response response = getRMapDiSCO(strDiscoUri, returnType, true);
 		return response;
 	}
@@ -167,7 +168,7 @@ public class DiscoResponseManager extends ResponseManager {
 	 * @return Response
 	 * @throws RMapApiException
 	 */	
-	private Response getRMapDiSCO(String strDiscoUri, RDFType returnType, Boolean viewLatestVersion) throws RMapApiException	{
+	private Response getRMapDiSCO(String strDiscoUri, RdfMediaType returnType, Boolean viewLatestVersion) throws RMapApiException	{
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {			
@@ -208,7 +209,7 @@ public class DiscoResponseManager extends ResponseManager {
 			}
 
 			//OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDisco, returnType.getRdfType());
-			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDiscoDTO.getRMapDiSCO(), returnType);
+			OutputStream discoOutput = rdfHandler.disco2Rdf(rmapDiscoDTO.getRMapDiSCO(), returnType.getRdfType());
 			if (discoOutput ==null){
 				throw new RMapApiException(ErrorCode.ER_CORE_RDFHANDLER_OUTPUT_ISNULL);
 			}		
@@ -221,7 +222,7 @@ public class DiscoResponseManager extends ResponseManager {
 					.entity(discoOutput.toString())
 					.location(new URI(Utils.makeDiscoUrl(strDiscoUri)))
 					.header("Link",linkRel)						//switch this to link() or links()?
-					.type(HttpTypeMediator.getResponseRdfMediaType("disco", returnType)) //TODO move version number to a property?
+					.type(HttpTypeMediator.getResponseRMapMediaType("disco", returnType.getRdfType())) //TODO move version number to a property?
 					.build(); 
 			
 			reqSuccessful = true;
@@ -771,7 +772,7 @@ public class DiscoResponseManager extends ResponseManager {
 			List <URI> uriList = rmapService.getDiSCOEvents(uriDiscoUri);						
 			if (uriList==null || uriList.size()==0)	{ 
 				//if the object is found, should always have at least one event
-				throw new RMapApiException(ErrorCode.ER_CORE_GET_EVENTLIST_EMPTY); 
+				throw new RMapApiException(ErrorCode.ER_CORE_GET_URILIST_EMPTY); 
 			}	
 									
 			if (returnType==NonRdfType.PLAIN_TEXT)	{		

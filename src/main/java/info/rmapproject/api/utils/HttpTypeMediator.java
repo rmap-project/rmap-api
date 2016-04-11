@@ -48,23 +48,23 @@ public class HttpTypeMediator {
 	/**
 	 * 
 	 * @param headers
-	 * @return RdfType
+	 * @return RdfMediaType
 	 * @throws RMapApiException
 	 */
-	public static RDFType getRdfResponseType(HttpHeaders headers) throws RMapApiException	{
-		RDFType returnType = null;
+	public static RdfMediaType getRdfResponseType(HttpHeaders headers) throws RMapApiException	{
+		RdfMediaType returnType = null;
 		try {
 			List<MediaType> acceptTypes=headers.getAcceptableMediaTypes();
 			for (MediaType acceptType : acceptTypes)	{
 				RdfMediaType matchingType = RdfMediaType.get(acceptType.toString());
 				if (matchingType!=null){
-					returnType=matchingType.getReturnType();
+					returnType=matchingType;
 					break;
 				}    		
 			}
 			
 			if (returnType==null){
-				returnType=RDFType.TURTLE; //default response type
+				returnType=RdfMediaType.TEXT_TURTLE; //default response type
 			} 
 		} catch (Exception ex){
 			throw RMapApiException.wrap(ex,ErrorCode.ER_COULD_NOT_MAP_ACCEPT_PARAMETER_TO_TYPE);
@@ -89,7 +89,7 @@ public class HttpTypeMediator {
 				matchingType = RdfMediaType.get(sContentType);
 			}
 			if (matchingType!=null){
-				requestType=matchingType.getReturnType();
+				requestType=matchingType.getRdfType();
 			}
 			
 			if (requestType==null){
@@ -107,12 +107,12 @@ public class HttpTypeMediator {
 	 * @param rdfType
 	 * @return
 	 */
-	public static String getResponseRdfMediaType(String rmapType, RDFType rdfType){
+	public static String getResponseRMapMediaType(String rmapType, RDFType rdfType){
 		String mediatype;
 		
         switch (rdfType) {
             case JSONLD: mediatype = "application/vnd.rmap-project." + rmapType + "+ld+json; version=" + MEDIATYPE_VERSION;
-                     break;
+                break;
             case RDFXML: mediatype = "application/vnd.rmap-project." + rmapType + "+rdf+xml; version=" + MEDIATYPE_VERSION;
             	break;
             case TURTLE: mediatype = "text/vnd.rmap-project." + rmapType + "+turtle; version=" + MEDIATYPE_VERSION;

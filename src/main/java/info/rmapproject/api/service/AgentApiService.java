@@ -3,9 +3,9 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.responsemgr.AgentResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
-import info.rmapproject.core.rdfhandler.RDFType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -15,6 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
@@ -91,7 +92,7 @@ public class AgentApiService {
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.agent+turtle;charset=UTF-8;"
 				})
     public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
-    	RDFType returnType = HttpTypeMediator.getRdfResponseType(headers);
+    	RdfMediaType returnType = HttpTypeMediator.getRdfResponseType(headers);
     	Response response=agentResponseManager.getRMapAgent(agentUri, returnType);
     	return response;
     }
@@ -141,7 +142,8 @@ public class AgentApiService {
 												@PathParam("agentUri") String agentUri, 
 									    		@Context UriInfo uriInfo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response eventList = agentResponseManager.getRMapAgentEvents(agentUri, outputType, uriInfo);
+    	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    	Response eventList = agentResponseManager.getRMapAgentEvents(agentUri, outputType, queryParams);
     	return eventList;
     }
     
@@ -161,7 +163,8 @@ public class AgentApiService {
     											@Context UriInfo uriInfo) throws RMapApiException {
     	
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response discoList = agentResponseManager.getRMapAgentDiSCOs(agentUri, outputType, uriInfo);
+    	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+    	Response discoList = agentResponseManager.getRMapAgentDiSCOs(agentUri, outputType, queryParams);
     	return discoList;
     }
     

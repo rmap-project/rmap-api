@@ -175,12 +175,8 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	public void testGetRMapDisco() throws Exception{
 
     	Response response=null;
-    	RDFType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
-   		if (matchingType!=null){
-    		returnType=matchingType.getReturnType();
-    	}
 
 		//createDisco
 		InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
@@ -191,7 +187,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		rmapService.createDiSCO(rmapDisco, super.reqAgent);
 	
 		try {
-			response = discoResponseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),returnType);
+			response = discoResponseManager.getRMapDiSCO(URLEncoder.encode(discoURI, "UTF-8"),matchingType);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -233,17 +229,13 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		rmapService.updateDiSCO(new URI(discoURI), rmapDisco2, super.reqAgent);
 		
     	Response response=null;
-    	RDFType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
-   		if (matchingType!=null){
-    		returnType=matchingType.getReturnType();
-    	}
-   				
+
 		try {
 			//now get the updated DiSCO
 			String encodedUri = URLEncoder.encode(discoURI2, "UTF-8");
-			response = discoResponseManager.getRMapDiSCO(encodedUri,returnType);
+			response = discoResponseManager.getRMapDiSCO(encodedUri,matchingType);
 		} catch (Exception e) {
 			e.printStackTrace();			
 			fail("Exception thrown " + e.getMessage());
@@ -270,19 +262,15 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 
     	@SuppressWarnings("unused")
 		Response response=null;
-    	RDFType returnType = null;
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
-   		if (matchingType!=null){
-    		returnType=matchingType.getReturnType();
-    	}
    		
    		String discoURI = "ark:/27927/doesnotexist";
 		boolean correctErrorThrown = false;
    		
 		try {
 			String encodedUri = URLEncoder.encode(discoURI, "UTF-8");
-			response = discoResponseManager.getRMapDiSCO(encodedUri,returnType);
+			response = discoResponseManager.getRMapDiSCO(encodedUri,matchingType);
 		} catch (RMapApiException e) {
 			assertEquals(e.getErrorCode(), ErrorCode.ER_DISCO_OBJECT_NOT_FOUND);
 			e.printStackTrace();			

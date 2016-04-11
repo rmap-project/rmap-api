@@ -3,10 +3,10 @@ package info.rmapproject.api.service;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.api.lists.NonRdfType;
+import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.api.responsemgr.EventResponseManager;
 import info.rmapproject.api.utils.HttpTypeMediator;
 import info.rmapproject.core.model.RMapObjectType;
-import info.rmapproject.core.rdfhandler.RDFType;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -109,7 +109,7 @@ public class EventApiService {
 				"text/turtle;charset=UTF-8;", "application/vnd.rmap-project.event+turtle;charset=UTF-8;"
 				})
     public Response apiGetRMapEvent(@Context HttpHeaders headers, @PathParam("eventUri") String eventUri) throws RMapApiException {
-    	RDFType returnType = HttpTypeMediator.getRdfResponseType(headers);
+    	RdfMediaType returnType = HttpTypeMediator.getRdfResponseType(headers);
     	Response response=eventResponseManager.getRMapEvent(eventUri, returnType);
     	return response;
     }

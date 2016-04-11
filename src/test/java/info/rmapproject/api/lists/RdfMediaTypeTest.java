@@ -21,7 +21,7 @@ public class RdfMediaTypeTest {
 	public void testGet() {
 		RdfMediaType type = RdfMediaType.get("text/turtle");
 		assertEquals(type, RdfMediaType.TEXT_TURTLE);	
-		RDFType returnType = type.getReturnType();
+		RDFType returnType = type.getRdfType();
 		assertEquals(returnType, RDFType.TURTLE);
 	}
 

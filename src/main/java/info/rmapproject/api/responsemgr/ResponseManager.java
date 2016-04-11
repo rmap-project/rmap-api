@@ -3,19 +3,24 @@ package info.rmapproject.api.responsemgr;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
+import info.rmapproject.core.model.RMapIri;
+import info.rmapproject.core.model.RMapLiteral;
+import info.rmapproject.core.model.RMapValue;
 import info.rmapproject.core.model.request.DateRange;
 import info.rmapproject.core.model.request.RMapSearchParams;
 import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rmapservice.RMapService;
 
-import java.nio.charset.Charset;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.UriInfo;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 
 public abstract class ResponseManager {
 
@@ -25,6 +30,7 @@ public abstract class ResponseManager {
 	protected static final String PAGE_PARAM="page";
 	protected static final String AGENTS_PARAM="agents";
 	protected static final String STATUS_PARAM="status";
+	protected static final String PAGENUM_PLACEHOLDER = "**$#pagenum#$**";
 	
 	
 	protected final RMapService rmapService;
@@ -46,71 +52,128 @@ public abstract class ResponseManager {
 		this.rmapService = rmapService;
 		this.rdfHandler = rdfHandler;
 	}
-		
+	
 	/**
-	 * Creates pagination links for linkRef in response header
+	 * Creates path with a placeholder for the page number to be used in pagination links
+	 * @param path
+	 * @param queryParams
+	 * @param defaultLimit
+	 * @return
+	 * @throws RMapApiException
+	 */
+	protected String getPaginatedLinkTemplate(String path, MultivaluedMap<String,String> queryParams, Integer defaultLimit) 
+			throws RMapApiException{
+		try {
+			//First build a template query string to return to the user.
+			String from = queryParams.getFirst(FROM_PARAM);
+			//until is required when paginating, this adds the current date datetime if none specified
+			String until = queryParams.getFirst(UNTIL_PARAM);
+			if (until==null || until.trim().length()==0){
+				DateFormat df = new SimpleDateFormat("yyyyMMddhhmmss");
+				Date thisMoment = Calendar.getInstance().getTime();        
+				String untilNow = df.format(thisMoment);
+				until=untilNow;
+			}
+			String status = queryParams.getFirst(STATUS_PARAM);
+			String agents = queryParams.getFirst(AGENTS_PARAM);
+			
+			//limit is also required when paginating - if none is specified in the query, use the default
+			String limit = queryParams.getFirst(LIMIT_PARAM);
+			if (limit==null || limit.trim().length()==0){
+				limit=defaultLimit.toString();
+			}
+			String page = queryParams.getFirst(PAGE_PARAM);
+						
+			StringBuilder newReqUrl = new StringBuilder();
+			
+			if (from!=null) {
+				newReqUrl.append("&" + FROM_PARAM + "=" + from);
+			}
+			if (until!=null){
+				newReqUrl.append("&" + UNTIL_PARAM + "=" + until);			
+			}
+			if (status!=null){
+				newReqUrl.append("&" + STATUS_PARAM + "=" + status);
+			}
+			if (agents!=null){
+				newReqUrl.append("&" + AGENTS_PARAM + "=" + agents);
+			}
+			if (limit!=null){
+				newReqUrl.append("&" + LIMIT_PARAM + "=" + limit);		
+			}
+			if (page!=null){
+				newReqUrl.append("&" + PAGE_PARAM + "=" + PAGENUM_PLACEHOLDER);					
+			}
+			if (newReqUrl.length()>0){				
+				newReqUrl.substring(1); //remove extra "&" at start
+			}
+			newReqUrl.insert(0, path + "?");
+			
+			return newReqUrl.toString();
+	
+		} catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
+		}
+		
+	}
+			
+	/**
+	 * Creates pagination links for linkRef in response header. Note that duplicate parameters or irrelevant parameters will be ignored.
 	 * @param path
 	 * @param origQuery
 	 * @param page
 	 * @param includeNext
 	 * @return
 	 */
-	protected String generatePaginationLinks(String path, UriInfo uriInfo, Integer page, boolean includeNext){
-
-		String query = uriInfo.getRequestUri().getQuery(); 
-		String numberPlaceholder = "**#pagenum#**";
+	protected String generatePaginationLinks(String path, MultivaluedMap<String,String> queryParams, 
+											Integer defaultLimit, boolean includeNext) throws RMapApiException{
 		
-		List<NameValuePair> queryParams = URLEncodedUtils.parse(query, Charset.forName("UTF-8"));
-		StringBuilder newReqUrl = new StringBuilder(path + "?");
-		boolean firstpass = true;
-		boolean pageParamExists = false;
-	    for(NameValuePair param : queryParams) {
-	    	if (!firstpass) {
-	    		newReqUrl.append("&");
-	    	}
-	    	if(param.getName().equals("page")){
-	    		pageParamExists=true;
-	    		newReqUrl.append(param.getName() + "=" + numberPlaceholder);
-	    	} else {
-	    		newReqUrl.append(param.getName() + "=" + param.getValue());		    		
-	    	}
-	    	firstpass=false;
-	    }
-	    if (!pageParamExists){
-	    	newReqUrl.append("&page=" + numberPlaceholder);
-	    }
-	    
-	    StringBuilder paginationLinks = new StringBuilder();
-	    if (page>1){
-	    	String firstUrl = newReqUrl.toString();
-	    	firstUrl = firstUrl.replace(numberPlaceholder, "1");
-	    	paginationLinks.append("<" + firstUrl + ">" + ";rel=\"first\"");
-	    	
-	    	String previousUrl = path + newReqUrl.toString();
-	    	Integer previousPage = page-1;
-	    	previousUrl = previousUrl.replace(numberPlaceholder, previousPage.toString());
-	    	paginationLinks.append("<" + previousUrl + ">" + ";rel=\"previous\"");
-	    }
-	    
-	    if (includeNext){
-	    	String nextUrl = newReqUrl.toString();
-	    	Integer nextPage = page+1;
-	    	nextUrl = nextUrl.replace(numberPlaceholder, nextPage.toString());
-	    	paginationLinks.append("<" + nextUrl + ">" + ";rel=\"next\"");	    	
-	    }	    
-		return paginationLinks.toString();
+		try {
+			Integer pageNum = 1;
+			
+			String page = queryParams.getFirst(PAGE_PARAM);
+			page = page.trim();
+			pageNum = Integer.parseInt(page);
+			
+			String newReqUrl = getPaginatedLinkTemplate(path, queryParams, defaultLimit);
+			
+			//now build the pagination links
+		    StringBuilder paginationLinks = new StringBuilder();
+		    if (pageNum>1){
+		    	String firstUrl = newReqUrl.toString();
+		    	firstUrl = firstUrl.replace(PAGENUM_PLACEHOLDER, "1");
+		    	paginationLinks.append("<" + firstUrl + ">" + ";rel=\"first\"");
+		    	
+		    	String previousUrl = path + newReqUrl.toString();
+		    	Integer previousPage = pageNum-1;
+		    	previousUrl = previousUrl.replace(PAGENUM_PLACEHOLDER, previousPage.toString());
+		    	paginationLinks.append("<" + previousUrl + ">" + ";rel=\"previous\"");
+		    }
+		    
+		    if (includeNext){
+		    	String nextUrl = newReqUrl.toString();
+		    	Integer nextPage = pageNum+1;
+		    	nextUrl = nextUrl.replace(PAGENUM_PLACEHOLDER, nextPage.toString());
+		    	paginationLinks.append("<" + nextUrl + ">" + ";rel=\"next\"");	    	
+		    }	    
+			return paginationLinks.toString();
+	
+		} catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
+		}
 	}
 
 	/**
-	 * Creates search parameters object from UriInfo
+	 * Creates search parameters object from the queryParams. Note that duplicate parameters or irrelevant parameters will be ignored.
 	 * @param uriInfo
 	 * @param includeNext
 	 * @return
 	 */
-	protected RMapSearchParams generateSearchParamObj(UriInfo uriInfo) throws RMapApiException{
+	protected RMapSearchParams generateSearchParamObj(MultivaluedMap<String,String> queryParams) throws RMapApiException{
 		RMapSearchParams params = new RMapSearchParams();
-		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters(); 
-		
+		if (queryParams==null || queryParams.size()==0){
+			return params; //default params
+		}
 		try {
 			String from = queryParams.getFirst(FROM_PARAM);
 			String until = queryParams.getFirst(UNTIL_PARAM);
@@ -135,7 +198,6 @@ public abstract class ResponseManager {
 			if (page!=null){
 				params.setPage(page);				
 			}
-			
 		}
 		catch (RMapDefectiveArgumentException ex) {
 			throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
@@ -144,7 +206,91 @@ public abstract class ResponseManager {
 		return params;
 	}
 		
+	/**
+	 * Converts a string of text passed in as the "object" through the API request to a valid RMapValue
+	 * determining whether it is a typed literal, URI etc.
+	 * @param sPathString
+	 * @return
+	 * @throws RMapApiException
+	 */
+	public RMapValue convertPathStringToRMapValue(String sPathString) throws RMapApiException{
+		RMapValue object = null;
+		try {
+			sPathString = URLDecoder.decode(sPathString, "UTF-8");
 	
+			if (sPathString.startsWith("\"")) {
+				String literal = sPathString.substring(1, sPathString.lastIndexOf("\""));
+				String literalProp = sPathString.substring(sPathString.lastIndexOf("\"")+1);
+				
+				if (literalProp.contains("^^")) {
+					String sType = literalProp.substring(literalProp.indexOf("^^")+2);
+					RMapIri type = null;
+					sType = sType.trim();
+	
+					sType = removeUriAngleBrackets(sType);
+					type = new RMapIri(new URI(sType));
+					object = new RMapLiteral(literal, type);
+				}
+				else if (literalProp.contains("@")) {
+					String language = literalProp.substring(literalProp.indexOf("@")+1);
+					language = language.trim();
+					object = new RMapLiteral(literal, language);
+				}
+				else {
+					object = new RMapLiteral(literal);
+				}
+			}
+			else { //should be a URI
+				object = new RMapIri(new URI(sPathString));
+			}	
+		}
+		catch (URISyntaxException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+		catch (UnsupportedEncodingException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+	
+		return object;
+	}
+	
+	/**
+	 * Converts a string of text passed in as a "resource" (including subject or predicate) through the API request to a valid java.net.URI
+	 * @param sPathString
+	 * @return
+	 * @throws RMapApiException
+	 */
+	public URI convertPathStringToURI(String sPathString) throws RMapApiException{
+		URI uri = null;
+		try {
+			sPathString = URLDecoder.decode(sPathString, "UTF-8");
+			sPathString = removeUriAngleBrackets(sPathString);
+			uri = new URI(sPathString);
+		}
+		catch (URISyntaxException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+		catch (UnsupportedEncodingException ex){
+			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
+		}
+		return uri;
+	}
+	
+	/**
+	 * Checks for angle brackets around a string URI and removes them if found
+	 * @param sUri
+	 * @return
+	 */
+	public String removeUriAngleBrackets(String sUri) {
+		//remove any angle brackets on a string Uri
+		if (sUri.startsWith("<")) {
+			sUri = sUri.substring(1);
+		}
+		if (sUri.endsWith(">")) {
+			sUri = sUri.substring(0,sUri.length()-1);
+		}
+		return sUri;
+	}
 	
 	
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.core.model.RMapIri;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEventCreation;
@@ -91,7 +92,7 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 			
 			//getRMapStatement
 			Response response = null;
-			response = eventResponseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),RDFType.RDFXML);
+			response = eventResponseManager.getRMapEvent(URLEncoder.encode(sEventUri, "UTF-8"),RdfMediaType.APPLICATION_RDFXML);
 			//response = responseManager.getRMapEvent("ark%3A%2F27927%2Ftf9yhn14ef","RDFXML");
 	
 			assertNotNull(response);

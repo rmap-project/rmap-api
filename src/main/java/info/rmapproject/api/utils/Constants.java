@@ -1,7 +1,7 @@
 package info.rmapproject.api.utils;
 
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.core.rdfhandler.RDFType;
+import info.rmapproject.api.lists.RdfMediaType;
 
 public final class Constants  {
 	  /**File path for error message text*/
@@ -13,7 +13,7 @@ public final class Constants  {
 	  
 	  public static final String BASE_URL = "";
 
-	  public static final RDFType DEFAULT_RDF_TYPE = RDFType.TURTLE;
+	  public static final RdfMediaType DEFAULT_RDF_TYPE = RdfMediaType.TEXT_TURTLE;
 	  public static final NonRdfType DEFAULT_NONRDF_TYPE = NonRdfType.JSON;
 
 	  private Constants(){

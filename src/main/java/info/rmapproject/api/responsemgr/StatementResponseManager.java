@@ -12,17 +12,17 @@ import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.exception.RMapObjectNotFoundException;
 import info.rmapproject.core.model.RMapValue;
 import info.rmapproject.core.model.request.RMapSearchParams;
+import info.rmapproject.core.rdfhandler.RDFHandler;
 import info.rmapproject.core.rmapservice.RMapService;
 import info.rmapproject.core.utils.Terms;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,23 +33,19 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author khanson
  *
  */
-public class StatementResponseManager {
-
-	private final RMapService rmapService;
+public class StatementResponseManager extends ResponseManager {
 	
 	/**
-	 * Constructor autowires the RMapService 
+	 * Constructor autowires the RMapService and RDFHandler
 	 * @param rmapService
+	 * @param rdfHandler
 	 * @throws RMapApiException
 	 */
 	@Autowired
-	public StatementResponseManager(RMapService rmapService) throws RMapApiException {
-		if (rmapService ==null){
-			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_RMAP_SERVICE);
-		}
-		this.rmapService = rmapService;
+	public StatementResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
+		super(rmapService, rdfHandler);
 	}
-	
+		
 	
 	/**
 	 * Displays Statement Service Options
@@ -117,8 +113,10 @@ public class StatementResponseManager {
 	 * @throws RMapApiException
 	 */	
 	public Response getStatementRelatedDiSCOs(String subject, String predicate, 
-											String object, NonRdfType returnType, RMapSearchParams params) throws RMapApiException	{
+											String object, NonRdfType returnType,
+											MultivaluedMap<String,String> queryParams) throws RMapApiException	{
 		Response response = null;
+		boolean reqSuccessful = false;
 		try {
 			if (subject==null || subject.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_SUBJECT_PROVIDED); 
@@ -130,17 +128,16 @@ public class StatementResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_OBJECT_PROVIDED); 
 			}
 			if (returnType==null) {returnType = Constants.DEFAULT_NONRDF_TYPE;}
+
+			URI rmapSubject = convertPathStringToURI(subject);
+			URI rmapPredicate = convertPathStringToURI(predicate);
+			RMapValue rmapObject = convertPathStringToRMapValue(object);
 			
-			subject = URLDecoder.decode(subject, "UTF-8");
-			subject = Utils.removeUriAngleBrackets(subject);
-			URI rmapSubject = new URI(subject);
-
-			predicate = URLDecoder.decode(predicate, "UTF-8");
-			predicate = Utils.removeUriAngleBrackets(predicate);
-			URI rmapPredicate = new URI(predicate);
-
-			object = URLDecoder.decode(object, "UTF-8");
-			RMapValue rmapObject = Utils.convertObjectStringToRMapValue(object);
+			RMapSearchParams params = generateSearchParamObj(queryParams);
+			
+			Integer limit=params.getLimit();
+			//we are going to get one extra record to see if we need a "next"
+			params.setLimit(limit+1);
 						
 			List<URI> matchingObjects = rmapService.getStatementRelatedDiSCOs(rmapSubject, rmapPredicate, rmapObject, params);
 
@@ -152,24 +149,41 @@ public class StatementResponseManager {
 				throw new RMapApiException(ErrorCode.ER_STMT_NOT_FOUND);
 			}
 			
-			String outputString = "";
-			if (returnType == NonRdfType.PLAIN_TEXT)	{
-				outputString= URIListHandler.uriListToPlainText(matchingObjects);
+			ResponseBuilder responseBldr = null;
+			
+			//if the list is longer than the limit and there is currently no page defined, then do 303 with pagination
+			if (!queryParams.containsKey(PAGE_PARAM)
+					&& matchingObjects.size()>limit){  
+				//start See Other response to indicate need for pagination
+				String otherUrl = getPaginatedLinkTemplate(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit);
+				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				responseBldr = Response.status(Response.Status.SEE_OTHER)
+						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
+						.location(new URI(otherUrl));		
 			}
-			else	{
-				outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_DISCO_PATH);		
-			}
-			response = Response.status(Response.Status.OK)
+			else { 
+				//show results list as normal
+				String outputString="";		
+				if (returnType==NonRdfType.PLAIN_TEXT)	{		
+					outputString= URIListHandler.uriListToPlainText(matchingObjects);
+				}
+				else	{
+					outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_DISCO_PATH);		
+				}
+				responseBldr = Response.status(Response.Status.OK)
 						.entity(outputString)
-						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType))
-						.build();
+						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
+
+				if (matchingObjects.size()>limit || params.getPage()>1) {
+					boolean showNextLink=matchingObjects.size()>limit;
+					String pageLinks = 
+							generatePaginationLinks(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit, showNextLink);
+					responseBldr.header("Link",pageLinks);
+				}
+			}
+			response = responseBldr.build();
+			reqSuccessful = true;
 	    }
-		catch (URISyntaxException ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-		}
-		catch (UnsupportedEncodingException ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-		}
 		catch(RMapApiException ex)	{
         	throw RMapApiException.wrap(ex);
 		}
@@ -186,9 +200,8 @@ public class StatementResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService!=null){rmapService.closeConnection();}
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
 	}
@@ -203,9 +216,10 @@ public class StatementResponseManager {
 	 * @return HTTP Response
 	 * @throws RMapApiException
 	 */	
-	public Response getStatementAssertingAgents(String subject, String predicate, String object, NonRdfType returnType, RMapSearchParams params) 
-			throws RMapApiException	{
+	public Response getStatementAssertingAgents(String subject, String predicate, String object, NonRdfType returnType, 
+												MultivaluedMap<String,String> queryParams) throws RMapApiException	{
 		Response response = null;
+		boolean reqSuccessful = false;
 		try {
 			if (subject==null || subject.length()==0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_SUBJECT_PROVIDED); 
@@ -217,37 +231,59 @@ public class StatementResponseManager {
 				throw new RMapApiException(ErrorCode.ER_NO_STMT_OBJECT_PROVIDED); 
 			}
 			if (returnType==null) {returnType = Constants.DEFAULT_NONRDF_TYPE;}
+
+			URI rmapSubject = convertPathStringToURI(subject);
+			URI rmapPredicate = convertPathStringToURI(predicate);
+			RMapValue rmapObject = convertPathStringToRMapValue(object);
 			
-			subject = URLDecoder.decode(subject, "UTF-8");
-			predicate = URLDecoder.decode(predicate, "UTF-8");
-			object = URLDecoder.decode(object, "UTF-8");
+			RMapSearchParams params = generateSearchParamObj(queryParams);
 			
-			URI rmapSubject = new URI(subject);
-			URI rmapPredicate = new URI(predicate);
-			RMapValue rmapObject = Utils.convertObjectStringToRMapValue(object);
+			Integer limit=params.getLimit();
+			//we are going to get one extra record to see if we need a "next"
+			params.setLimit(limit+1);
+			
 			List<URI> matchingObjects = new ArrayList<URI>();
 			matchingObjects = rmapService.getStatementAssertingAgents(rmapSubject, rmapPredicate, rmapObject, params);
 			if (matchingObjects == null){
 				throw new RMapApiException(ErrorCode.ER_CORE_COULDNT_RETRIEVE_STMT_ASSERTINGAGTS);
 			}
+
+			ResponseBuilder responseBldr = null;
 			
-			String outputString = "";
-			if (returnType == NonRdfType.PLAIN_TEXT)	{	
-				outputString= URIListHandler.uriListToPlainText(matchingObjects);
+			//if the list is longer than the limit and there is currently no page defined, then do 303 with pagination
+			if (!queryParams.containsKey(PAGE_PARAM)
+					&& matchingObjects.size()>limit){  
+				//start See Other response to indicate need for pagination
+				String otherUrl = getPaginatedLinkTemplate(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit);
+				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				responseBldr = Response.status(Response.Status.SEE_OTHER)
+						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
+						.location(new URI(otherUrl));		
 			}
-			else	{
-				outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_AGENT_PATH);	
-			}
-			response = Response.status(Response.Status.OK)
+			else { 
+				//show results list as normal
+				String outputString="";		
+				if (returnType==NonRdfType.PLAIN_TEXT)	{		
+					outputString= URIListHandler.uriListToPlainText(matchingObjects);
+				}
+				else	{
+					outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_AGENT_PATH);		
+				}
+				responseBldr = Response.status(Response.Status.OK)
 						.entity(outputString)
-						.build();
+						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
+
+				if (matchingObjects.size()>limit || params.getPage()>1) {
+					boolean showNextLink=matchingObjects.size()>limit;
+					String pageLinks = 
+							generatePaginationLinks(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit, showNextLink);
+					responseBldr.header("Link",pageLinks);
+				}
+			}
+			response = responseBldr.build();
+			
+			reqSuccessful=true;
 	    }
-		catch (URISyntaxException ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-		}
-		catch (UnsupportedEncodingException ex){
-			throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-		}
 		catch(RMapApiException ex)	{
         	throw RMapApiException.wrap(ex);
 		}
@@ -264,9 +300,8 @@ public class StatementResponseManager {
         	throw RMapApiException.wrap(ex,ErrorCode.ER_UNKNOWN_SYSTEM_ERROR);
 		}
 		finally{
-			if (rmapService!=null){
-				rmapService.closeConnection();
-			}
+			if (rmapService!=null){rmapService.closeConnection();}
+			if (!reqSuccessful && response!=null) response.close();
 		}
 		return response;
 	}

@@ -2,12 +2,8 @@ package info.rmapproject.api.utils;
 
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.core.model.RMapIri;
-import info.rmapproject.core.model.RMapLiteral;
-import info.rmapproject.core.model.RMapValue;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.MissingResourceException;
 /**
@@ -141,6 +137,20 @@ public class Utils {
 		String resourceUrl = appendEncodedUriToURL(getResourceBaseUrl(),uri);
 		return resourceUrl;
 	}
+
+	/**
+	 * Appends Resource URI to Resource API URL
+	 * @param uri
+	 * @return
+	 * @throws RMapApiException
+	 */
+	public static String makeStmtUrl(String s, String p, String o) throws RMapApiException {
+		String stmtUrl = appendEncodedUriToURL(getStmtBaseUrl(),s) + "/";
+		stmtUrl = appendEncodedUriToURL(stmtUrl,p) + "/";
+		stmtUrl = appendEncodedUriToURL(stmtUrl,o);
+		return stmtUrl;
+	}
+	
 	
 	/**
 	 * Appends encoded URI to an API URL
@@ -152,6 +162,9 @@ public class Utils {
 	public static String appendEncodedUriToURL(String baseURL, String objUri) throws RMapApiException {
 		String url = null;
 		try {
+			//may already been encoded, so let's decode first to make sure we aren't double encoding
+			objUri = URLDecoder.decode(objUri,"UTF-8");
+			//now encode!
 			url = baseURL + URLEncoder.encode(objUri,"UTF-8");
 		}
 		catch (Exception e)	{
@@ -159,75 +172,6 @@ public class Utils {
 		}
 		return url;
 	}
-	
-		
-	/**
-	 * Converts a string of text passed in as the "object" through the API request to a valid RMapValue
-	 * determining whether it is a typed literal, URI etc.
-	 * @param sObject
-	 * @return
-	 * @throws RMapApiException
-	 * @throws URISyntaxException 
-	 */
-	public static RMapValue convertObjectStringToRMapValue(String sObject) throws RMapApiException{
-		RMapValue object = null;
-		
-		if (sObject.startsWith("\"")) {
-			String literal = sObject.substring(1, sObject.lastIndexOf("\""));
-			String literalProp = sObject.substring(sObject.lastIndexOf("\"")+1);
-			
-			if (literalProp.contains("^^")) {
-				String sType = literalProp.substring(literalProp.indexOf("^^")+2);
-				RMapIri type = null;
-				sType = sType.trim();
 
-				sType = removeUriAngleBrackets(sType);
-				
-				try {
-					type = new RMapIri(new URI(sType));
-				}
-				catch (Exception ex){
-					throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);
-				}
-				
-				object = new RMapLiteral(literal, type);
-			}
-			else if (literalProp.contains("@")) {
-				String language = literalProp.substring(literalProp.indexOf("@")+1);
-				language = language.trim();
-				object = new RMapLiteral(literal, language);
-			}
-			else {
-				object = new RMapLiteral(literal);
-			}
-		}
-		else { //should be a URI
-			try {
-				object = new RMapIri(new URI(sObject));
-			}
-			catch (Exception ex){
-				throw RMapApiException.wrap(ex, ErrorCode.ER_PARAM_WONT_CONVERT_TO_URI);					
-			}
-		}
-		
-		return object;
-	}
-		
-	/**
-	 * Checks for angle brackets around a string URI and removes them if found
-	 * @param sUri
-	 * @return
-	 */
-	public static String removeUriAngleBrackets(String sUri) {
-		//remove any angle brackets on a string Uri
-		if (sUri.startsWith("<")) {
-			sUri = sUri.substring(1);
-		}
-		if (sUri.endsWith(">")) {
-			sUri = sUri.substring(0,sUri.length()-1);
-		}
-		return sUri;
-	}
-	
 	
 }

@@ -8,6 +8,8 @@ import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.core.model.RMapObjectType;
 import info.rmapproject.core.model.disco.RMapDiSCO;
+import info.rmapproject.core.model.event.RMapEvent;
+import info.rmapproject.core.model.event.RMapEventType;
 import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.utils.Terms;
 
@@ -16,6 +18,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -229,5 +232,46 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 		}
 
 	}
+	
+		
+	/**
+	 * Make sure it doesn't fail if you pass in a url with a space.
+	 * URL spaces should be replaced with "+"
+	 */
+	@Test
+	public void getRMapResourcesSpaceInUrl() {
+		
+		Response response = null;
+		try {
+			//createDisco
+			InputStream rdf = new ByteArrayInputStream(discoWithSpaceInUrl.getBytes(StandardCharsets.UTF_8));
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
+			String discoURI = rmapDisco.getId().toString();
+	        assertNotNull(discoURI);
+			rmapService.createDiSCO(rmapDisco, super.reqAgent);
+						
+			MultivaluedMap<String, String> params = new MultivaluedHashMap<String, String>();
+			params.add("page", "1");
+			params.add("limit", "10");
+			String encodedUrl = "http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585+mm.zip";
+			response = resourceResponseManager.getRMapResourceTriples(encodedUrl, RdfMediaType.APPLICATION_RDFXML, params);
+
+			assertNotNull(response);
+			//String location = response.getLocation().toString();
+			String body = response.getEntity().toString();
+			//assertTrue(location.contains("resource"));
+			assertTrue(body.contains(encodedUrl));
+			assertEquals(200, response.getStatus());	
+			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+	
+	}
+	
+	
 	
 }

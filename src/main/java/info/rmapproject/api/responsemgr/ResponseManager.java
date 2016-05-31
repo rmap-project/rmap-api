@@ -31,6 +31,7 @@ public abstract class ResponseManager {
 	protected static final String AGENTS_PARAM="agents";
 	protected static final String STATUS_PARAM="status";
 	protected static final String PAGENUM_PLACEHOLDER = "**$#pagenum#$**";
+	protected static final String FIRST_PAGE="1";
 	
 	
 	protected final RMapService rmapService;
@@ -52,6 +53,8 @@ public abstract class ResponseManager {
 		this.rmapService = rmapService;
 		this.rdfHandler = rdfHandler;
 	}
+	
+	//TODO: all of these pagination and queryparam functions need to be sorted out - extracted out into new class(es)
 	
 	/**
 	 * Creates path with a placeholder for the page number to be used in pagination links
@@ -81,9 +84,7 @@ public abstract class ResponseManager {
 			String limit = queryParams.getFirst(LIMIT_PARAM);
 			if (limit==null || limit.trim().length()==0){
 				limit=defaultLimit.toString();
-			}
-			String page = queryParams.getFirst(PAGE_PARAM);
-						
+			}						
 			StringBuilder newReqUrl = new StringBuilder();
 			
 			if (from!=null) {
@@ -101,11 +102,10 @@ public abstract class ResponseManager {
 			if (limit!=null){
 				newReqUrl.append("&" + LIMIT_PARAM + "=" + limit);		
 			}
-			if (page!=null){
-				newReqUrl.append("&" + PAGE_PARAM + "=" + PAGENUM_PLACEHOLDER);					
-			}
-			if (newReqUrl.length()>0){				
-				newReqUrl.substring(1); //remove extra "&" at start
+			newReqUrl.append("&" + PAGE_PARAM + "=" + PAGENUM_PLACEHOLDER);					
+			
+			if (newReqUrl.length()>0){
+				newReqUrl.deleteCharAt(0); //remove extra "&" at start
 			}
 			newReqUrl.insert(0, path + "?");
 			
@@ -121,37 +121,27 @@ public abstract class ResponseManager {
 	 * Creates pagination links for linkRef in response header. Note that duplicate parameters or irrelevant parameters will be ignored.
 	 * @param path
 	 * @param origQuery
-	 * @param page
+	 * @param offset
 	 * @param includeNext
 	 * @return
 	 */
-	protected String generatePaginationLinks(String path, MultivaluedMap<String,String> queryParams, 
-											Integer defaultLimit, boolean includeNext) throws RMapApiException{
+	protected String generatePaginationLinks(String pageUrlTemplate, Integer pageNum, boolean includeNext) throws RMapApiException{
 		
 		try {
-			Integer pageNum = 1;
-			
-			String page = queryParams.getFirst(PAGE_PARAM);
-			page = page.trim();
-			pageNum = Integer.parseInt(page);
-			
-			String newReqUrl = getPaginatedLinkTemplate(path, queryParams, defaultLimit);
-			
 			//now build the pagination links
 		    StringBuilder paginationLinks = new StringBuilder();
 		    if (pageNum>1){
-		    	String firstUrl = newReqUrl.toString();
+		    	String firstUrl = pageUrlTemplate.toString();
 		    	firstUrl = firstUrl.replace(PAGENUM_PLACEHOLDER, "1");
 		    	paginationLinks.append("<" + firstUrl + ">" + ";rel=\"first\"");
 		    	
-		    	String previousUrl = path + newReqUrl.toString();
 		    	Integer previousPage = pageNum-1;
-		    	previousUrl = previousUrl.replace(PAGENUM_PLACEHOLDER, previousPage.toString());
+		    	String previousUrl = pageUrlTemplate.replace(PAGENUM_PLACEHOLDER, previousPage.toString());
 		    	paginationLinks.append("<" + previousUrl + ">" + ";rel=\"previous\"");
 		    }
 		    
 		    if (includeNext){
-		    	String nextUrl = newReqUrl.toString();
+		    	String nextUrl = pageUrlTemplate.toString();
 		    	Integer nextPage = pageNum+1;
 		    	nextUrl = nextUrl.replace(PAGENUM_PLACEHOLDER, nextPage.toString());
 		    	paginationLinks.append("<" + nextUrl + ">" + ";rel=\"next\"");	    	
@@ -196,7 +186,7 @@ public abstract class ResponseManager {
 				params.setLimit(limit);				
 			}
 			if (page!=null){
-				params.setPage(page);				
+				params.setOffsetByPage(page);				
 			}
 		}
 		catch (RMapDefectiveArgumentException ex) {
@@ -264,6 +254,7 @@ public abstract class ResponseManager {
 		URI uri = null;
 		try {
 			sPathString = URLDecoder.decode(sPathString, "UTF-8");
+			sPathString = sPathString.replace(" ", "+");
 			sPathString = removeUriAngleBrackets(sPathString);
 			uri = new URI(sPathString);
 		}
@@ -290,6 +281,48 @@ public abstract class ResponseManager {
 			sUri = sUri.substring(0,sUri.length()-1);
 		}
 		return sUri;
+	}
+	
+	/**
+	 * Extracts page number as integer from query parameters
+	 * @param queryParams
+	 * @return
+	 * @throws RMapApiException
+	 */
+	public Integer extractPage(MultivaluedMap<String,String> queryParams) throws RMapApiException {
+		Integer iPage = null;
+		
+		if (queryParams.containsKey(PAGE_PARAM)) {
+			try{
+				String page=queryParams.getFirst(PAGE_PARAM).trim();
+				iPage = Integer.parseInt(page);
+			}
+			catch (Exception ex) {
+				throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
+			}
+		}
+		return iPage;
+	}
+	
+
+	/**
+	 * Extracts limit as integer from query parameters
+	 * @param queryParams
+	 * @return
+	 * @throws RMapApiException
+	 */
+	public Integer extractLimit(MultivaluedMap<String,String> queryParams) throws RMapApiException {
+		Integer iLimit = null;
+		if (!queryParams.containsKey(LIMIT_PARAM)) {
+			try{
+				String limit=queryParams.getFirst(LIMIT_PARAM).trim();
+				iLimit = Integer.parseInt(limit);
+			}
+			catch (Exception ex) {
+				throw RMapApiException.wrap(ex, ErrorCode.ER_BAD_PARAMETER_IN_REQUEST);
+			}
+		}
+		return iLimit;
 	}
 	
 	

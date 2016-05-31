@@ -134,7 +134,10 @@ public class StatementResponseManager extends ResponseManager {
 			RMapValue rmapObject = convertPathStringToRMapValue(object);
 			
 			RMapSearchParams params = generateSearchParamObj(queryParams);
+
+			String path = Utils.makeStmtUrl(subject,predicate,object) + "/discos";
 			
+			Integer currPage = extractPage(queryParams);
 			Integer limit=params.getLimit();
 			//we are going to get one extra record to see if we need a "next"
 			params.setLimit(limit+1);
@@ -155,13 +158,27 @@ public class StatementResponseManager extends ResponseManager {
 			if (!queryParams.containsKey(PAGE_PARAM)
 					&& matchingObjects.size()>limit){  
 				//start See Other response to indicate need for pagination
-				String otherUrl = getPaginatedLinkTemplate(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit);
-				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				String otherUrl = getPaginatedLinkTemplate(path, queryParams, limit);
+				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, FIRST_PAGE);
 				responseBldr = Response.status(Response.Status.SEE_OTHER)
 						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
 						.location(new URI(otherUrl));		
 			}
 			else { 
+				responseBldr = Response.status(Response.Status.OK)
+						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
+				
+				if (matchingObjects.size()>limit || currPage>1) {
+					boolean showNextLink=matchingObjects.size()>limit;
+					String pageLinkTemplate = getPaginatedLinkTemplate(path, queryParams, limit);
+					String pageLinks = generatePaginationLinks(pageLinkTemplate, currPage, showNextLink);
+					responseBldr.header("Link",pageLinks);
+					if (showNextLink){
+						//gone over limit so remove the last record since it was only added to check for record that would spill to next page
+						matchingObjects.remove(matchingObjects.size()-1);			
+					}
+				}
+				
 				//show results list as normal
 				String outputString="";		
 				if (returnType==NonRdfType.PLAIN_TEXT)	{		
@@ -170,16 +187,8 @@ public class StatementResponseManager extends ResponseManager {
 				else	{
 					outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_DISCO_PATH);		
 				}
-				responseBldr = Response.status(Response.Status.OK)
-						.entity(outputString)
-						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
+				responseBldr.entity(outputString);
 
-				if (matchingObjects.size()>limit || params.getPage()>1) {
-					boolean showNextLink=matchingObjects.size()>limit;
-					String pageLinks = 
-							generatePaginationLinks(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit, showNextLink);
-					responseBldr.header("Link",pageLinks);
-				}
 			}
 			response = responseBldr.build();
 			reqSuccessful = true;
@@ -237,7 +246,10 @@ public class StatementResponseManager extends ResponseManager {
 			RMapValue rmapObject = convertPathStringToRMapValue(object);
 			
 			RMapSearchParams params = generateSearchParamObj(queryParams);
+
+			String path = Utils.makeStmtUrl(subject,predicate,object) + "/agents";
 			
+			Integer currPage = extractPage(queryParams);
 			Integer limit=params.getLimit();
 			//we are going to get one extra record to see if we need a "next"
 			params.setLimit(limit+1);
@@ -254,13 +266,29 @@ public class StatementResponseManager extends ResponseManager {
 			if (!queryParams.containsKey(PAGE_PARAM)
 					&& matchingObjects.size()>limit){  
 				//start See Other response to indicate need for pagination
-				String otherUrl = getPaginatedLinkTemplate(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit);
-				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				String seeOtherUrl = getPaginatedLinkTemplate(path, queryParams, limit);
+				seeOtherUrl = seeOtherUrl.replace(PAGENUM_PLACEHOLDER, FIRST_PAGE);
 				responseBldr = Response.status(Response.Status.SEE_OTHER)
 						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
-						.location(new URI(otherUrl));		
+						.location(new URI(seeOtherUrl));		
 			}
 			else { 
+				responseBldr = Response.status(Response.Status.OK)
+						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
+
+				if (matchingObjects.size()>limit || currPage>1) {
+					boolean showNextLink=matchingObjects.size()>limit;
+
+					String pageLinkTemplate = getPaginatedLinkTemplate(path, queryParams, limit);
+					String pageLinks = generatePaginationLinks(pageLinkTemplate, currPage, showNextLink);
+					responseBldr.header("Link",pageLinks);
+
+					if (showNextLink){
+						//gone over limit so remove the last record since it was only added to check for record that would spill to next page
+						matchingObjects.remove(matchingObjects.size()-1);			
+					}
+				}
+				
 				//show results list as normal
 				String outputString="";		
 				if (returnType==NonRdfType.PLAIN_TEXT)	{		
@@ -269,16 +297,8 @@ public class StatementResponseManager extends ResponseManager {
 				else	{
 					outputString= URIListHandler.uriListToJson(matchingObjects, Terms.RMAP_AGENT_PATH);		
 				}
-				responseBldr = Response.status(Response.Status.OK)
-						.entity(outputString)
-						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
+				responseBldr.entity(outputString);
 
-				if (matchingObjects.size()>limit || params.getPage()>1) {
-					boolean showNextLink=matchingObjects.size()>limit;
-					String pageLinks = 
-							generatePaginationLinks(Utils.makeStmtUrl(subject,predicate,object), queryParams, limit, showNextLink);
-					responseBldr.header("Link",pageLinks);
-				}
 			}
 			response = responseBldr.build();
 			

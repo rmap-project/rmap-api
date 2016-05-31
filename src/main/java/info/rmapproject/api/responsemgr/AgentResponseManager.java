@@ -93,7 +93,7 @@ public class AgentResponseManager extends ResponseManager {
 		try {				
 			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/agent>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
-						.header("Allow", "HEAD,OPTIONS,GET,POST,DELETE")
+						.header("Allow", "HEAD,OPTIONS,GET")
 						.header("Link",linkRel)	
 						.build();
 			reqSuccessful = true;
@@ -314,23 +314,31 @@ public class AgentResponseManager extends ResponseManager {
 			
 			URI uriAgentUri = convertPathStringToURI(agentUri);
 			RMapSearchParams params = generateSearchParamObj(queryParams);
-					
+			
+			Integer currPage = extractPage(queryParams);
 			Integer limit=params.getLimit();
 			//we are going to get one extra record to see if we need a "next"
 			params.setLimit(limit+1);
 						 	
+			String path = Utils.makeAgentUrl(agentUri);
+			
 			List <URI> uriList = null;
 			switch (rmapObjType) {
             case EVENT:
 				uriList = rmapService.getAgentEventsInitiated(uriAgentUri, params);	
+				path=path+"/events";
 				break;
             case DISCO:
 				uriList = rmapService.getAgentDiSCOs(uriAgentUri, params);	
+				path=path+"/discos";
 				break;
             default: //default to DiSCO
 				uriList = rmapService.getAgentDiSCOs(uriAgentUri, params);	
+				path=path+"/discos";
 				break;
 			}
+			//now that we've run the query, set the limit back to correct value
+			params.setLimit(limit);
 						
 			if (uriList==null || uriList.size()==0)	{ 
 				//if the object is found, should always have at least one event
@@ -343,14 +351,30 @@ public class AgentResponseManager extends ResponseManager {
 			if (!queryParams.containsKey(PAGE_PARAM)
 					&& uriList.size()>limit){  
 				//start See Other response to indicate need for pagination
-				String otherUrl = getPaginatedLinkTemplate(Utils.makeAgentUrl(agentUri), queryParams, limit);
-				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				String seeOtherUrl = getPaginatedLinkTemplate(path, queryParams, limit);
+				seeOtherUrl = seeOtherUrl.replace(PAGENUM_PLACEHOLDER, FIRST_PAGE);
 				responseBldr = Response.status(Response.Status.SEE_OTHER)
 						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
-						.location(new URI(otherUrl));		
+						.location(new URI(seeOtherUrl));		
 			}
 			else { 
 				//show results list as normal
+				responseBldr = Response.status(Response.Status.OK)
+						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));		
+
+				//are we doing page links?
+				if (uriList.size()>limit || currPage>1) {
+					String pageLinkTemplate = getPaginatedLinkTemplate(path, queryParams, limit);
+					boolean showNextLink=uriList.size()>limit;
+					String pageLinks = 
+							generatePaginationLinks(pageLinkTemplate, currPage, showNextLink);
+					responseBldr.header("Link",pageLinks);
+					if (showNextLink){
+						//gone over limit so remove the last record since it was only added to check for record that would spill to next page
+						uriList.remove(uriList.size()-1);			
+					}
+				}
+				
 				String outputString="";		
 				if (returnType==NonRdfType.PLAIN_TEXT)	{		
 					outputString= URIListHandler.uriListToPlainText(uriList);
@@ -358,16 +382,7 @@ public class AgentResponseManager extends ResponseManager {
 				else	{
 					outputString= URIListHandler.uriListToJson(uriList, rmapObjType.getPath().toString());		
 				}
-				responseBldr = Response.status(Response.Status.OK)
-						.entity(outputString.toString())
-						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));		
-
-				if (uriList.size()>limit || params.getPage()>1) {
-					boolean showNextLink=uriList.size()>limit;
-					String pageLinks = 
-							generatePaginationLinks(Utils.makeAgentUrl(agentUri), queryParams, limit, showNextLink);
-					responseBldr.header("Link",pageLinks);
-				}
+				responseBldr.entity(outputString.toString());
 			}
 			
 			response = responseBldr.build();	

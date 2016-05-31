@@ -125,7 +125,10 @@ public class ResourceResponseManager extends ResponseManager {
 						
 			URI uriResourceUri = convertPathStringToURI(strResourceUri);
 			RMapSearchParams params = generateSearchParamObj(queryParams);
+
+			String path = Utils.makeResourceUrl(strResourceUri);
 			
+			Integer currPage = extractPage(queryParams);
 			Integer limit=params.getLimit();
 			//we are going to get one extra record to see if we need a "next"
 			params.setLimit(limit+1);
@@ -136,15 +139,19 @@ public class ResourceResponseManager extends ResponseManager {
 			switch (objType) {
 	            case DISCO:
 					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, params);
+					path = path +"/discos";
 					break;
 	            case AGENT:
 					uriList = rmapService.getResourceAssertingAgents(uriResourceUri, params);
+					path = path +"/agents";
 					break;
 	            case EVENT:
 					uriList = rmapService.getResourceRelatedEvents(uriResourceUri, params);
+					path = path +"/events";
 					break;
 	            default:
 					uriList = rmapService.getResourceRelatedDiSCOs(uriResourceUri, params);
+					path = path +"/discos";
 					break;
 			}
 			 
@@ -159,30 +166,42 @@ public class ResourceResponseManager extends ResponseManager {
 			if (!queryParams.containsKey(PAGE_PARAM)
 					&& uriList.size()>limit){  
 				//start See Other response to indicate need for pagination
-				String otherUrl = getPaginatedLinkTemplate(Utils.makeResourceUrl(strResourceUri), queryParams, limit);
-				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				String seeOtherUrl = getPaginatedLinkTemplate(path, queryParams, limit);
+				seeOtherUrl = seeOtherUrl.replace(PAGENUM_PLACEHOLDER, FIRST_PAGE);
 				responseBldr = Response.status(Response.Status.SEE_OTHER)
 						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
-						.location(new URI(otherUrl));		
+						.location(new URI(seeOtherUrl));		
 			}
 			else { 
 				//show results list as normal
+
+				//start response
+				responseBldr = Response.status(Response.Status.OK)
+							.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	;
+				
+				//are we showing page links?
+				if (uriList.size()>limit) {
+					boolean showNextLink=uriList.size()>limit;
+					String pageLinkTemplate = getPaginatedLinkTemplate(path, queryParams, limit);
+					String pageLinks = 
+							generatePaginationLinks(pageLinkTemplate, currPage, showNextLink);
+					responseBldr.header("Link",pageLinks);
+					if (showNextLink){
+						//gone over limit so remove the last record since it was only added to check for record that would spill to next page
+						uriList.remove(uriList.size()-1);		
+					}
+				}
+								
 				if (returnType==NonRdfType.PLAIN_TEXT)	{		
 					outputString= URIListHandler.uriListToPlainText(uriList);
 				}
 				else	{
 					outputString= URIListHandler.uriListToJson(uriList, objType.getPath().toString());		
 				}
-				responseBldr = Response.status(Response.Status.OK)
-						.entity(outputString.toString())
-						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	;		
+				
+				responseBldr.entity(outputString.toString());
 
-				if (uriList.size()>limit || params.getPage()>1) {
-					boolean showNextLink=uriList.size()>limit;
-					String pageLinks = 
-							generatePaginationLinks(Utils.makeResourceUrl(strResourceUri), queryParams, limit, showNextLink);
-					responseBldr.header("Link",pageLinks);
-				}
+
 			}
 			
 			response = responseBldr.build();	
@@ -234,6 +253,7 @@ public class ResourceResponseManager extends ResponseManager {
 			URI uriResourceUri = convertPathStringToURI(strResourceUri);
 			RMapSearchParams params = generateSearchParamObj(queryParams);
 
+			Integer currPage = extractPage(queryParams);
 			Integer limit=params.getLimit();
 			//we are going to get one extra record to see if we need a "next"
 			params.setLimit(limit+1);
@@ -246,8 +266,7 @@ public class ResourceResponseManager extends ResponseManager {
 			}	
 			if (stmtList.size() == 0)	{
 				throw new RMapApiException(ErrorCode.ER_NO_STMTS_FOUND_FOR_RESOURCE); 				
-			}
-			
+			}			
 			
 			ResponseBuilder responseBldr = null;
 			
@@ -256,28 +275,34 @@ public class ResourceResponseManager extends ResponseManager {
 					&& stmtList.size()>limit){  
 				//start See Other response to indicate need for pagination
 				String otherUrl = getPaginatedLinkTemplate(Utils.makeResourceUrl(strResourceUri), queryParams, limit);
-				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, params.getPage().toString());
+				otherUrl = otherUrl.replace(PAGENUM_PLACEHOLDER, FIRST_PAGE);
 				responseBldr = Response.status(Response.Status.SEE_OTHER)
 						.entity(ErrorCode.ER_RESPONSE_TOO_LONG_NEED_PAGINATION.getMessage())
 						.location(new URI(otherUrl));		
 			}
-			else { 				
+			else { 			
+				responseBldr = Response.status(Response.Status.OK);	
+				
+				if (stmtList.size()>limit || (currPage!=null && currPage>1)) {
+					boolean showNextLink=stmtList.size()>limit;
+					String pageLinkTemplate = getPaginatedLinkTemplate(Utils.makeResourceUrl(strResourceUri), queryParams, limit);
+					String pageLinks =  generatePaginationLinks(pageLinkTemplate, currPage, showNextLink);
+					responseBldr.header("Link",pageLinks);
+					if (showNextLink){
+						//gone over limit so remove the last record since it was only added to check for record that would spill to next page
+						stmtList.remove(stmtList.size()-1);		
+					}
+				}
+				
 				//convert to RDF
 				OutputStream rdf = rdfHandler.triples2Rdf(stmtList, returnType.getRdfType());
 				if (rdf == null){
 					throw new RMapApiException(ErrorCode.ER_CORE_CANT_CREATE_STMT_RDF);					
 				}
 				
-				responseBldr = Response.status(Response.Status.OK)
-						.entity(rdf.toString())
-						.type(returnType.getMimeType());		
+				responseBldr.entity(rdf.toString())
+							.type(returnType.getMimeType());		
 
-				if (stmtList.size()>limit || params.getPage()>1) {
-					boolean showNextLink=stmtList.size()>limit;
-					String pageLinks = 
-							generatePaginationLinks(Utils.makeResourceUrl(strResourceUri), queryParams, limit, showNextLink);
-					responseBldr.header("Link",pageLinks);
-				}
 			}
 			
 			response = responseBldr.build();	

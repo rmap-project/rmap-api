@@ -10,6 +10,8 @@ import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.core.exception.RMapDefectiveArgumentException;
 import info.rmapproject.core.exception.RMapException;
 import info.rmapproject.core.model.disco.RMapDiSCO;
+import info.rmapproject.core.model.event.RMapEvent;
+import info.rmapproject.core.model.event.RMapEventType;
 import info.rmapproject.core.rdfhandler.RDFType;
 
 import java.io.ByteArrayInputStream;
@@ -18,6 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import javax.ws.rs.core.Response;
 
@@ -367,7 +370,33 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		}
 		
 	}
-	
+
+	/**
+	 * make sure deletion status is as expected.
+	 */
+	@Test
+	public void testDeletionStatus(){
+		try {
+			//createDisco
+			InputStream rdf = new ByteArrayInputStream(discoWithSpaceInUrl.getBytes(StandardCharsets.UTF_8));
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
+			String discoURI = rmapDisco.getId().toString();
+	        assertNotNull(discoURI);
+			rmapService.createDiSCO(rmapDisco, super.reqAgent);
+			//delete and check status
+			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);			
+			List<URI> rmapEvents = rmapService.getDiSCOEvents(new URI(discoURI));
+			assertTrue(rmapEvents.size()==2);
+			RMapEvent event = rmapService.readEvent(rmapEvents.get(0));
+			RMapEvent event2 = rmapService.readEvent(rmapEvents.get(1));
+			assertTrue(event.getEventType()==RMapEventType.TOMBSTONE || event2.getEventType()==RMapEventType.TOMBSTONE);
+					
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+
+	}
 	
 	
 	

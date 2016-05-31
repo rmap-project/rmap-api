@@ -5,9 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import info.rmapproject.api.lists.NonRdfType;
-import info.rmapproject.core.model.RMapStatus;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.request.RMapSearchParams;
+import info.rmapproject.core.model.request.RMapStatusFilter;
 import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.utils.Terms;
 
@@ -88,7 +88,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 			rmapService.createDiSCO(rmapDisco, super.reqAgent);
 			
 			RMapSearchParams params = new RMapSearchParams();
-			params.setStatusCode(RMapStatus.ACTIVE);
+			params.setStatusCode(RMapStatusFilter.ACTIVE);
 
 
 			MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<String, String>();

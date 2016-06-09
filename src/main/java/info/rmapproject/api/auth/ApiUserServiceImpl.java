@@ -18,8 +18,10 @@ import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.apache.cxf.jaxrs.utils.JAXRSUtils;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 
 
+@Scope("request")
 public class ApiUserServiceImpl implements ApiUserService {
 
 	@Autowired 

@@ -24,6 +24,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author khanson
  *
  */
-
+@Scope("request")
 @Path("/discos")
 public class DiSCOApiService {
 

@@ -27,12 +27,14 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 /**
  * 
  * @author khanson
  * Creates HTTP responses for Resource REST API requests
  *
  */
+@Scope("prototype")
 public class ResourceResponseManager extends ResponseManager {
 	
 	/**
@@ -177,7 +179,7 @@ public class ResourceResponseManager extends ResponseManager {
 
 				//start response
 				responseBldr = Response.status(Response.Status.OK)
-							.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	;
+							.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
 				
 				//are we showing page links?
 				if (uriList.size()>limit) {

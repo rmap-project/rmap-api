@@ -79,7 +79,7 @@ public class ApiUserServiceTest {
 	public void getKeyUriForEventTest() {
 		try {
 			URI apiKeyUri = apiUserService.getApiKeyForEvent();
-			assertTrue(apiKeyUri.toString().equals("ark:/29297/fakermaptestkey"));
+			assertTrue(apiKeyUri.toString().equals("http://rmap-project.org/keyids/fakermaptestkey"));
 		} catch (RMapApiException e) {
 			fail("key not retrieved");
 		}

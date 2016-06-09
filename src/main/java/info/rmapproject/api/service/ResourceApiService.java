@@ -21,12 +21,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 
 /**
  * API service for rdfs:Resources in RMap
  * @author khanson
  */
 
+@Scope("request")
 @Path("/resources")
 public class ResourceApiService {
 

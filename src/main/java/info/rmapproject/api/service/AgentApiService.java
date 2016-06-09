@@ -20,6 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 
+@Scope("request")
 @Path("/agents")
 public class AgentApiService {
 	

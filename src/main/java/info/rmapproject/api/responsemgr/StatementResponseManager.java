@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 
 /**
  * 
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author khanson
  *
  */
+@Scope("prototype")
 public class StatementResponseManager extends ResponseManager {
 	
 	/**
@@ -276,7 +278,7 @@ public class StatementResponseManager extends ResponseManager {
 				responseBldr = Response.status(Response.Status.OK)
 						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
 
-				if (matchingObjects.size()>limit || currPage>1) {
+				if (matchingObjects.size()>limit || (currPage!=null && currPage>1)) {
 					boolean showNextLink=matchingObjects.size()>limit;
 
 					String pageLinkTemplate = getPaginatedLinkTemplate(path, queryParams, limit);

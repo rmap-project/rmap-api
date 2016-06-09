@@ -8,8 +8,6 @@ import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.core.model.RMapObjectType;
 import info.rmapproject.core.model.disco.RMapDiSCO;
-import info.rmapproject.core.model.event.RMapEvent;
-import info.rmapproject.core.model.event.RMapEventType;
 import info.rmapproject.core.rdfhandler.RDFType;
 import info.rmapproject.core.utils.Terms;
 
@@ -18,7 +16,6 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -223,7 +220,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 			//String location = response.getLocation().toString();
 			String body = response.getEntity().toString();
 			//assertTrue(location.contains("resource"));
-			assertTrue(body.contains("fabio/JournalArticle"));
+			assertTrue(body.contains("JournalArticle"));
 			assertEquals(200, response.getStatus());	
 			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
 		} catch (Exception e) {

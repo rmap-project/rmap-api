@@ -1,8 +1,8 @@
 package info.rmapproject.api.exception;
 
-import java.net.URI;
-
 import info.rmapproject.api.utils.Utils;
+
+import java.net.URI;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -12,11 +12,13 @@ import javax.ws.rs.ext.Provider;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.context.annotation.Scope;
 /**
  * Converts RMap API exceptions to HTTP responses
  * @author khanson
  *
  */
+@Scope("prototype")
 @Provider
 public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException>
 {

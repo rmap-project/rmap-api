@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response;
 
 import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 /**
  * 
@@ -34,7 +33,6 @@ import org.springframework.context.annotation.Scope;
  * @author khanson
  *
  */
-@Scope("prototype")
 public class EventResponseManager extends ResponseManager {
 	
 	/**

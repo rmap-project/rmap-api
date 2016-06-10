@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.springframework.web.context.WebApplicationContext;
 
 
 /**
@@ -30,18 +30,25 @@ import org.springframework.context.annotation.Scope;
  *
  */
 
-@Scope("request")
 @Path("/agents")
 public class AgentApiService {
-	
-	private AgentResponseManager agentResponseManager;
 
     @Autowired
-    public void setAgentResponseManager(AgentResponseManager agentResponseManager) throws RMapApiException {
+    private WebApplicationContext context;
+    
+	//private AgentResponseManager agentResponseManager;
+
+    /**
+     * Get new agent response manager bean - must use WebApplicationContext to avoid thread issues.
+     * @return
+     * @throws RMapApiException
+     */
+    private AgentResponseManager getAgentResponseManager() throws RMapApiException {
+    	AgentResponseManager agentResponseManager = (AgentResponseManager)context.getBean("agentResponseManager");
     	if (agentResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
     	} 
-    	this.agentResponseManager = agentResponseManager;
+    	return agentResponseManager;
 	}
 
 	/**
@@ -52,7 +59,7 @@ public class AgentApiService {
 	 */
     @HEAD
     public Response apiGetApiDetails() throws RMapApiException {
-    	Response response = agentResponseManager.getAgentServiceHead();
+    	Response response = getAgentResponseManager().getAgentServiceHead();
 	    return response;
     }
     
@@ -65,7 +72,7 @@ public class AgentApiService {
 	 */
     @OPTIONS
     public Response apiGetApiDetailedOptions() throws RMapApiException {
-    	Response response = agentResponseManager.getAgentServiceHead();
+    	Response response = getAgentResponseManager().getAgentServiceHead();
 	    return response;
     }
     
@@ -95,7 +102,7 @@ public class AgentApiService {
 				})
     public Response apiGetRMapAgent(@Context HttpHeaders headers, @PathParam("agentUri") String agentUri) throws RMapApiException {
     	RdfMediaType returnType = HttpTypeMediator.getRdfResponseType(headers);
-    	Response response=agentResponseManager.getRMapAgent(agentUri, returnType);
+    	Response response=getAgentResponseManager().getRMapAgent(agentUri, returnType);
     	return response;
     }
     
@@ -117,7 +124,7 @@ public class AgentApiService {
     @HEAD
     @Path("/{agentUri}")
     public Response apiGetAgentStatus(@PathParam("agentUri") String agentUri) throws RMapApiException {
-    	Response response = agentResponseManager.getRMapAgentHeader(agentUri);
+    	Response response = getAgentResponseManager().getRMapAgentHeader(agentUri);
 	    return response;
     }
    
@@ -145,7 +152,7 @@ public class AgentApiService {
 									    		@Context UriInfo uriInfo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
     	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-    	Response eventList = agentResponseManager.getRMapAgentEvents(agentUri, outputType, queryParams);
+    	Response eventList = getAgentResponseManager().getRMapAgentEvents(agentUri, outputType, queryParams);
     	return eventList;
     }
     
@@ -166,7 +173,7 @@ public class AgentApiService {
     	
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
     	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-    	Response discoList = agentResponseManager.getRMapAgentDiSCOs(agentUri, outputType, queryParams);
+    	Response discoList = getAgentResponseManager().getRMapAgentDiSCOs(agentUri, outputType, queryParams);
     	return discoList;
     }
     

@@ -34,8 +34,8 @@ public abstract class ResponseManager {
 	protected static final String FIRST_PAGE="1";
 	
 	
-	protected final RMapService rmapService;
-	protected final RDFHandler rdfHandler;
+	protected RMapService rmapService;
+	protected RDFHandler rdfHandler;
 	
 	/**
 	 * Constructor receives rmapService and rdfHandler

@@ -26,11 +26,11 @@
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer"/>
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"/>
 		
-    <bean id="discoResponseManager" class="info.rmapproject.api.responsemgr.DiscoResponseManager"/>
-    <bean id="agentResponseManager" class="info.rmapproject.api.responsemgr.AgentResponseManager"/>
-    <bean id="eventResponseManager" class="info.rmapproject.api.responsemgr.EventResponseManager"/>
-    <bean id="statementResponseManager" class="info.rmapproject.api.responsemgr.StatementResponseManager"/>
-    <bean id="resourceResponseManager" class="info.rmapproject.api.responsemgr.ResourceResponseManager"/>
+    <bean id="discoResponseManager" class="info.rmapproject.api.responsemgr.DiscoResponseManager" scope="prototype"/>
+    <bean id="agentResponseManager" class="info.rmapproject.api.responsemgr.AgentResponseManager" scope="prototype"/>
+    <bean id="eventResponseManager" class="info.rmapproject.api.responsemgr.EventResponseManager" scope="prototype"/>
+    <bean id="statementResponseManager" class="info.rmapproject.api.responsemgr.StatementResponseManager" scope="prototype"/>
+    <bean id="resourceResponseManager" class="info.rmapproject.api.responsemgr.ResourceResponseManager" scope="prototype"/>
 	
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
@@ -42,7 +42,7 @@
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <!-- <bean class="org.codehaus.jackson.jaxrs.JacksonJsonProvider"/>-->
-       		<bean class="info.rmapproject.api.exception.RMapApiExceptionHandler"/>
+       		<bean class="info.rmapproject.api.exception.RMapApiExceptionHandler" scope="prototype"/>
         </jaxrs:providers>
 		<jaxrs:inInterceptors>
 		    <ref bean="authenticationInterceptor"/>
@@ -55,8 +55,11 @@
     <bean id="rdfHandler" class="info.rmapproject.core.rdfhandler.impl.openrdf.RioRDFHandler"/>
 	<bean id="triplestore" class="info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameSailMemoryTriplestore"/> -->
 		
-	<bean id="authenticationInterceptor" class="info.rmapproject.api.auth.AuthenticationInterceptor"/>   
-	<bean id="apiUserService" class="info.rmapproject.api.auth.ApiUserServiceImpl"/>  
+   <!-- <bean id="rmapService" class="info.rmapproject.core.rmapservice.impl.openrdf.ORMapService" scope="prototype"/>
+    <bean id="triplestore" class="info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameHttpTriplestore" scope="prototype"/>  --> 
+		
+	<bean id="authenticationInterceptor" class="info.rmapproject.api.auth.AuthenticationInterceptor" scope="prototype"/>   
+	<bean id="apiUserService" class="info.rmapproject.api.auth.ApiUserServiceImpl" scope="prototype"/>  
 
 	
 </beans>

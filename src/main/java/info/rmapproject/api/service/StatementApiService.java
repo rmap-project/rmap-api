@@ -19,27 +19,34 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * API service for RMap Stmts
  * @author khanson
  */
 
-@Scope("request")
 @Path("/stmts")
 public class StatementApiService {
 	
-	private StatementResponseManager statementResponseManager = null;
-
     @Autowired
-    public void setStatementResponseManager(StatementResponseManager statementResponseManager) throws RMapApiException {
+    private WebApplicationContext context;
+	//private StatementResponseManager statementResponseManager = null;
+
+    /**
+     * Get new statement response manager bean - must use WebApplicationContext to avoid thread issues.
+     * @return
+     * @throws RMapApiException
+     */
+    private StatementResponseManager getStatementResponseManager() throws RMapApiException {
+    	StatementResponseManager statementResponseManager = (StatementResponseManager)context.getBean("statementResponseManager");
     	if (statementResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
-    	}
-    	this.statementResponseManager = statementResponseManager;
+    	} 
+    	return statementResponseManager;
 	}
-	
+    
+    
 	/*
 	 * if ever need full path...
 	 * @Context
@@ -65,7 +72,7 @@ public class StatementApiService {
     @Produces("application/json")
     public Response apiGetServiceInfo() throws RMapApiException {
    		//TODO: for now returns same as options, but might want html response to describe API?
-    	Response response = statementResponseManager.getStatementServiceOptions();
+    	Response response = getStatementResponseManager().getStatementServiceOptions();
    		return response;
     }
     
@@ -77,7 +84,7 @@ public class StatementApiService {
 	 */
     @HEAD
     public Response apiGetStmtApiDetails() throws RMapApiException	{
-    	Response response = statementResponseManager.getStatementServiceHead();
+    	Response response = getStatementResponseManager().getStatementServiceHead();
 	    return response;
     }
     
@@ -91,7 +98,7 @@ public class StatementApiService {
     @OPTIONS
     @Produces("application/json")
     public Response apiGetStmtApiDetailedOptions() throws RMapApiException	{
-    	Response response = statementResponseManager.getStatementServiceOptions();
+    	Response response = getStatementResponseManager().getStatementServiceOptions();
 	    return response;
     }
         
@@ -127,7 +134,7 @@ public class StatementApiService {
 	    											@Context UriInfo uriInfo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
     	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-    	Response response = statementResponseManager.getStatementRelatedDiSCOs(subject, predicate, object, outputType, queryParams);
+    	Response response = getStatementResponseManager().getStatementRelatedDiSCOs(subject, predicate, object, outputType, queryParams);
 	    return response;	
     }
 
@@ -159,7 +166,7 @@ public class StatementApiService {
 											@Context UriInfo uriInfo) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
     	MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-    	Response response = statementResponseManager.getStatementAssertingAgents(subject, predicate, object, outputType, queryParams);
+    	Response response = getStatementResponseManager().getStatementAssertingAgents(subject, predicate, object, outputType, queryParams);
 	    return response;	
     }
        

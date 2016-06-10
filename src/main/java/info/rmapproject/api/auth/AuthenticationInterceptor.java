@@ -13,7 +13,6 @@ import org.apache.cxf.message.Message;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 /**
  * Intercepts interactions with the API to authenticate the user and 
@@ -21,7 +20,6 @@ import org.springframework.context.annotation.Scope;
  * @author khanson
  *
  */
-@Scope("request")
 public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message> {
 
 	private ApiUserService apiUserService;

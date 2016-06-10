@@ -34,7 +34,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 /**
  * 
@@ -42,7 +41,6 @@ import org.springframework.context.annotation.Scope;
  * @author khanson
  *
  */
-@Scope("prototype")
 public class AgentResponseManager extends ResponseManager {
 		
 	/**

@@ -24,7 +24,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
+import org.springframework.web.context.WebApplicationContext;
 
 
 /**
@@ -33,20 +33,25 @@ import org.springframework.context.annotation.Scope;
  * @author khanson
  *
  */
-@Scope("request")
 @Path("/discos")
 public class DiSCOApiService {
 
-	private DiscoResponseManager discoResponseManager;	
-
     @Autowired
-    public void setDiscoResponseManager(DiscoResponseManager discoResponseManager) throws RMapApiException {
+    private WebApplicationContext context;
+	//private DiscoResponseManager discoResponseManager;	
+
+    /**
+     * Get new disco response manager bean - must use WebApplicationContext to avoid thread issues.
+     * @return
+     * @throws RMapApiException
+     */
+    private DiscoResponseManager getDiscoResponseManager() throws RMapApiException {
+    	DiscoResponseManager discoResponseManager = (DiscoResponseManager)context.getBean("discoResponseManager");
     	if (discoResponseManager==null) {
 			throw new RMapApiException(ErrorCode.ER_FAILED_TO_INIT_API_RESP_MGR);			
-    	}
-   		this.discoResponseManager = discoResponseManager;
+    	} 
+    	return discoResponseManager;
 	}
-
 		
 	
 /*
@@ -67,7 +72,7 @@ public class DiSCOApiService {
     @Produces("application/json;charset=UTF-8;")
     public Response getServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
-    	Response response = discoResponseManager.getDiSCOServiceOptions();
+    	Response response = getDiscoResponseManager().getDiSCOServiceOptions();
 	    return response;
     }
     
@@ -80,7 +85,7 @@ public class DiSCOApiService {
 	 */
     @HEAD
     public Response getApiDetails() throws RMapApiException {
-    	Response response = discoResponseManager.getDiSCOServiceHead();
+    	Response response = getDiscoResponseManager().getDiSCOServiceHead();
 	    return response;
     }
     
@@ -93,7 +98,7 @@ public class DiSCOApiService {
 	 */
     @OPTIONS
     public Response apiGetApiDetailedOptions() throws RMapApiException {
-    	Response response = discoResponseManager.getDiSCOServiceHead();
+    	Response response = getDiscoResponseManager().getDiSCOServiceHead();
 	    return response;
     }
     
@@ -124,7 +129,7 @@ public class DiSCOApiService {
 				})
     public Response apiGetRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	RdfMediaType returnType = HttpTypeMediator.getRdfResponseType(headers);
-    	Response response=discoResponseManager.getRMapDiSCO(discoUri, returnType);
+    	Response response=getDiscoResponseManager().getRMapDiSCO(discoUri, returnType);
     	return response;
     }
     
@@ -153,7 +158,7 @@ public class DiSCOApiService {
 				})
     public Response apiGetLatestRMapDiSCO(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	RdfMediaType returnType = HttpTypeMediator.getRdfResponseType(headers);
-    	Response response=discoResponseManager.getLatestRMapDiSCOVersion(discoUri, returnType);
+    	Response response=getDiscoResponseManager().getLatestRMapDiSCOVersion(discoUri, returnType);
     	return response;
     }
    
@@ -177,7 +182,7 @@ public class DiSCOApiService {
     @HEAD
     @Path("/{discoUri}")
     public Response apiGetDiSCOStatus(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = discoResponseManager.getRMapDiSCOHeader(discoUri);
+    	Response response = getDiscoResponseManager().getRMapDiSCOHeader(discoUri);
 	    return response;
     }
 
@@ -205,7 +210,7 @@ public class DiSCOApiService {
 		})
     public Response apiCreateRMapDiSCO(@Context HttpHeaders headers, InputStream discoRdf) throws RMapApiException {
     	RDFType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
-    	Response createResponse = discoResponseManager.createRMapDiSCO(discoRdf, requestFormat);
+    	Response createResponse = getDiscoResponseManager().createRMapDiSCO(discoRdf, requestFormat);
 		return createResponse;
     }	
 
@@ -235,7 +240,7 @@ public class DiSCOApiService {
     										@PathParam("discoid") String origDiscoId, 
     										InputStream discoRdf) throws RMapApiException {
     	RDFType requestFormat = HttpTypeMediator.getRdfTypeOfRequest(headers);
-    	Response updateResponse = discoResponseManager.updateRMapDiSCO(origDiscoId, discoRdf, requestFormat);
+    	Response updateResponse = getDiscoResponseManager().updateRMapDiSCO(origDiscoId, discoRdf, requestFormat);
 		return updateResponse;
     }
 
@@ -259,7 +264,7 @@ public class DiSCOApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapDiSCOEventList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response eventList = discoResponseManager.getRMapDiSCOEvents(discoUri, outputType);
+    	Response eventList = getDiscoResponseManager().getRMapDiSCOEvents(discoUri, outputType);
     	return eventList;
     }
 
@@ -283,7 +288,7 @@ public class DiSCOApiService {
     @DELETE
     @Path("/{discoUri}")
     public Response apiDeleteRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = discoResponseManager.tombstoneRMapDiSCO(discoUri);
+    	Response response = getDiscoResponseManager().tombstoneRMapDiSCO(discoUri);
 	    return response;
     }
 
@@ -298,7 +303,7 @@ public class DiSCOApiService {
     @POST
     @Path("/{discoUri}/inactivate")
     public Response apiInactivateRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
-    	Response response = discoResponseManager.inactivateRMapDiSCO(discoUri);
+    	Response response = getDiscoResponseManager().inactivateRMapDiSCO(discoUri);
 	    return response;
     }
     
@@ -322,7 +327,7 @@ public class DiSCOApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapDiSCOVersionList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response versionList = discoResponseManager.getRMapDiSCOVersions(discoUri, outputType, false);
+    	Response versionList = getDiscoResponseManager().getRMapDiSCOVersions(discoUri, outputType, false);
     	return versionList;
     }
     
@@ -339,7 +344,7 @@ public class DiSCOApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapDiSCOAgentVersionList(@Context HttpHeaders headers, @PathParam("discoUri") String discoUri) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response versionList = discoResponseManager.getRMapDiSCOVersions(discoUri, outputType, true);
+    	Response versionList = getDiscoResponseManager().getRMapDiSCOVersions(discoUri, outputType, true);
     	return versionList;
     }
     

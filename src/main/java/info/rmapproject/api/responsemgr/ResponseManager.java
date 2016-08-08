@@ -33,9 +33,12 @@ public abstract class ResponseManager {
 	protected static final String PAGENUM_PLACEHOLDER = "**$#pagenum#$**";
 	protected static final String FIRST_PAGE="1";
 	
+	protected static final String DATE_STRING_FORMAT = "yyyyMMddHHmmss";
+	
 	
 	protected RMapService rmapService;
 	protected RDFHandler rdfHandler;
+	
 	
 	/**
 	 * Constructor receives rmapService and rdfHandler
@@ -72,7 +75,7 @@ public abstract class ResponseManager {
 			//until is required when paginating, this adds the current date datetime if none specified
 			String until = queryParams.getFirst(UNTIL_PARAM);
 			if (until==null || until.trim().length()==0){
-				DateFormat df = new SimpleDateFormat("yyyyMMddhhmmss");
+				DateFormat df = new SimpleDateFormat(DATE_STRING_FORMAT);
 				Date thisMoment = Calendar.getInstance().getTime();        
 				String untilNow = df.format(thisMoment);
 				until=untilNow;

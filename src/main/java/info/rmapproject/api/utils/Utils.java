@@ -13,6 +13,7 @@ import java.util.MissingResourceException;
  */
 public class Utils {
 	private static String apiPath;
+	private static String documentationPath;
 	
     /**
      * Initialize properties file
@@ -23,6 +24,7 @@ public class Utils {
 	protected static void init() throws RMapApiException{
 		try {
 			apiPath = ConfigUtils.getPropertyValue(Constants.RMAP_API_PROPS_FILE, Constants.API_PATH_KEY);
+			documentationPath = ConfigUtils.getPropertyValue(Constants.RMAP_API_PROPS_FILE, Constants.DOCUMENTATION_PATH_KEY);
 			isInitialized=true;
 		}
 		catch(MissingResourceException me){
@@ -171,6 +173,13 @@ public class Utils {
 			throw new RMapApiException(ErrorCode.ER_CANNOT_ENCODE_URL);
 		}
 		return url;
+	}
+	
+	public static String getDocumentationPath() throws RMapApiException{
+		if (!isInitialized){
+			init();
+		}
+		return documentationPath;
 	}
 
 	

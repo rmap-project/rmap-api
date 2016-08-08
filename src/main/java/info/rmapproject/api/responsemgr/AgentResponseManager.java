@@ -63,9 +63,9 @@ public class AgentResponseManager extends ResponseManager {
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/agent>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
+			String linkRel = "<" +Utils.getDocumentationPath()+ ">;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
-						.entity("{\"description\":\"will show copy of swagger content\"}")
+					.entity("{\"description\":\"Follow header link to read documentation.\"}")
 						.header("Allow", "HEAD,OPTIONS,GET,POST,DELETE")
 						.header("Link",linkRel)	
 						.build();

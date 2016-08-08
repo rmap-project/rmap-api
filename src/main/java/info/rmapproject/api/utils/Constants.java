@@ -4,12 +4,17 @@ import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfMediaType;
 
 public final class Constants  {
-	  /**File path for error message text*/
+	  /**Name of API properties file*/
 	  public static final String RMAP_API_PROPS_FILE = "rmapapi";
-	  public static final String API_PATH_KEY = "rmapapi.path";
-	  
+	  	  
 	  /**File path for error message text*/
 	  public static final String ERROR_MSGS_PROPS_FILE = "api_error_msgs";
+
+	  /**Property key to retrieve API path**/
+	  public static final String API_PATH_KEY = "rmapapi.path";
+	  
+	  /**Property key to retrieve documentation path for API headers**/
+	  public static final String DOCUMENTATION_PATH_KEY = "rmapapi.documentationPath";
 	  
 	  public static final String BASE_URL = "";
 

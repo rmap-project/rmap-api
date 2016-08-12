@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.TreeMap;
 /**
- * For Exceptions caught in RMap API
+ * Defines Exceptions caught in RMap API
  * @author khanson
  */
 public class RMapApiException extends Exception {

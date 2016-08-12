@@ -165,6 +165,9 @@ public class ApiUserServiceImpl implements ApiUserService {
 		}	
 	}
 
+    /* (non-Javadoc)
+	 * @see info.rmapproject.api.auth.ApiUserServiceInt#getCurrentRequestAgent()
+	 */
 	@Override
 	public RMapRequestAgent getCurrentRequestAgent() throws RMapApiException {
 		RMapRequestAgent requestAgent = new RMapRequestAgent(getCurrentSystemAgentUri(), getApiKeyForEvent());

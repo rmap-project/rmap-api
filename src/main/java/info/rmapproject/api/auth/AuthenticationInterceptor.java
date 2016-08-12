@@ -45,6 +45,8 @@ public class AuthenticationInterceptor extends AbstractPhaseInterceptor<Message>
 
     /**
      * Gets basic authentication information from request and validates key
+     * throws an error if key is invalid.
+     * @param message
      */
     public void handleMessage(Message message) {
 

@@ -7,7 +7,7 @@ import javax.ws.rs.core.Response.Status;
 
 /**
  * @author khanson
- * Custom error codes for RMap API
+ * Manages custom error codes for RMap API. 
  */
 public enum ErrorCode {		
 	ER_RESPONSE_TOO_LONG_NEED_PAGINATION (Status.SEE_OTHER, 3031001),
@@ -131,27 +131,48 @@ public enum ErrorCode {
 	ER_CORE_GENERIC_RMAP_EXCEPTION (Status.INTERNAL_SERVER_ERROR,5009000),
 	ER_UNKNOWN_SYSTEM_ERROR (Status.INTERNAL_SERVER_ERROR,5009001); 
 
+	/**Error code number*/
 	private final int number;
+	
+	/** HTTP Response status*/
 	private final Status status;
+	
+	/**
+	 * Message corresponding to error code.
+	 */
+	private String message;
 
+
+	/**
+	 * Initiate error code object
+	 * @param status
+	 * @param number
+	 */
 	private ErrorCode (Status status, int number) {
 		this.number = number;
 		this.status = status;
 	}
 
+	/**
+	 * Get error code number
+	 * @return
+	 */
 	public int getNumber()  {
 		return number;
 	}
-
+	
+	/**
+	 * Get HTTP response status for error code
+	 * @return
+	 */
 	public Status getStatus()  {
 		return status;
 	}
 	
-	private String message;
-
 	/**
+	 * Retrieves the message that corresponds to the error code.
+	 * String messages are configured in the file named in the Constants.ERROR_MSGS_PROPS_FILE property.
 	 * @return String
-	 * Returns the message that corresponds to the error code.
 	 */
 	public String getMessage() {
         if (message == null) {
@@ -170,9 +191,9 @@ public enum ErrorCode {
 	}
 
 	/**
+	 * If all else fails, a simple default error is returned in English.
 	 * @param errorCode
 	 * @return String 
-	 * If all else fails, a simple default error is returned in English.
 	 */
 	private static String getDefaultText(ErrorCode errorCode){
 		String defaultText = "";

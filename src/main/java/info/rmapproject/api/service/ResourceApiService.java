@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -24,22 +43,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * API service for rdfs:Resources in RMap
+ * REST API service for rdfs:Resources in RMap.
+ *
  * @author khanson
  */
 
 @Path("/resources")
 public class ResourceApiService {
 
+    /** Web Application context to retrieve bean values (must use WebApplicationContext to avoid thread issues). */
     @Autowired
     private WebApplicationContext context;
 	//private ResourceResponseManager resourceResponseManager = null;
 
     /**
-     * Get new resource response manager bean - must use WebApplicationContext to avoid thread issues.
-     * @return
-     * @throws RMapApiException
-     */
+	 * Get new resource response manager bean.
+	 *
+	 * @return the Resource Response Manager
+	 * @throws RMapApiException the RMap API exception
+	 */
     private ResourceResponseManager getResourceResponseManager() throws RMapApiException {
     	ResourceResponseManager resourceResponseManager = (ResourceResponseManager)context.getBean("resourceResponseManager");
     	if (resourceResponseManager==null) {
@@ -58,9 +80,10 @@ public class ResourceApiService {
  */	
 	/**
 	 * GET /resource
-     * Returns link to Resource API information, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns link to Resource API information, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	@GET
     @Produces("application/json;charset=UTF-8;")
@@ -73,9 +96,10 @@ public class ResourceApiService {
 
 	/**
 	 * HEAD /resource
-     * Returns Resource API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns Resource API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @HEAD
     public Response apiGetResourceApiDetails()	throws RMapApiException {
@@ -86,9 +110,10 @@ public class ResourceApiService {
 
 	/**
 	 * OPTIONS /resource
-     * Returns Resource API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns Resource API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
     @Produces("application/json;charset=UTF-8;")
@@ -99,14 +124,14 @@ public class ResourceApiService {
     }   
 
 	/**
-	 * 
 	 * GET /resource/{resourceUri}/events[?agents={agentsCsv}&from={dateFrom}&until={dateTo}]
-	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
-	 * @param headers
-	 * @param resourceUri
-	 * @param uriInfo
-	 * @return
-	 * @throws RMapApiException
+	 * Returns list of all RMap:Event URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param resourceUri the Resource URI
+	 * @param uriInfo the URI info for retrieving query string params etc
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{resourceUri}/events")
@@ -122,12 +147,13 @@ public class ResourceApiService {
 		
 	/**
 	 * GET /resource/{resourceUri}/agents[?agents={agentsCsv}&from={dateFrom}&until={dateTo}]
-	 * Returns list of all RMap:Agent URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
-	 * @param headers
-	 * @param resourceUri
-	 * @param uriInfo
-	 * @return
-	 * @throws RMapApiException
+	 * Returns list of all RMap:Agent URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param resourceUri the Resource URI
+	 * @param uriInfo the URI info for retrieving query string params etc
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{resourceUri}/agents")
@@ -143,12 +169,13 @@ public class ResourceApiService {
     
 	/**
 	 * GET /resource/{resourceUri}/discos[?status={status}&agents={agentsCsv}&from={dateFrom}&until={dateTo}]
-	 * Returns list of all RMap:DiSCO URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT
-	 * @param headers
-	 * @param resourceUri
-	 * @param uriInfo
-	 * @return
-	 * @throws RMapApiException
+	 * Returns list of all RMap:DiSCO URIs related to the rdfs:Resource URI as JSON or PLAIN TEXT.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param resourceUri the Resource URI
+	 * @param uriInfo the URI info for retrieving query string params etc
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{resourceUri}/discos")
@@ -165,12 +192,13 @@ public class ResourceApiService {
 
 	/**
 	 * GET /resources/{resourceUri}[?status={status}&agents={agentsCsv}&from={dateFrom}&until={dateTo}]
-	 * Returns list of all rdf:triples related to the rdfs:Resource URI as RDF serialization
-	 * @param headers
-	 * @param resourceUri
-	 * @param uriInfo
-	 * @return
-	 * @throws RMapApiException
+	 * Returns list of all rdf:triples related to the rdfs:Resource URI as RDF serialization.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param resourceUri the Resource URI
+	 * @param uriInfo the URI info for retrieving query string params etc
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{resourceUri}")

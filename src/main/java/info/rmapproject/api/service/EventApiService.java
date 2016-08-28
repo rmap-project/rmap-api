@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -22,23 +41,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * API service for RMap Events
+ * REST API service for RMap Events.
  * @author khanson
  */
 
 @Path("/events")
 public class EventApiService {
 
-
     @Autowired
+    /** Web Application context to retrieve bean values (must use WebApplicationContext to avoid thread issues). */
     private WebApplicationContext context;
 	//private EventResponseManager eventResponseManager = null;	
 
     /**
-     * Get new event response manager bean - must use WebApplicationContext to avoid thread issues.
-     * @return
-     * @throws RMapApiException
-     */
+	 * Get new event response manager bean
+	 *
+	 * @return the Event Response Manager
+	 * @throws RMapApiException the RMap API exception
+	 */
     private EventResponseManager getEventResponseManager() throws RMapApiException {
     	EventResponseManager eventResponseManager = (EventResponseManager)context.getBean("eventResponseManager");
     	if (eventResponseManager==null) {
@@ -56,11 +76,12 @@ public class EventApiService {
  *-------------------------------
  */	
 	/**
-	 * GET /event
-     * Returns link to Event API information, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
-	 */	
+ * GET /event
+ * Returns link to Event API information, and lists HTTP options.
+ *
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */	
     @GET
     @Produces("application/json;charset=UTF-8;")
     public Response apiGetServiceInfo() throws RMapApiException {
@@ -72,9 +93,10 @@ public class EventApiService {
 
 	/**
 	 * HEAD /event
-     * Returns Event API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns Event API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @HEAD
     public Response apiGetEventApiDetails() throws RMapApiException {
@@ -85,9 +107,10 @@ public class EventApiService {
 
 	/**
 	 * OPTIONS /event
-     * Returns Event API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns Event API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
     @Produces("application/json;charset=UTF-8;")
@@ -106,10 +129,12 @@ public class EventApiService {
  */
 	/**
 	 * GET /event/{eventUri}
-	 * Returns requested RMap:Event as RDF/XML, JSON-LD, NQUADS, TURTLE
-	 * @param eventUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns requested RMap:Event as RDF/XML, JSON-LD, NQUADS, TURTLE.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param eventUri the Event URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */  
     @GET
     @Path("/{eventUri}")
@@ -137,10 +162,12 @@ public class EventApiService {
     
 	/**
 	 * GET /event/{eventUri}/discos
-	 * Returns list of RMap:Statement URIs related to the RMap:Event URI as TEXT or JSON
-	 * @param eventUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns list of RMap:Statement URIs related to the RMap:Event URI as TEXT or JSON.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param eventUri the Event URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{eventUri}/discos")
@@ -153,10 +180,12 @@ public class EventApiService {
 
 	/**
 	 * GET /event/{eventUri}/agents
-	 * Returns list of RMap:Statement URIs related to the RMap:Event URI as TEXT or JSON
-	 * @param eventUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns list of RMap:Statement URIs related to the RMap:Event URI as TEXT or JSON.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param eventUri the Event URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{eventUri}/agents")
@@ -169,10 +198,12 @@ public class EventApiService {
 
 	/**
 	 * GET /event/{eventUri}/resources
-	 * Returns list of rdfs:Resource URIs related to the RMap:Event URI as TEXT or JSON
-	 * @param eventUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns list of rdfs:Resource URIs related to the RMap:Event URI as TEXT or JSON.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param eventUri the Event URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @GET
     @Path("/{eventUri}/rmapobjs")

@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.mockobjects;
 
 import info.rmapproject.api.auth.ApiUserService;
@@ -18,16 +37,26 @@ import org.apache.cxf.configuration.security.AuthorizationPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
+/**
+ * Mock version of ApiUserServiceImpl for unit tests
+ */
 @ContextConfiguration({ "classpath*:/spring-*-context.xml" })
 public class ApiUserServiceMockImpl implements ApiUserService {
 
+	/** The authorization policy. */
 	private AuthorizationPolicy policy;
+	
+	/** The name to use as a test user. */
 	private static final String TEST_USER = "rmaptest";
+	
+	/** The password to use for the test user. */
 	private static final String TEST_PASS = "rmaptest";
 
+	/** The RMap service. */
 	@Autowired 
 	private RMapService rmapService;
-	
+
+	/** RMap Auth Service instance */
 	@Autowired
 	private RMapAuthService rmapAuthService;
 	
@@ -63,8 +92,6 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	    return policy.getPassword();
 	}
 		
-
-
     /* (non-Javadoc)
 	 * @see info.rmapproject.api.auth.ApiUserServiceInt#getSystemAgentUriForEvent()
 	 */
@@ -146,6 +173,9 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 		return apiKeyUri;
 	}
 
+	/* (non-Javadoc)
+	 * @see info.rmapproject.api.auth.ApiUserService#validateKey(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void validateKey(String accessKey, String secret)
 			throws RMapApiException {
@@ -157,6 +187,9 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 		}	
 	}
 
+	/* (non-Javadoc)
+	 * @see info.rmapproject.api.auth.ApiUserService#getCurrentRequestAgent()
+	 */
 	@Override
 	public RMapRequestAgent getCurrentRequestAgent() throws RMapApiException {
 		RMapRequestAgent agent = new RMapRequestAgent(getCurrentSystemAgentUri(), getApiKeyForEvent());

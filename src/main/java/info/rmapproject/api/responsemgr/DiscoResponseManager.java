@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 
@@ -40,29 +59,32 @@ import java.util.List;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openrdf.model.vocabulary.DC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
- * Creates HTTP responses for RMap DiSCO REST API requests
- * @author khanson
+ * Creates HTTP responses for RMap DiSCO REST API requests.
  *
+ * @author khanson
  */
 public class DiscoResponseManager extends ResponseManager {
 
-    
-	private final Logger log = LogManager.getLogger(this.getClass()); 
+
+	/** The Constant log. */
+	private static final Logger log = LoggerFactory.getLogger(DiscoResponseManager.class);
 	
+	/** The API User Service. */
 	private final ApiUserService apiUserService;
 	
 	/**
-	 * Constructor autowires the RMapService, RDFHandler, ApiUserService
-	 * @param rmapService
-	 * @param rdfHandler
-	 * @throws RMapApiException
+	 * Constructor autowires the RMapService, RDFHandler, ApiUserService.
+	 *
+	 * @param rmapService the RMap Service
+	 * @param rdfHandler the RDF handler
+	 * @param apiUserService the API User Service
+	 * @throws RMapApiException the RMap API exception
 	 */
 	@Autowired
 	public DiscoResponseManager(RMapService rmapService, 
@@ -78,9 +100,10 @@ public class DiscoResponseManager extends ResponseManager {
 
 
 	/**
-	 * Displays DiSCO Service Options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Displays DiSCO Service Options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getDiSCOServiceOptions() throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -107,9 +130,10 @@ public class DiscoResponseManager extends ResponseManager {
 
 
 	/**
-	 * Displays DiSCO Service Options Header
-	 * @return Response
-	 * @throws RMapApiException
+	 * Displays DiSCO Service Options Header.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getDiSCOServiceHead() throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -135,10 +159,11 @@ public class DiscoResponseManager extends ResponseManager {
 
 	/**
 	 * Retrieves RMap DiSCO in requested RDF format and forms an HTTP response.
-	 * @param strDiscoUri
-	 * @param acceptType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param strDiscoUri the DiSCO URI
+	 * @param returnType the RDF return type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */	
 	public Response getRMapDiSCO(String strDiscoUri, RdfMediaType returnType) throws RMapApiException	{
 		Response response = getRMapDiSCO(strDiscoUri, returnType, false);
@@ -148,10 +173,11 @@ public class DiscoResponseManager extends ResponseManager {
 	
 	/**
 	 * Retrieves latest version of RMap DiSCO in requested RDF format and forms an HTTP response.
-	 * @param strDiscoUri
-	 * @param returnType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param strDiscoUri the DiSCO URI
+	 * @param returnType the RDF return type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getLatestRMapDiSCOVersion(String strDiscoUri, RdfMediaType returnType) throws RMapApiException	{
 		Response response = getRMapDiSCO(strDiscoUri, returnType, true);
@@ -162,10 +188,12 @@ public class DiscoResponseManager extends ResponseManager {
 	/**
 	 * Using URI Provided, retrieves either the latest version or requested version of an RMap DiSCO 
 	 * in RDF format specified and forms an HTTP response.
-	 * @param strDiscoUri 
-	 * @param acceptType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param strDiscoUri the DiSCO URI
+	 * @param returnType the RDF return type
+	 * @param viewLatestVersion true if view latest version
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */	
 	private Response getRMapDiSCO(String strDiscoUri, RdfMediaType returnType, Boolean viewLatestVersion) throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -264,10 +292,10 @@ public class DiscoResponseManager extends ResponseManager {
 
 	/**
 	 * Retrieves RMap DiSCO metadata and returns it in an HTTP header-only response.
-	 * @param strDiscoUri
-	 * @param acceptType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param strDiscoUri the str disco uri
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */	
 	public Response getRMapDiSCOHeader(String strDiscoUri) throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -323,9 +351,11 @@ public class DiscoResponseManager extends ResponseManager {
 
 	/**
 	 * Creates new RMap:DiSCO from valid client-provided RDF.
-	 * @param discoRdf
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoRdf the disco rdf
+	 * @param contentType the content type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response createRMapDiSCO(InputStream discoRdf, RDFType contentType) throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -410,11 +440,12 @@ public class DiscoResponseManager extends ResponseManager {
 	/**
 	 * Updates RMap:DiSCO.  Does this by inactivating the previous version of the DiSCO and 
 	 * creating a new version using valid client-provided RDF.
-	 * @param origDiscoUri
-	 * @param discoRdf
-	 * @param contentType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param origDiscoUri the DiSCO URI to update
+	 * @param discoRdf the DiSCO as RDF
+	 * @param contentType the request content type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response updateRMapDiSCO(String origDiscoUri, InputStream discoRdf, RDFType contentType) throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -528,9 +559,10 @@ public class DiscoResponseManager extends ResponseManager {
 	
 	/**
 	 * Sets status of RMap:DiSCO to tombstoned.  
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response tombstoneRMapDiSCO(String discoUri) throws RMapApiException {
 		return changeRMapDiSCOStatus(discoUri, "TOMBSTONED");
@@ -538,9 +570,10 @@ public class DiscoResponseManager extends ResponseManager {
 
 	/**
 	 * Sets status of RMap:DiSCO to inactive.  
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response inactivateRMapDiSCO(String discoUri) throws RMapApiException {
 		return changeRMapDiSCOStatus(discoUri, "INACTIVE");
@@ -549,10 +582,11 @@ public class DiscoResponseManager extends ResponseManager {
 
 	/**
 	 * Sets status of RMap:DiSCO to tombstoned or inactive, depending on newStatus defined.  
-	 * @param discoUri
-	 * @param newStatus
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @param newStatus the new status
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	private Response changeRMapDiSCOStatus(String discoUri, String newStatus) throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -652,11 +686,12 @@ public class DiscoResponseManager extends ResponseManager {
 	 * Gets list of RMap:DiSCO version URIs and returns them as JSON or Plain Text. 
 	 * Set retAgentVersionsOnly to true to return the list of version that match the 
 	 * system Agent of the discoUri parameter.
-	 * @param discoUri
-	 * @param listType
-	 * @param retAgentVersionsOnly
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @param returnType the non-RDF return type
+	 * @param retAgentVersionsOnly true if return versions by same agent only
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getRMapDiSCOVersions(String discoUri, NonRdfType returnType, Boolean retAgentVersionsOnly) throws RMapApiException {
 
@@ -741,10 +776,11 @@ public class DiscoResponseManager extends ResponseManager {
 	/**
 	 * Retrieves list of RMap:Event URIs associated with the RMap:DiSCO URI provided and returns 
 	 * the results as a JSON or Plain Text list.
-	 * @param discoUri
-	 * @param returnType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @param returnType the non-RDF return type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getRMapDiSCOEvents(String discoUri, NonRdfType returnType) throws RMapApiException {
 
@@ -818,11 +854,12 @@ public class DiscoResponseManager extends ResponseManager {
 
 	/**
 	 * Retrieves the string of links to DiSCO versions, Status and Events for HTTP Response header Link property.
-	 * @param rmapDiSCODTO
-	 * @return String
-	 * @throws RMapApiException
-	 * @throws RMapException
-	 * @throws RMapDefectiveArgumentException 
+	 *
+	 * @param rmapDiSCODTO the DiSCO data transfer object
+	 * @return DiSCO links string for header
+	 * @throws RMapApiException the RMap API Exception
+	 * @throws RMapException the RMap Exception
+	 * @throws RMapDefectiveArgumentException the RMap Defective Argument exception
 	 */
 	private String buildGetDiscoLinks(RMapDiSCODTO rmapDiSCODTO) throws RMapApiException, RMapException, RMapDefectiveArgumentException {
 		StringBuilder links = new StringBuilder("");

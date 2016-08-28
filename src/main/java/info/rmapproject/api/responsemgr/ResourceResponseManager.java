@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -27,19 +46,20 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
+
 /**
- * 
- * @author khanson
- * Creates HTTP responses for Resource REST API requests
+ * Creates HTTP responses for Resource REST API requests.
  *
+ * @author khanson
  */
 public class ResourceResponseManager extends ResponseManager {
 	
 	/**
-	 * Constructor autowires the RMapService and RDFHandler
-	 * @param rmapService
-	 * @param rdfHandler
-	 * @throws RMapApiException
+	 * Constructor autowires the RMapService and RDFHandler.
+	 *
+	 * @param rmapService the RMap Service
+	 * @param rdfHandler the RDF handler
+	 * @throws RMapApiException the RMap API exception
 	 */
 	@Autowired
 	public ResourceResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
@@ -47,9 +67,10 @@ public class ResourceResponseManager extends ResponseManager {
 	}
 	
 	/**
-	 * Displays Resource Service Options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Displays Resource Service Options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getResourceServiceOptions() throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -77,9 +98,10 @@ public class ResourceResponseManager extends ResponseManager {
 
 
 	/**
-	 * Displays Resource Service Options Header
-	 * @return Response
-	 * @throws RMapApiException
+	 * Displays Resource Service Options Header.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getResourceServiceHead() throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -103,13 +125,14 @@ public class ResourceResponseManager extends ResponseManager {
 	}
 
 	/**
-	 * Get RMap Resource related objects, output in format requested (currently JSON or PLAIN TEXT)
-	 * @param strResourceUri
-	 * @param objType
-	 * @param returnType
-	 * @param uriInfo
-	 * @return Response
-	 * @throws RMapApiException
+	 * Get RMap Resource related objects, output in format requested (currently JSON or PLAIN TEXT).
+	 *
+	 * @param strResourceUri the Resource URI
+	 * @param objType the RMap object type to retrieve
+	 * @param returnType the non-RDF return type
+	 * @param queryParams the query params
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getRMapResourceRelatedObjs(String strResourceUri, 
 												RMapObjectType objType, 
@@ -235,11 +258,12 @@ public class ResourceResponseManager extends ResponseManager {
 	/**
 	 * Generate HTTP Response for list of RDF triples that reference the resource URI provided.
 	 * Graph is filtered according to query params provided.
-	 * @param strResourceUri
-	 * @param returnType
-	 * @param queryParams
-	 * @return
-	 * @throws RMapApiException
+	 *
+	 * @param strResourceUri the Resource URI
+	 * @param returnType the RDF return type
+	 * @param queryParams the query params
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getRMapResourceTriples(String strResourceUri, RdfMediaType returnType,
 											MultivaluedMap<String,String> queryParams) throws RMapApiException {

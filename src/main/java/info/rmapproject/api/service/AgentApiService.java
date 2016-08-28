@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -22,27 +41,27 @@ import javax.ws.rs.core.UriInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 
-
 /**
- * 
- * API service for RMap Agents
- * @author khanson
+ * REST API service for RMap Agents.
  *
+ * @author khanson
  */
 
 @Path("/agents")
 public class AgentApiService {
 
+    /** Web Application context to retrieve bean values (must use WebApplicationContext to avoid thread issues). */
     @Autowired
     private WebApplicationContext context;
     
 	//private AgentResponseManager agentResponseManager;
 
     /**
-     * Get new agent response manager bean - must use WebApplicationContext to avoid thread issues.
-     * @return
-     * @throws RMapApiException
-     */
+	 * Get new RMap Agent response manager bean
+	 *
+	 * @return instance of AgentResponseManager
+	 * @throws RMapApiException the RMap API exception
+	 */
     private AgentResponseManager getAgentResponseManager() throws RMapApiException {
     	AgentResponseManager agentResponseManager = (AgentResponseManager)context.getBean("agentResponseManager");
     	if (agentResponseManager==null) {
@@ -53,9 +72,10 @@ public class AgentApiService {
 
 	/**
 	 * HEAD /agent
-     * Returns Agent API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns Agent API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @HEAD
     public Response apiGetApiDetails() throws RMapApiException {
@@ -66,9 +86,10 @@ public class AgentApiService {
 
 	/**
 	 * OPTIONS /agent
-     * Returns Agent API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns Agent API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
     public Response apiGetApiDetailedOptions() throws RMapApiException {
@@ -87,12 +108,14 @@ public class AgentApiService {
  */
     
 	/**
-	 * GET /agent/{agentUri}
-	 * Returns requested RMap:Agent as RDF/XML, JSON-LD, Turtle or NQUADS
-	 * @param agentUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
+ * GET /agent/{agentUri}
+ * Returns requested RMap:Agent as RDF/XML, JSON-LD, Turtle or NQUADS.
+ *
+ * @param headers the HTTP request headers
+ * @param agentUri the Agent URI
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */    
     @GET
     @Path("/{agentUri}")
     @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.agent+rdf+xml;charset=UTF-8;",
@@ -113,14 +136,15 @@ public class AgentApiService {
  * 
  *-------------------------------
  */
-	/**
-	 * HEAD /agent/{agentUri}
-     * Returns status information for specific Agent as a HTTP response header. 
-     * Includes event list, versions, and URI
-	 * @param agentUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */
+ /**
+ * HEAD /agent/{agentUri}
+ * Returns status information for specific Agent as a HTTP response header. 
+ * Includes event list, versions, and URI
+ *
+ * @param agentUri the Agent URI
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */
     @HEAD
     @Path("/{agentUri}")
     public Response apiGetAgentStatus(@PathParam("agentUri") String agentUri) throws RMapApiException {
@@ -138,12 +162,15 @@ public class AgentApiService {
  */
     
 	/**
-	 * GET /agent/{agentUri}/events
-	 * Returns list of RMap:Event URIs related to the Agent URI as JSON or PLAINTEXT
-	 * @param agentUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
+ * GET /agent/{agentUri}/events
+ * Returns list of RMap:Event URIs related to the Agent URI as JSON or PLAINTEXT.
+ *
+ * @param headers the HTTP request headers
+ * @param agentUri the Agent URI
+ * @param uriInfo the uri info to retrieve query params etc.
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */    
     @GET
     @Path("/{agentUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
@@ -159,10 +186,13 @@ public class AgentApiService {
    
 	/**
 	 * GET /agent/{agentUri}/discos
-	 * Returns list of URIs for RMap:DiSCOs that were created by the Agent URI as JSON or PLAINTEXT
-	 * @param agentUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns list of URIs for RMap:DiSCOs that were created by the Agent URI as JSON or PLAINTEXT.
+	 *
+	 * @param headers the HTTP request headers
+	 * @param agentUri the Agent URI
+	 * @param uriInfo the uri info to retrieve query params etc
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */    
     @GET
     @Path("/{agentUri}/discos")

@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.auth;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -19,11 +38,17 @@ import org.apache.cxf.jaxrs.utils.JAXRSUtils;
 import org.apache.cxf.message.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Implementation of the API User Service, which manages interaction between rmap-auth and the API. 
+ * @author khanson
+ */
 public class ApiUserServiceImpl implements ApiUserService {
 
+	/** RMap Service instance */
 	@Autowired 
 	private RMapService rmapService;
 	
+	/** RMap Auth Service instance */
 	@Autowired
 	private RMapAuthService rmapAuthService;
 	
@@ -89,7 +114,7 @@ public class ApiUserServiceImpl implements ApiUserService {
 				//no agent id
 				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);				
 			}
-			
+
 			rmapAuthService.createOrUpdateAgentFromUser(user.getUserId());	
 
 			sysAgentUri = new URI(agentUri);

@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import static org.junit.Assert.assertTrue;
@@ -23,32 +42,52 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+/**
+ * Tests for ResponseManager.
+ * @author khanson
+ */
 @RunWith( SpringJUnit4ClassRunner.class )
 @ContextConfiguration({ "classpath:/spring-rmapapi-context.xml" })
 public class ResponseManagerTest {
 
+	/** The Agent URI. */
 	protected IRI AGENT_URI;
+	
+	/** The ID Provider URI. */
 	protected IRI IDPROVIDER_URI;
+	
+	/** The Auth ID. */
 	protected IRI AUTH_ID;
+	
+	/** The agent name. */
 	protected Value NAME;
 	
+	/** The rmap service. */
 	@Autowired
 	protected RMapService rmapService;
 
+	/** The rdf handler. */
 	@Autowired
 	protected RDFHandler rdfHandler;
 	
+	/** The triplestore. */
 	@Autowired
 	protected SesameTriplestore triplestore;
 	
+	/** The disco response manager. */
 	@Autowired
 	protected DiscoResponseManager discoResponseManager;
 	
+	/** The test agent URI. */
 	protected java.net.URI testAgentURI; //used to pass back into rmapService since all of these use java.net.URI
+	
+	/** The context. */
 	protected ApplicationContext context;
 
+	/** The req agent. */
 	protected RMapRequestAgent reqAgent; 
 		
+	/** The generic disco rdf. */
 	protected String genericDiscoRdf = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
@@ -92,6 +131,7 @@ public class ResponseManagerTest {
 	    	+ "</rdf:Description>"	
 	    	+ "</rdf:RDF>";
 
+	/** The disco with space in url. */
 	protected String discoWithSpaceInUrl = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
@@ -136,19 +176,32 @@ public class ResponseManagerTest {
 	    	+ "</rdf:RDF>";
 	
 	
+	/**
+	 * Instantiates a new response manager test.
+	 */
 	public ResponseManagerTest() {
 		super();
 	}
 
 	
+	/**
+	 * Setup before each test
+	 *
+	 * @throws Exception the exception
+	 */
 	@Before
 	public void setUp() throws Exception {
 		this.testAgentURI = createTestAgent();
         reqAgent = new RMapRequestAgent(testAgentURI);
 	}
 
+	/**
+	 * Creates the test RMap Agent.
+	 *
+	 * @return the Agent URI
+	 */
 	protected java.net.URI createTestAgent() {
-		AGENT_URI = ORAdapter.getValueFactory().createIRI("ark:/22573/rmaptestagent");
+		AGENT_URI = ORAdapter.getValueFactory().createIRI("rmap:rmaptestagent");
 		IDPROVIDER_URI = ORAdapter.getValueFactory().createIRI("http://orcid.org/");
 		AUTH_ID = ORAdapter.getValueFactory().createIRI("http://rmap-project.org/identities/rmaptestauthid");
 		NAME = ORAdapter.getValueFactory().createLiteral("RMap test Agent");
@@ -169,7 +222,7 @@ public class ResponseManagerTest {
 				@SuppressWarnings("unused")
 				RMapEvent event = rmapService.createAgent(agent, reqAgt);
 				if (rmapService.isAgentId(agentUri)){
-					System.out.println("Test Agent successfully created!  URI is ark:/29297/rmaptestagent");
+					System.out.println("Test Agent successfully created!  URI is rmap:rmaptestagent");
 				}
 			}
 			
@@ -180,6 +233,11 @@ public class ResponseManagerTest {
 	}
 	
 
+	/**
+	 * Test conversion of String to RMapValue.
+	 *
+	 * @throws RMapApiException the RMap API Exception
+	 */
 	@Test 
 	public void testConvertObjectStringToRMapValue() throws RMapApiException {
 		String objectJustLiteral = "\"This is a literal\"";

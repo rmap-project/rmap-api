@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import static org.junit.Assert.assertEquals;
@@ -25,12 +44,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
+/**
+ * Tests for the ResourceResponseManager class
+ */
 public class ResourceResponseManagerTest extends ResponseManagerTest {
 	
+	/** The Resource Response Manager. */
 	@Autowired
 	protected ResourceResponseManager resourceResponseManager;
 	
+	/* (non-Javadoc)
+	 * @see info.rmapproject.api.responsemgr.ResponseManagerTest#setUp()
+	 */
 	@Before
 	public void setUp() throws Exception {
 		try {
@@ -42,12 +67,18 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	}
 	
 
+	/**
+	 * Test resource response manager.
+	 */
 	@Test
 	public void testResourceResponseManager() {
 		assertTrue (resourceResponseManager instanceof ResourceResponseManager);
 	}
 
 	
+	/**
+	 * Test get resource service options.
+	 */
 	@Test
 	public void testGetResourceServiceOptions() {
 		Response response = null;
@@ -61,6 +92,9 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 
+	/**
+	 * Test get resource service head.
+	 */
 	@Test
 	public void testGetResourceServiceHead() {
 		Response response = null;
@@ -75,6 +109,9 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 
+	/**
+	 * Test get RMap Resource related objs.
+	 */
 	@Test
 	public void testGetRMapResourceRelatedObjs() {
 		Response response = null;
@@ -104,6 +141,9 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	}
 	
 
+	/**
+	 * Test get RMap Resource related DiSCOs.
+	 */
 	@Test
 	public void testGetRMapResourceRelatedDiSCOs() {
 		Response response = null;
@@ -135,6 +175,9 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 	}
 	
 
+	/**
+	 * Test get RMap Resource related DiSCOs with status.
+	 */
 	@Test
 	public void testGetRMapResourceRelatedDiSCOsWithStatus() {
 		Response responseActive = null;
@@ -153,7 +196,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 			String discoURI2 = rmapDisco.getId().toString();
 	        assertNotNull(discoURI2);
 	        
-			/*String discoURI = "ark:/22573/rmd18m7p1b";*/
+			/*String discoURI = "rmap:rmd18m7p1b";*/
 			
 			//create a disco using the test agent
 			rmapService.createDiSCO(rmapDisco, super.reqAgent);
@@ -197,6 +240,9 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 		
 	}
 		
+	/**
+	 * Test the RMap Resource RDF stmts.
+	 */
 	@Test
 	public void getRMapResourceRdfStmts() {
 		Response response = null;

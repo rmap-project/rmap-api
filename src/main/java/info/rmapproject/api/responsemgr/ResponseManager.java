@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -22,29 +41,54 @@ import java.util.Date;
 
 import javax.ws.rs.core.MultivaluedMap;
 
+/**
+ * Abstract class containing generic declarations for response managers. Response managers generate 
+ * HTTP responses for different kinds of REST API requests.
+ * @author khanson
+ */
 public abstract class ResponseManager {
 
+	/** The term used in the querystring for the date from parameter. */
 	protected static final String FROM_PARAM="from";
+
+	/** The term used in the querystring for the date until parameter. */
 	protected static final String UNTIL_PARAM="until";
+
+	/** The term used in the querystring for the limit parameter. */
 	protected static final String LIMIT_PARAM="limit";
+
+	/** The term used in the querystring for the page number parameter. */
 	protected static final String PAGE_PARAM="page";
+
+	/** The term used in the querystring for the agent filter parameter. */
 	protected static final String AGENTS_PARAM="agents";
+
+	/** The term used in the querystring for the status filter parameter. */
 	protected static final String STATUS_PARAM="status";
+
+	/** An character sequence used as a placeholder for the page number when processing pagination. */
 	protected static final String PAGENUM_PLACEHOLDER = "**$#pagenum#$**";
+	
+	/** The number of the first page of results */
 	protected static final String FIRST_PAGE="1";
 	
+	/** The date format as a string. */
 	protected static final String DATE_STRING_FORMAT = "yyyyMMddHHmmss";
 	
 	
+	/** The RMap Service. */
 	protected RMapService rmapService;
+	
+	/** The RDF handler. */
 	protected RDFHandler rdfHandler;
 	
 	
 	/**
-	 * Constructor receives rmapService and rdfHandler
-	 * @param rmapService
-	 * @param rdfHandler
-	 * @throws RMapApiException
+	 * Constructor receives RMapService and RDFHandler.
+	 *
+	 * @param rmapService the RMapService
+	 * @param rdfHandler the RDF handler
+	 * @throws RMapApiException the RMap API exception
 	 */
 	protected ResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
 		if (rmapService ==null){
@@ -60,12 +104,13 @@ public abstract class ResponseManager {
 	//TODO: all of these pagination and queryparam functions need to be sorted out - extracted out into new class(es)
 	
 	/**
-	 * Creates path with a placeholder for the page number to be used in pagination links
-	 * @param path
-	 * @param queryParams
-	 * @param defaultLimit
-	 * @return
-	 * @throws RMapApiException
+	 * Creates URL path with a placeholder for the page number to be used in pagination links.
+	 *
+	 * @param path the URL path
+	 * @param queryParams the query params
+	 * @param defaultLimit the default limit
+	 * @return the paginated link template
+	 * @throws RMapApiException the RMap API exception
 	 */
 	protected String getPaginatedLinkTemplate(String path, MultivaluedMap<String,String> queryParams, Integer defaultLimit) 
 			throws RMapApiException{
@@ -122,11 +167,12 @@ public abstract class ResponseManager {
 			
 	/**
 	 * Creates pagination links for linkRef in response header. Note that duplicate parameters or irrelevant parameters will be ignored.
-	 * @param path
-	 * @param origQuery
-	 * @param offset
-	 * @param includeNext
-	 * @return
+	 *
+	 * @param pageUrlTemplate the page URL template
+	 * @param pageNum the page number to create links with
+	 * @param includeNext true if you should include the next link
+	 * @return pagination links 
+	 * @throws RMapApiException the RMap API exception
 	 */
 	protected String generatePaginationLinks(String pageUrlTemplate, Integer pageNum, boolean includeNext) throws RMapApiException{
 		
@@ -158,9 +204,10 @@ public abstract class ResponseManager {
 
 	/**
 	 * Creates search parameters object from the queryParams. Note that duplicate parameters or irrelevant parameters will be ignored.
-	 * @param uriInfo
-	 * @param includeNext
-	 * @return
+	 *
+	 * @param queryParams the query params
+	 * @return the RMap search params object
+	 * @throws RMapApiException the RMap API exception
 	 */
 	protected RMapSearchParams generateSearchParamObj(MultivaluedMap<String,String> queryParams) throws RMapApiException{
 		RMapSearchParams params = new RMapSearchParams();
@@ -202,9 +249,10 @@ public abstract class ResponseManager {
 	/**
 	 * Converts a string of text passed in as the "object" through the API request to a valid RMapValue
 	 * determining whether it is a typed literal, URI etc.
-	 * @param sPathString
-	 * @return
-	 * @throws RMapApiException
+	 *
+	 * @param sPathString the url path string
+	 * @return and RMap Value (a Resource or BNode)
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public RMapValue convertPathStringToRMapValue(String sPathString) throws RMapApiException{
 		RMapValue object = null;
@@ -249,9 +297,10 @@ public abstract class ResponseManager {
 	
 	/**
 	 * Converts a string of text passed in as a "resource" (including subject or predicate) through the API request to a valid java.net.URI
-	 * @param sPathString
-	 * @return
-	 * @throws RMapApiException
+	 *
+	 * @param sPathString the URL path as string
+	 * @return the URI
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public URI convertPathStringToURI(String sPathString) throws RMapApiException{
 		URI uri = null;
@@ -271,9 +320,10 @@ public abstract class ResponseManager {
 	}
 	
 	/**
-	 * Checks for angle brackets around a string URI and removes them if found
-	 * @param sUri
-	 * @return
+	 * Checks for angle brackets around a string URI and removes them if found.
+	 *
+	 * @param sUri the URI as a string
+	 * @return the string with angle brackets removed
 	 */
 	public String removeUriAngleBrackets(String sUri) {
 		//remove any angle brackets on a string Uri
@@ -287,10 +337,11 @@ public abstract class ResponseManager {
 	}
 	
 	/**
-	 * Extracts page number as integer from query parameters
-	 * @param queryParams
-	 * @return
-	 * @throws RMapApiException
+	 * Extracts page number as integer from query parameters.
+	 *
+	 * @param queryParams the query params
+	 * @return the page number
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Integer extractPage(MultivaluedMap<String,String> queryParams) throws RMapApiException {
 		Integer iPage = null;
@@ -309,10 +360,11 @@ public abstract class ResponseManager {
 	
 
 	/**
-	 * Extracts limit as integer from query parameters
-	 * @param queryParams
-	 * @return
-	 * @throws RMapApiException
+	 * Extracts limit as integer from query parameters.
+	 *
+	 * @param queryParams the query params
+	 * @return the limit
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Integer extractLimit(MultivaluedMap<String,String> queryParams) throws RMapApiException {
 		Integer iLimit = null;

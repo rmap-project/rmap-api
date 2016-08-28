@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.utils;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -10,21 +29,24 @@ import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+
 /**
  * Various methods for mapping the content-type or accept-type in the HTTP request to the internal list of acceptable types.
  * @author khanson
  */
 public class HttpTypeMediator {
 
-	private static String MEDIATYPE_VERSION = "1.0-beta";
+	/** The media type version. */
+	private static String MEDIATYPE_VERSION = "1.0.0-beta";
 	
 	
 	//private static final Logger log = LogManager.getLogger(HttpTypeMediator.class);
 	/**
-	 * Maps the accept-type to the matching response type
-	 * @param headers
-	 * @return BasicOutputType
-	 * @throws RMapApiException
+	 * Maps the accept-type to the matching response type.
+	 *
+	 * @param headers the HTTP request headers
+	 * @return the non-rdf type for the response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public static NonRdfType getNonRdfResponseType(HttpHeaders headers) throws RMapApiException {
 		NonRdfType outputType = null;
@@ -46,10 +68,11 @@ public class HttpTypeMediator {
 	}
 	
 	/**
-	 * 
-	 * @param headers
-	 * @return RdfMediaType
-	 * @throws RMapApiException
+	 * Gets the RDF response type.
+	 *
+	 * @param headers the HTTP Request headers
+	 * @return the RDF media type
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public static RdfMediaType getRdfResponseType(HttpHeaders headers) throws RMapApiException	{
 		RdfMediaType returnType = null;
@@ -74,10 +97,11 @@ public class HttpTypeMediator {
 	}
 	
 	/**
-	 * 
-	 * @param headers
-	 * @return RdfType
-	 * @throws RMapApiException
+	 * Gets the RDF type of a request using the request headers
+	 *
+	 * @param headers the HTTP Request headers
+	 * @return the RDF type
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public static RDFType getRdfTypeOfRequest(HttpHeaders headers) throws RMapApiException	{
 		RDFType requestType = null;
@@ -102,10 +126,11 @@ public class HttpTypeMediator {
 	}
 	
 	/**
-	 * Determine RDF media type that will be returned in the response
-	 * @param rmapType
-	 * @param rdfType
-	 * @return
+	 * Determine RDF media type that will be returned in the response as the content-type
+	 *
+	 * @param rmapType the RMap media type
+	 * @param rdfType the RDF type
+	 * @return the RMap media type to use in the response content type
 	 */
 	public static String getResponseRMapMediaType(String rmapType, RDFType rdfType){
 		String mediatype;
@@ -125,10 +150,10 @@ public class HttpTypeMediator {
 	}
 	
 	/**
-	 * Determine non-RDF media type that will be returned in the response
-	 * @param rmapType
-	 * @param rdfType
-	 * @return
+	 * Determine non-RDF media type that will be returned in the response.
+	 *
+	 * @param rdfType the RDF type
+	 * @return the non-RDF media type string for the response
 	 */
 	public static String getResponseNonRdfMediaType(NonRdfType rdfType){
 		String mediatype;

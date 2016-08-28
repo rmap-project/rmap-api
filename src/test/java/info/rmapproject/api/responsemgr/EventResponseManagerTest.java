@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import static org.junit.Assert.assertEquals;
@@ -21,11 +40,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Tests for EventResponseManager class.
+ */
 public class EventResponseManagerTest extends ResponseManagerTest {
 
+	/** The Event Response Manager. */
 	@Autowired
 	protected EventResponseManager eventResponseManager;
 	
+	/* (non-Javadoc)
+	 * @see info.rmapproject.api.responsemgr.ResponseManagerTest#setUp()
+	 */
 	@Before
 	public void setUp() throws Exception {
 		try {
@@ -36,11 +62,17 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 		}
 	}
 
+	/**
+	 * Test Event response manager instance.
+	 */
 	@Test
 	public void testEventResponseManager() {
 		assertTrue (eventResponseManager instanceof EventResponseManager);
 	}
 	
+	/**
+	 * Test get event service options.
+	 */
 	@Test
 	public void testGetEventServiceOptions() {
 		Response response = null;
@@ -55,6 +87,9 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 
+	/**
+	 * Test get event service head.
+	 */
 	@Test
 	public void testGetEventServiceHead() {
 		Response response = null;
@@ -69,6 +104,9 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 	
+	/**
+	 * Test get RMap Event.
+	 */
 	@Test
 	public void testGetRMapEvent() {
 		//create RMapStatement
@@ -88,7 +126,7 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 			
 			String sEventUri = eventUri.toString();
 			assertTrue(sEventUri.length()>0);
-			assertTrue(sEventUri.contains("ark:"));
+			assertTrue(sEventUri.contains("rmap:"));
 			
 			//getRMapStatement
 			Response response = null;

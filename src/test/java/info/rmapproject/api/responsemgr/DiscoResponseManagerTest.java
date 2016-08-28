@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import static org.junit.Assert.assertEquals;
@@ -28,9 +47,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
+/**
+ * Tests for DiscoResponseManager
+ * @author khanson
+ */
 public class DiscoResponseManagerTest extends ResponseManagerTest {
 	
+	/** The DiSCO RDF no creator. */
 	protected String discoRDFNoCreator = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
 			+ "<rdf:RDF "  
 			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
@@ -69,6 +92,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	    	+ "</rdf:Description>"  
 	    	+ "</rdf:RDF>";
 	
+	/** The DiSCO turtle RDF. */
 	protected String discoTurtleRdf = 
 			"@prefix dc: <http://purl.org/dc/elements/1.1/> ."
 			+ "@prefix frbr: <http://purl.org/vocab/frbr/core#> ."
@@ -96,7 +120,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			+ "    foaf:name \"Axel Huebl\" ;"
 			+ "    a dcterms:Agent"
 			+ "  ], ["
-			+ "    foaf:name \"René Widera\" ;"
+			+ "    foaf:name \"Renï¿½ Widera\" ;"
 			+ "    a dcterms:Agent"
 			+ "  ] ;"
 			+ "  scoro:contact-person <http://orcid.org/0000-0002-6459-0842> ;"
@@ -106,7 +130,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			+ "    a dcterms:Agent"
 			+ "  ] ;"
 			+ "  scoro:project-member ["
-			+ "    foaf:name \"René Widera\" ;"
+			+ "    foaf:name \"Renï¿½ Widera\" ;"
 			+ "    a dcterms:Agent"
 			+ "  ] ;"
 			+ "  dc:subject \"CUDA, HPC, Manycore, GPU, Policy Based Design\" ."
@@ -118,11 +142,14 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 			+ "  dcterms:creator <http://datacite.org> ;"
 			+ "  ore:aggregates <http://dx.doi.org/10.5281/zenodo.13962> .";
 	
+	/** The disco response manager. */
 	@Autowired
 	protected DiscoResponseManager discoResponseManager;
 	
 	/**
-	 * @throws java.lang.Exception
+	 * Sets the up.
+	 *
+	 * @throws Exception the exception
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -135,12 +162,18 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	}
 		
 
+	/**
+	 * Test DiSCO response manager instance.
+	 */
 	@Test
 	public void testDiSCOResponseManager() {
 		assertTrue (discoResponseManager instanceof DiscoResponseManager);
 	}
 
 	
+	/**
+	 * Test get DiSCO service head.
+	 */
 	@Test
 	public void testGetDiSCOServiceHead() {
 		Response response = null;
@@ -155,6 +188,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		assertEquals(200, response.getStatus());	
 	}
 	
+	/**
+	 * Test get DiSCO service options.
+	 */
 	@Test
 	public void testGetDiSCOServiceOptions() {
 		Response response = null;
@@ -172,7 +208,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 
 	/**
 	 * Tests whether appropriate 200 OK response is generated when you get a statement that 
-	 * exists in the database.  
+	 * exists in the database.
+	 *
+	 * @throws Exception the exception
 	 */
 	@Test
 	public void testGetRMapDisco() throws Exception{
@@ -186,7 +224,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
 		String discoURI = rmapDisco.getId().toString();
         assertNotNull(discoURI);
-		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
+		/*String discoURI = "rmap:rmd18m7p1b";*/
 		rmapService.createDiSCO(rmapDisco, super.reqAgent);
 	
 		try {
@@ -207,7 +245,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	
 
 	/**
-	 * Tests whether can retrieve response for updated DiSCO 
+	 * Tests whether can retrieve response for updated DiSCO.
+	 *
+	 * @throws Exception the exception
 	 */
 	@Test
 	public void testGetRMapDiscoThatHasBeenUpdated() throws Exception{
@@ -223,7 +263,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 		String discoURI2 = rmapDisco.getId().toString();
         assertNotNull(discoURI2);
         
-		/*String discoURI = "ark:/22573/rmd18m7p1b";*/
+		/*String discoURI = "rmap:rmd18m7p1b";*/
 		
 		//create a disco using the test agent
 		rmapService.createDiSCO(rmapDisco, super.reqAgent);
@@ -258,7 +298,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 
 	/**
 	 * Tests whether appropriate not found error is generated when you get a disco that 
-	 * doesn't exist in the database.  
+	 * doesn't exist in the database.
+	 *
+	 * @throws Exception the exception
 	 */
 	@Test
 	public void testGetRMapDiscoThatDoesntExist() throws Exception{
@@ -268,7 +310,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
     	
    		RdfMediaType matchingType = RdfMediaType.get("application/xml");
    		
-   		String discoURI = "ark:/27927/doesnotexist";
+   		String discoURI = "rmap:doesnotexist";
 		boolean correctErrorThrown = false;
    		
 		try {
@@ -292,6 +334,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	
 	
 
+	/**
+	 * Test create DiSCO using turtle RDF
+	 */
 	@Test
 	public void testCreateTurtleDisco() {
 		Response response = null;
@@ -314,6 +359,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	}
 
 
+	/**
+	 * Tests create DiSCO using RDF XML
+	 */
 	@Test
 	public void testCreateRdfXmlDisco() {
 		Response response = null;
@@ -346,6 +394,9 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	}
 	
 	
+	/**
+	 * Test create DiSCO when there is no creator.
+	 */
 	@Test
 	public void testCreateDiscoNoCreator() {
 		@SuppressWarnings("unused")
@@ -372,7 +423,7 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	}
 
 	/**
-	 * make sure deletion status is as expected.
+	 * Test DiSCO deletion has the correct status.
 	 */
 	@Test
 	public void testDeletionStatus(){

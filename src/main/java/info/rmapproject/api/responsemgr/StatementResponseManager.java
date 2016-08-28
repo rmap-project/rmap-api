@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -28,18 +47,18 @@ import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
- * Creates HTTP responses for Statement REST API requests
- * @author khanson
+ * Creates HTTP responses for Statement REST API requests.
  *
+ * @author khanson
  */
 public class StatementResponseManager extends ResponseManager {
 	
 	/**
-	 * Constructor autowires the RMapService and RDFHandler
-	 * @param rmapService
-	 * @param rdfHandler
-	 * @throws RMapApiException
+	 * Constructor autowires the RMapService and RDFHandler.
+	 *
+	 * @param rmapService the RMap Service
+	 * @param rdfHandler the RDF handler
+	 * @throws RMapApiException the RMap API exception
 	 */
 	@Autowired
 	public StatementResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
@@ -48,9 +67,10 @@ public class StatementResponseManager extends ResponseManager {
 		
 	
 	/**
-	 * Displays Statement Service Options
-	 * @return
-	 * @throws RMapApiException
+	 * Displays Statement Service Options.
+	 *
+	 * @return the statement service options
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getStatementServiceOptions() throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -77,9 +97,10 @@ public class StatementResponseManager extends ResponseManager {
 
 
 	/**
-	 * Displays Statement Service Options Header
+	 * Displays Statement Service Options Header.
+	 *
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getStatementServiceHead() throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -104,13 +125,14 @@ public class StatementResponseManager extends ResponseManager {
 			
 	/**
 	 * Retrieves RMap DiSCOs related to subject/predicate/object provided and forms an HTTP response.
-	 * @param subject
-	 * @param predicate
-	 * @param object
-	 * @param returnType
-	 * @param params
+	 *
+	 * @param subject the subject
+	 * @param predicate the predicate
+	 * @param object the object
+	 * @param returnType the non-RDF return type
+	 * @param queryParams the query params
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API exception
 	 */	
 	public Response getStatementRelatedDiSCOs(String subject, String predicate, 
 											String object, NonRdfType returnType,
@@ -217,13 +239,14 @@ public class StatementResponseManager extends ResponseManager {
 
 	/**
 	 * Retrieves RMap System Agents that asserted a statement with subject/predicate/object provided and forms an HTTP response.
-	 * @param subject
-	 * @param predicate
-	 * @param object
-	 * @param returnType
-	 * @param params
+	 *
+	 * @param subject the subject
+	 * @param predicate the predicate
+	 * @param object the object
+	 * @param returnType the non-RDF return type
+	 * @param queryParams the query params
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API exception
 	 */	
 	public Response getStatementAssertingAgents(String subject, String predicate, String object, NonRdfType returnType, 
 												MultivaluedMap<String,String> queryParams) throws RMapApiException	{

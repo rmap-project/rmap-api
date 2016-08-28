@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -28,18 +47,18 @@ import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
- * Creates HTTP responses for Event REST API requests
- * @author khanson
+ * Creates HTTP responses for Event REST API requests.
  *
+ * @author khanson
  */
 public class EventResponseManager extends ResponseManager {
 	
 	/**
-	 * Constructor autowires the RMapService and RDFHandler
-	 * @param rmapService
-	 * @param rdfHandler
-	 * @throws RMapApiException
+	 * Constructor autowires the RMapService and RDFHandler.
+	 *
+	 * @param rmapService the rmap service
+	 * @param rdfHandler the rdf handler
+	 * @throws RMapApiException the RMap API exception
 	 */
 	@Autowired
 	public EventResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
@@ -48,9 +67,10 @@ public class EventResponseManager extends ResponseManager {
 	
 	
 	/**
-	 * Displays Event Service Options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Displays Event Service Options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getEventServiceOptions() throws RMapApiException {
 		boolean reqSuccessful = false;
@@ -76,9 +96,10 @@ public class EventResponseManager extends ResponseManager {
 
 
 	/**
-	 * Displays Event Service Options Header
-	 * @return Response
-	 * @throws RMapApiException
+	 * Displays Event Service Options Header.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getEventServiceHead() throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -105,10 +126,11 @@ public class EventResponseManager extends ResponseManager {
 
 	/**
 	 * Retrieves RMap Event in requested RDF format and forms an HTTP response.
-	 * @param strEventUri
-	 * @param acceptType
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param strEventUri the Event URI
+	 * @param returnType the RDF return type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */	
 	public Response getRMapEvent(String strEventUri, RdfMediaType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -170,11 +192,13 @@ public class EventResponseManager extends ResponseManager {
 	}
 
 	/**
-	 * Get RMap Event related objects, output in format requested (currently JSON or PLAIN TEXT)
-	 * @param eventId
-	 * @param objType
-	 * @param returnType
-	 * @return Response
+	 * Get RMap Event related objects, output in format requested (currently JSON or PLAIN TEXT).
+	 *
+	 * @param strEventUri the Event URI
+	 * @param objType the RMap object types to retreive (DiSCO or Agent)
+	 * @param returnType the non-RDF return type
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
 	public Response getRMapEventRelatedObjs(String strEventUri, RMapObjectType objType, NonRdfType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;

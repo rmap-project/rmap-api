@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.service;
 
 import info.rmapproject.api.exception.ErrorCode;
@@ -26,25 +45,25 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.context.WebApplicationContext;
 
-
 /**
- * 
- * API service for RMap DiSCO 
- * @author khanson
+ * REST API service for RMap DiSCO .
  *
+ * @author khanson
  */
 @Path("/discos")
 public class DiSCOApiService {
 
+    /** Web Application context to retrieve bean values (must use WebApplicationContext to avoid thread issues). */
     @Autowired
     private WebApplicationContext context;
 	//private DiscoResponseManager discoResponseManager;	
 
     /**
-     * Get new disco response manager bean - must use WebApplicationContext to avoid thread issues.
-     * @return
-     * @throws RMapApiException
-     */
+	 * Get new DiSCO response manager bean
+	 *
+	 * @return the disco response manager
+	 * @throws RMapApiException the RMap API exception
+	 */
     private DiscoResponseManager getDiscoResponseManager() throws RMapApiException {
     	DiscoResponseManager discoResponseManager = (DiscoResponseManager)context.getBean("discoResponseManager");
     	if (discoResponseManager==null) {
@@ -63,11 +82,12 @@ public class DiSCOApiService {
  */	
 
 	/**
-	 * GET /disco
-     * Returns link to DiSCO API information, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
-	 */
+	* GET /disco
+	* Returns link to DiSCO API information, and lists HTTP options.
+	*
+	* @return HTTP Response
+	* @throws RMapApiException the RMap API exception
+	*/
     @GET
     @Produces("application/json;charset=UTF-8;")
     public Response getServiceInfo() throws RMapApiException {
@@ -79,9 +99,10 @@ public class DiSCOApiService {
     
 	/**
 	 * HEAD /disco
-     * Returns DiSCO API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns DiSCO API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @HEAD
     public Response getApiDetails() throws RMapApiException {
@@ -92,9 +113,10 @@ public class DiSCOApiService {
 
 	/**
 	 * OPTIONS /disco
-     * Returns DiSCO API information/link, and lists HTTP options
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns DiSCO API information/link, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
     public Response apiGetApiDetailedOptions() throws RMapApiException {
@@ -115,10 +137,12 @@ public class DiSCOApiService {
 
 	/**
 	 * GET /disco/{discoUri}
-	 * Returns requested RMap:DiSCO as RDF/XML, NQUADS, TURTLE or JSON-LD
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns requested RMap:DiSCO as RDF/XML, NQUADS, TURTLE or JSON-LD.
+	 *
+	 * @param header the HTTP request headers
+	 * @param discoUri the DiSCO URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */  
     @GET
     @Path("/{discoUri}")
@@ -143,12 +167,14 @@ public class DiSCOApiService {
  */
 
 	/**
-	 * GET /disco/{discoUri}/latest
-	 * Returns latest version of requested RMap:DiSCO as RDF/XML, JSON-LD, NQUADS or TURTLE
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
+ * GET /disco/{discoUri}/latest
+ * Returns latest version of requested RMap:DiSCO as RDF/XML, JSON-LD, NQUADS or TURTLE.
+ *
+ * @param header the HTTP request headers
+ * @param discoUri the DiSCO URI
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */    
     @GET
     @Path("/{discoUri}/latest")
     @Produces({"application/rdf+xml;charset=UTF-8;", "application/xml;charset=UTF-8;", "application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
@@ -163,21 +189,22 @@ public class DiSCOApiService {
     }
    
     
-    
-/*
- *-------------------------------
- *
- *		GET DISCO HEADER
- * 
- *-------------------------------
- */
-	/**
+	    
+	/*
+	 *-------------------------------
+	 *
+	 *		GET DISCO HEADER
+	 * 
+	 *-------------------------------
+	 */
+     /**
 	 * HEAD /disco/{discoUri}
-     * Returns status information for specific DiSCO as a HTTP response header. 
-     * Includes event list, versions, and URI
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns status information for specific DiSCO as a HTTP response header. 
+	 * Includes event list, versions, and URI
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */
     @HEAD
     @Path("/{discoUri}")
@@ -196,12 +223,14 @@ public class DiSCOApiService {
  */ 
     
 	/**
-	 * POST /disco/
-	 * Creates new DiSCO from RDF/XML, JSON-LD or TURTLE
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */
+ * POST /disco/
+ * Creates new DiSCO from RDF/XML, JSON-LD or TURTLE.
+ *
+ * @param header the HTTP request headers
+ * @param discoRdf the new DiSCO as RDF
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */
     @POST
     @Path("/")
     @Consumes({"application/rdf+xml;charset=UTF-8;", "application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
@@ -224,12 +253,15 @@ public class DiSCOApiService {
  */ 
 
 	/**
-	 * POST /disco/{discoid}
-	 * Sets original DiSCO as inactive and creates a new DiSCO from RDF/XML, JSON-LD or TURTLE
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */
+ * POST /disco/{discoid}
+ * Sets original DiSCO as inactive and creates a new DiSCO from RDF/XML, JSON-LD or TURTLE.
+ *
+ * @param header the HTTP request headers
+ * @param origDiscoId the ID of the DiSCO to be updated
+ * @param discoRdf the new DiSCO as RDF
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */
     @POST
     @Path("/{discoid}")
     @Consumes({"application/rdf+xml;charset=UTF-8;", "application/vnd.rmap-project.disco+rdf+xml;charset=UTF-8;",
@@ -253,12 +285,14 @@ public class DiSCOApiService {
  */
     
 	/**
-	 * GET /disco/{discoUri}/events
-	 * Returns list of RMap:Event URIs related to the DiSCO URI as JSON or PLAINTEXT
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
+ * GET /disco/{discoUri}/events
+ * Returns list of RMap:Event URIs related to the DiSCO URI as JSON or PLAINTEXT.
+ *
+ * @param header the HTTP request headers
+ * @param discoUri the DiSCO URI
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */    
     @GET
     @Path("/{discoUri}/events")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
@@ -277,14 +311,15 @@ public class DiSCOApiService {
  *-------------------------------
  */
     
-	/**
-	 * DELETE /disco/{discoUri}
-	 * Sets status of target RMap:DiSCO to "tombstoned".  It will still be stored in the triplestore
-	 * but won't be visible through the API.
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
+  /**
+  * DELETE /disco/{discoUri}
+  * Sets status of target RMap:DiSCO to "tombstoned".  It will still be stored in the triplestore
+  * but won't be visible through the API.
+  *
+  * @param discoUri the DiSCO URI
+  * @return HTTP Response
+  * @throws RMapApiException the RMap API exception
+  */    
     @DELETE
     @Path("/{discoUri}")
     public Response apiDeleteRMapDiSCO(@PathParam("discoUri") String discoUri) throws RMapApiException {
@@ -296,9 +331,10 @@ public class DiSCOApiService {
 	 * POST /disco/{discoUri}/inactivate
 	 * Sets status of target RMap:DiSCO to "inactive".  It will still be stored in the triplestore
 	 * and will still be visible through the API for certain requests.
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param discoUri the DiSCO URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */    
     @POST
     @Path("/{discoUri}/inactivate")
@@ -316,12 +352,14 @@ public class DiSCOApiService {
  */
     
 	/**
-	 * GET /disco/{discoUri}/allversions
-	 * Returns list of all RMap:DiSCO version URIs as JSON or PLAIN TEXT
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
-	 */    
+ * GET /disco/{discoUri}/allversions
+ * Returns list of all RMap:DiSCO version URIs as JSON or PLAIN TEXT.
+ *
+ * @param header the HTTP request headers
+ * @param discoUri the DiSCO URI
+ * @return HTTP Response
+ * @throws RMapApiException the RMap API exception
+ */    
     @GET
     @Path("/{discoUri}/allversions")
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
@@ -334,10 +372,12 @@ public class DiSCOApiService {
     
 	/**
 	 * GET /disco/{discoUri}/agentversions
-	 * Returns list of discoUri agent's RMap:DiSCO version URIs as JSON
-	 * @param discoUri
-	 * @return Response
-	 * @throws RMapApiException
+	 * Returns list of discoUri agent's RMap:DiSCO version URIs as JSON.
+	 *
+	 * @param header the HTTP request headers
+	 * @param discoUri the DiSCO URI
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
 	 */    
     @GET
     @Path("/{discoUri}/agentversions")

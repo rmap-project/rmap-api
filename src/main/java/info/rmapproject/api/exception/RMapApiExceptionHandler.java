@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.exception;
 
 import info.rmapproject.api.utils.Utils;
@@ -10,21 +29,26 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * Converts RMap API exceptions to HTTP responses
- * @author khanson
+ * Converts RMap Transform API exceptions to HTTP responses.
  *
+ * @author khanson
  */
 @Provider
 public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException>
 {
-	private final Logger log = LogManager.getLogger(this.getClass());
+	
+	/** The log. */
+	private static final Logger log = LoggerFactory.getLogger(RMapApiExceptionHandler.class);
 	
 	/**
-	 * Converts RMap API Exceptions to HTTP responses.
-	 * @param RMap API Exception
+	 * Converts RMap Transform API Exceptions to HTTP responses.
+	 *
+	 * @param exception the exception
+	 * @return the HTTP response for the exception
 	 */
     @Override
     public Response toResponse(RMapApiException exception)
@@ -93,7 +117,7 @@ public class RMapApiExceptionHandler implements ExceptionMapper<RMapApiException
     		response = Response.status(errType).type("text/plain").entity(errMsg.toString()).build(); 
     	}
 	
-    	log.fatal(errMsg.toString(), exception);
+    	log.error(errMsg.toString(), exception);
     	return response;
     }
 }

@@ -1,3 +1,22 @@
+/*******************************************************************************
+ * Copyright 2016 Johns Hopkins University
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This software was produced as part of the RMap Project (http://rmap-project.info),
+ * The RMap Project was funded by the Alfred P. Sloan Foundation and is a 
+ * collaboration between Data Conservancy, Portico, and IEEE.
+ *******************************************************************************/
 package info.rmapproject.api.responsemgr;
 
 
@@ -36,18 +55,18 @@ import org.openrdf.model.vocabulary.DC;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * 
- * Creates HTTP responses for RMap Agent REST API requests
- * @author khanson
+ * Creates HTTP responses for RMap Agent REST API requests.
  *
+ * @author khanson
  */
 public class AgentResponseManager extends ResponseManager {
 		
 	/**
-	 * Constructor autowires the RMapService and RDFHandler
-	 * @param rmapService
-	 * @param rdfHandler
-	 * @throws RMapApiException
+	 * Constructor autowires the RMapService and RDFHandler.
+	 *
+	 * @param rmapService the RMap Service
+	 * @param rdfHandler the RDF handler
+	 * @throws RMapApiException the RMap API Exception
 	 */
 	@Autowired
 	public AgentResponseManager(RMapService rmapService, RDFHandler rdfHandler) throws RMapApiException {
@@ -55,9 +74,10 @@ public class AgentResponseManager extends ResponseManager {
 	}
 	
 	/**
-	 * Displays Agent Service Options
+	 * Displays Agent Service Options.
+	 *
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API Exception
 	 */
 	public Response getAgentServiceOptions() throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -82,9 +102,10 @@ public class AgentResponseManager extends ResponseManager {
 	
 	
 	/**
-	 * Displays Agent Service Options Header
+	 * Displays Agent Service Options Header.
+	 *
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API Exception
 	 */
 	public Response getAgentServiceHead() throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -108,10 +129,11 @@ public class AgentResponseManager extends ResponseManager {
 		
 	/**
 	 * Retrieves RMap Agent in requested RDF format and forms an HTTP response.
-	 * @param strAgentUri
-	 * @param acceptType
+	 *
+	 * @param strAgentUri the Agent URI
+	 * @param returnType the return media type
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API Exception
 	 */	
 	public Response getRMapAgent(String strAgentUri, RdfMediaType returnType) throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -189,9 +211,10 @@ public class AgentResponseManager extends ResponseManager {
 
 	/**
 	 * Retrieves status of specific RMap Agent as HTTP response.
-	 * @param strAgentUri
+	 *
+	 * @param strAgentUri the Agent URI
 	 * @return HTTP Response
-	 * @throws RMapApiException
+	 * @throws RMapApiException the RMap API Exception
 	 */	
 	public Response getRMapAgentHeader(String strAgentUri) throws RMapApiException	{
 		boolean reqSuccessful = false;
@@ -261,11 +284,12 @@ public class AgentResponseManager extends ResponseManager {
 	/**
 	 * Retrieves list of RMap:DiSCO URIs that were created by the RMap:Agent URI provided and returns 
 	 * the results as a JSON or Plain Text list.
-	 * @param agentUri
-	 * @param returnType
-	 * @param queryParams
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param agentUri the Agent URI
+	 * @param returnType the non-RDF return type
+	 * @param queryParams the query params
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API Exception
 	 */
 	public Response getRMapAgentDiSCOs(String agentUri, 
 										NonRdfType returnType, 
@@ -276,11 +300,12 @@ public class AgentResponseManager extends ResponseManager {
 	/**
 	 * Retrieves list of RMap:Event URIs that were initiated by the RMap:Agent URI provided and returns 
 	 * the results as a JSON or Plain Text list.
-	 * @param agentUri
-	 * @param returnType
-	 * @param queryParams
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param agentUri the Agent URI
+	 * @param returnType the non-RDF return type
+	 * @param queryParams the query params
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API Exception
 	 */
 	public Response getRMapAgentEvents(String agentUri, 
 										NonRdfType returnType, 
@@ -291,12 +316,13 @@ public class AgentResponseManager extends ResponseManager {
 	/**
 	 * Retrieves list of RMap:Event or RMap:DiSCO URIs associated with the RMap:Agent URI provided and returns 
 	 * the results as a JSON or Plain Text list.
-	 * @param agentUri
-	 * @param returnType
-	 * @param queryParams
-	 * @param rmapObjType (return DISCO or EVENT URIs)
-	 * @return Response
-	 * @throws RMapApiException
+	 *
+	 * @param agentUri the Agent URI
+	 * @param returnType the non-RDF return type
+	 * @param queryParams the query params
+	 * @param rmapObjType (will return DISCO or EVENT URIs)
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API Exception
 	 */
 	public Response getRMapAgentObjects(String agentUri, 
 										NonRdfType returnType, 

@@ -81,21 +81,6 @@ public class DiSCOApiService {
  *-------------------------------
  */	
 
-	/**
-	* GET /disco
-	* Returns link to DiSCO API information, and lists HTTP options.
-	*
-	* @return HTTP Response
-	* @throws RMapApiException the RMap API exception
-	*/
-    @GET
-    @Produces("application/json;charset=UTF-8;")
-    public Response getServiceInfo() throws RMapApiException {
-    	//TODO: for now returns same as options, but might want html response to describe API?
-    	Response response = getDiscoResponseManager().getDiSCOServiceOptions();
-	    return response;
-    }
-    
     
 	/**
 	 * HEAD /disco
@@ -110,6 +95,20 @@ public class DiSCOApiService {
 	    return response;
     }
     
+	/**
+	* GET /disco
+	* Returns link to DiSCO API information, and lists HTTP options.
+	*
+	* @return HTTP Response
+	* @throws RMapApiException the RMap API exception
+	*/
+    @GET
+    public Response getServiceInfo() throws RMapApiException {
+    	//TODO: for now returns same as options, but might want html response to describe API?
+    	Response response = getDiscoResponseManager().getDiSCOServiceOptions();
+	    return response;
+    }
+    
 
 	/**
 	 * OPTIONS /disco
@@ -120,7 +119,7 @@ public class DiSCOApiService {
 	 */
     @OPTIONS
     public Response apiGetApiDetailedOptions() throws RMapApiException {
-    	Response response = getDiscoResponseManager().getDiSCOServiceHead();
+    	Response response = getDiscoResponseManager().getDiSCOServiceOptions();
 	    return response;
     }
     

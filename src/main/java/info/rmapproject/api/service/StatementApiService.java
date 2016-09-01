@@ -85,21 +85,6 @@ public class StatementApiService {
  *-------------------------------
  */	
 	/**
-	 * GET /stmt
-	 * Returns link to Statement API information, and lists HTTP options.
-	 *
-	 * @return HTTP Response
-	 * @throws RMapApiException the RMap API exception
-	 */
-    @GET
-    @Produces("application/json")
-    public Response apiGetServiceInfo() throws RMapApiException {
-   		//TODO: for now returns same as options, but might want html response to describe API?
-    	Response response = getStatementResponseManager().getStatementServiceOptions();
-   		return response;
-    }
-    
-	/**
 	 * HEAD /stmts
 	 * Returns Stmt API information/link, and lists HTTP options.
 	 *
@@ -112,6 +97,21 @@ public class StatementApiService {
 	    return response;
     }
     
+	/**
+	 * GET /stmts
+	 * Returns link to Statement API information, and lists HTTP options.
+	 *
+	 * @return HTTP Response
+	 * @throws RMapApiException the RMap API exception
+	 */
+    @GET
+    public Response apiGetServiceInfo() throws RMapApiException {
+   		//TODO: for now returns same as options, but might want html response to describe API?
+    	Response response = getStatementResponseManager().getStatementServiceOptions();
+   		return response;
+    }
+    
+    
 
 	/**
 	 * OPTIONS /stmts
@@ -121,7 +121,6 @@ public class StatementApiService {
 	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
-    @Produces("application/json")
     public Response apiGetStmtApiDetailedOptions() throws RMapApiException	{
     	Response response = getStatementResponseManager().getStatementServiceOptions();
 	    return response;

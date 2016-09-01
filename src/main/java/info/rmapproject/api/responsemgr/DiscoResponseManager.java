@@ -139,9 +139,9 @@ public class DiscoResponseManager extends ResponseManager {
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {				
-			String linkRel = "<http://rmapdns.ddns.net/swagger/docs/disco>;rel=\"" + DC.DESCRIPTION.toString() + "\"";
+			String linkRel = "<" +Utils.getDocumentationPath()+ ">;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
-					.header("Allow", "HEAD,OPTIONS,GET,POST,PATCH,DELETE")
+					.header("Allow", "HEAD,OPTIONS,GET,POST,DELETE")
 					.header("Link",linkRel)	
 					.build();
 			
@@ -737,7 +737,6 @@ public class DiscoResponseManager extends ResponseManager {
 			else	{
 				outputString= URIListHandler.uriListToJson(uriList, Terms.RMAP_DISCO_PATH);		
 			}
-
 		    			
 			response = Response.status(Response.Status.OK)
 							.entity(outputString.toString())

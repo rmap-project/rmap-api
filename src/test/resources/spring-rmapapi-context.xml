@@ -13,8 +13,7 @@
 	<context:component-scan base-package="info.rmapproject.api" />
     
     <import resource="classpath:META-INF/cxf/cxf.xml"/>
-    <import resource="classpath*:spring-rmapcore-context.xml" />
-    <import resource="classpath*:spring-rmapauth-context.xml" />
+    <import resource="classpath:spring-rmapcore-context.xml" />
     
     <context:property-placeholder/>
     <bean class="org.springframework.web.context.support.ServletContextPropertyPlaceholderConfigurer"/>
@@ -31,9 +30,7 @@
     <bean id="rmapIdService" class="info.rmapproject.core.idservice.ArkIdService"/>
     <bean id="rdfHandler" class="info.rmapproject.core.rdfhandler.impl.openrdf.RioRDFHandler"/> -->
 	<bean id="triplestore" class="info.rmapproject.core.rmapservice.impl.openrdf.triplestore.SesameSailMemoryTriplestore"/>
-		
-	<bean id="rmapAuthService" class="info.rmapproject.auth.service.RMapAuthServiceImpl"/>  
-	
+			
 	<bean id="authenticationInterceptor" class="info.rmapproject.api.auth.AuthenticationInterceptor"/>   
 	<bean id="apiUserService" class="info.rmapproject.api.mockobjects.ApiUserServiceMockImpl"/> 
 	<!-- <bean id="apiUserService" class="info.rmapproject.api.auth.ApiUserServiceImpl"/>   -->

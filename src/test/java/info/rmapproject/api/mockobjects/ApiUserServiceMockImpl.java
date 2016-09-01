@@ -22,11 +22,6 @@ package info.rmapproject.api.mockobjects;
 import info.rmapproject.api.auth.ApiUserService;
 import info.rmapproject.api.exception.ErrorCode;
 import info.rmapproject.api.exception.RMapApiException;
-import info.rmapproject.auth.exception.RMapAuthException;
-import info.rmapproject.auth.model.ApiKey;
-import info.rmapproject.auth.model.User;
-import info.rmapproject.auth.service.RMapAuthService;
-import info.rmapproject.core.model.event.RMapEvent;
 import info.rmapproject.core.model.request.RMapRequestAgent;
 import info.rmapproject.core.rmapservice.RMapService;
 
@@ -40,7 +35,7 @@ import org.springframework.test.context.ContextConfiguration;
 /**
  * Mock version of ApiUserServiceImpl for unit tests
  */
-@ContextConfiguration({ "classpath*:/spring-*-context.xml" })
+@ContextConfiguration({ "classpath:/spring-rmapapi-context.xml" })
 public class ApiUserServiceMockImpl implements ApiUserService {
 
 	/** The authorization policy. */
@@ -52,13 +47,19 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	/** The password to use for the test user. */
 	private static final String TEST_PASS = "rmaptest";
 
+	/** The fake test agent uri. */
+	private static final String STR_SYSAGENT_URI = "rmap:rmaptestagent";
+	
+	/** The fake api key uri. */
+	private static final String STR_APIKEY_URI = "rmap:fakermaptestkey";
+	
 	/** The RMap service. */
 	@Autowired 
 	private RMapService rmapService;
 
-	/** RMap Auth Service instance */
-	@Autowired
-	private RMapAuthService rmapAuthService;
+//	/** RMap Auth Service instance */
+//	@Autowired
+//	private RMapAuthService rmapAuthService;
 	
 		
 	/* (non-Javadoc)
@@ -108,30 +109,31 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	@Override
 	public URI getSystemAgentUri(String key, String secret) throws RMapApiException {
 		URI sysAgentUri = null;
-		
+		//TODO: need to mock key and user to do this part
 		try {
-			ApiKey apiKey = rmapAuthService.getApiKeyByKeySecret(key, secret);
-			User user = rmapAuthService.getUserById(apiKey.getUserId());
-
-			if (user.hasRMapAgent()){
-				//there is an agent id already, pass it back!
-				sysAgentUri = new URI(user.getRmapAgentUri());
-			}
-			else if (user.isDoRMapAgentSync()) {
-				//there is no agent id, but the record is flagged for synchronization - create the agent!
-				RMapEvent event = rmapAuthService.createOrUpdateAgentFromUser(user.getUserId());	
-				sysAgentUri = event.getAssociatedAgent().getIri();
-			}		
-			else {
-				//there is no agent id and no flag to create one
-				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);
-			}
+//			ApiKey apiKey = rmapAuthService.getApiKeyByKeySecret(key, secret);
+//			User user = rmapAuthService.getUserById(apiKey.getUserId());
+//
+//			if (user.hasRMapAgent()){
+//				//there is an agent id already, pass it back!
+//				sysAgentUri = new URI(user.getRmapAgentUri());
+//			}
+//			else if (user.isDoRMapAgentSync()) {
+//				//there is no agent id, but the record is flagged for synchronization - create the agent!
+//				RMapEvent event = rmapAuthService.createOrUpdateAgentFromUser(user.getUserId());	
+//				sysAgentUri = event.getAssociatedAgent().getIri();
+//			}		
+//			else {
+//				//there is no agent id and no flag to create one
+//				throw new RMapApiException(ErrorCode.ER_USER_HAS_NO_AGENT);
+//			}
+			sysAgentUri = new URI(STR_SYSAGENT_URI);
 					
-		} catch (RMapAuthException ex) {
-			throw RMapApiException.wrap(ex, ErrorCode.ER_USER_AGENT_COULD_NOT_BE_RETRIEVED);
-		}  catch (URISyntaxException ex) {
+		} catch (URISyntaxException ex) {
 			throw RMapApiException.wrap(ex, ErrorCode.ER_INVALID_AGENTID_FOR_USER);
-		} 
+		} catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_USER_AGENT_COULD_NOT_BE_RETRIEVED);
+		}  
 		
 		return sysAgentUri;
 	}
@@ -155,20 +157,21 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 		URI apiKeyUri = null;
 		
 		try {
-			ApiKey apiKey = rmapAuthService.getApiKeyByKeySecret(key, secret);
-			if (apiKey.isIncludeInEvent()){
-				apiKeyUri = new URI(apiKey.getKeyUri());
-			}
-			else {
-				//key should not be referenced in event, return null
-				return null;
-			}
-					
-		} catch (RMapAuthException ex) {
-			throw RMapApiException.wrap(ex, ErrorCode.ER_USER_AGENT_COULD_NOT_BE_RETRIEVED);
-		}  catch (URISyntaxException ex) {
+			//TODO: need to mock key and user to do this part
+//			ApiKey apiKey = rmapAuthService.getApiKeyByKeySecret(key, secret);
+//			if (apiKey.isIncludeInEvent()){
+//				apiKeyUri = new URI(apiKey.getKeyUri());
+//			}
+//			else {
+//				//key should not be referenced in event, return null
+//				return null;
+//			}
+			apiKeyUri = new URI(STR_APIKEY_URI);
+		} catch (URISyntaxException ex) {
 			throw RMapApiException.wrap(ex, ErrorCode.ER_INVALID_KEYURI_FOR_USER);
-		} 
+		} catch (Exception ex) {
+			throw RMapApiException.wrap(ex, ErrorCode.ER_USER_AGENT_COULD_NOT_BE_RETRIEVED);
+		}  
 		
 		return apiKeyUri;
 	}
@@ -180,9 +183,11 @@ public class ApiUserServiceMockImpl implements ApiUserService {
 	public void validateKey(String accessKey, String secret)
 			throws RMapApiException {
 		try {
-			rmapAuthService.validateApiKey(accessKey, secret);
+			//all fine, do nothing
+			//rmapAuthService.validateApiKey(accessKey, secret);
+			
 		}
-		catch (RMapAuthException e) {
+		catch (Exception e) {
 			throw RMapApiException.wrap(e, ErrorCode.ER_INVALID_USER_TOKEN_PROVIDED);
 		}	
 	}

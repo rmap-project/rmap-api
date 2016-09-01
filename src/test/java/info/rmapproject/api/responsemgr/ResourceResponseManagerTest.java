@@ -305,7 +305,7 @@ public class ResourceResponseManagerTest extends ResponseManagerTest {
 			//assertTrue(location.contains("resource"));
 			assertTrue(body.contains(encodedUrl));
 			assertEquals(200, response.getStatus());	
-			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
+			rmapService.deleteDiSCO(rmapDisco.getId().getIri(), super.reqAgent);
 			
 			
 		} catch (Exception e) {

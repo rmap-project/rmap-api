@@ -52,46 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author khanson
  */
 public class DiscoResponseManagerTest extends ResponseManagerTest {
-	
-	/** The DiSCO RDF no creator. */
-	protected String discoRDFNoCreator = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> "  
-			+ "<rdf:RDF "  
-			+ " xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\""  
-			+ " xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\""  
-			+ " xmlns:rmap=\"http://rmap-project.org/rmap/terms/\""  
-			+ " xmlns:ore=\"http://www.openarchives.org/ore/terms/\""  
-			+ " xmlns:dcterms=\"http://purl.org/dc/terms/\""  
-			+ " xmlns:dc=\"http://purl.org/dc/elements/1.1/\""  
-			+ " xmlns:foaf=\"http://xmlns.com/foaf/0.1/\""  
-			+ " xmlns:fabio=\"http://purl.org/spar/fabio/\">"  
-			+ "<rmap:DiSCO>"  
-			+ "<dc:description>"  
-			+ "This is an example DiSCO aggregating different file formats for an article on IEEE Xplore as well as multimedia content related to the article."  
-			+ "</dc:description>"  
-			+ "<ore:aggregates rdf:resource=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\"/>"  
-			+ "<ore:aggregates rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\"/>"  
-	    	+ "</rmap:DiSCO>"  
-	    	+ "<fabio:JournalArticle rdf:about=\"http://dx.doi.org/10.1109/ACCESS.2014.2332453\">"  
-	    	+ "<dc:title>Toward Scalable Systems for Big Data Analytics: A Technology Tutorial</dc:title>"  
-	    	+ "<dc:creator>Yonggang Wen</dc:creator>"  
-	    	+ "<dc:creator>Tat-Seng Chua</dc:creator>"  
-	    	+ "<dc:creator>Xuelong Li</dc:creator>"  
-	    	+ "<dc:subject>Hadoop</dc:subject>"  
-	    	+ "<dc:subject>Big data analytics</dc:subject>"  
-	    	+ "<dc:subject>data acquisition</dc:subject>"  
-	    	+ "</fabio:JournalArticle>"  
-	    	+ "<rdf:Description rdf:about=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip\">"  
-	    	+ "<dc:format>application/zip</dc:format>"  
-	    	+ "<dc:description>Zip file containing an AVI movie and a README file in Word format.</dc:description>"  
-	    	+ "<dc:hasPart rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip#big%32data%32intro.avi\"/>"  
-	    	+ "<dc:hasPart rdf:resource=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip#README.docx\"/>"  
-	    	+ "</rdf:Description>"  
-	    	+ "<rdf:Description rdf:about=\"http://ieeexplore.ieee.org/ielx7/6287639/6705689/6842585/html/mm/6842585-mm.zip#big%32data%32intro.avi\">"  
-	    	+ "<dc:format>video/x-msvideo</dc:format>"  
-	    	+ "<dc:extent>194KB</dc:extent>"  
-	    	+ "</rdf:Description>"  
-	    	+ "</rdf:RDF>";
-	
+		
 	/** The DiSCO turtle RDF. */
 	protected String discoTurtleRdf = 
 			"@prefix dc: <http://purl.org/dc/elements/1.1/> ."
@@ -394,34 +355,6 @@ public class DiscoResponseManagerTest extends ResponseManagerTest {
 	}
 	
 	
-	/**
-	 * Test create DiSCO when there is no creator.
-	 */
-	@Test
-	public void testCreateDiscoNoCreator() {
-		@SuppressWarnings("unused")
-		Response response = null;
-		boolean correctErrorThrown = false;
-		try {		
-			InputStream stream = new ByteArrayInputStream(discoRDFNoCreator.getBytes(StandardCharsets.UTF_8));
-			response = discoResponseManager.createRMapDiSCO(stream, RDFType.RDFXML);
-			
-		} catch (RMapApiException e) {
-			assertEquals(e.getErrorCode(), ErrorCode.ER_CORE_GENERIC_RMAP_EXCEPTION);
-			e.printStackTrace();			
-			correctErrorThrown=true;
-		}  catch (Exception e) {
-			System.out.print(e.getMessage());
-			e.printStackTrace();			
-			fail("Exception thrown " + e.getMessage());
-		} 
-		
-		if (!correctErrorThrown)	{
-			fail("An exception should have been thrown!"); 
-		}
-		
-	}
-
 	/**
 	 * Test DiSCO deletion has the correct status.
 	 */

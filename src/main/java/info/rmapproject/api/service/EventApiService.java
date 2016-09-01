@@ -83,7 +83,6 @@ public class EventApiService {
  * @throws RMapApiException the RMap API exception
  */	
     @GET
-    @Produces("application/json;charset=UTF-8;")
     public Response apiGetServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
     	Response response = getEventResponseManager().getEventServiceOptions();
@@ -113,7 +112,6 @@ public class EventApiService {
 	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
-    @Produces("application/json;charset=UTF-8;")
     public Response apiGetEventApiDetailedOptions() throws RMapApiException {
     	Response response = getEventResponseManager().getEventServiceOptions();
 	    return response;
@@ -210,7 +208,7 @@ public class EventApiService {
     @Produces({"application/json;charset=UTF-8;","text/plain;charset=UTF-8;"})
     public Response apiGetRMapEventResources(@Context HttpHeaders headers, @PathParam("eventUri") String eventUri) throws RMapApiException {
     	NonRdfType outputType = HttpTypeMediator.getNonRdfResponseType(headers);
-    	Response relatedResources = getEventResponseManager().getRMapEventRelatedObjs(eventUri, null, outputType);
+    	Response relatedResources = getEventResponseManager().getRMapEventRelatedObjs(eventUri, RMapObjectType.OBJECT, outputType);
 	    return relatedResources;
     }
 

@@ -23,8 +23,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import info.rmapproject.api.lists.NonRdfType;
 import info.rmapproject.api.lists.RdfMediaType;
 import info.rmapproject.core.model.RMapIri;
+import info.rmapproject.core.model.RMapObjectType;
 import info.rmapproject.core.model.disco.RMapDiSCO;
 import info.rmapproject.core.model.event.RMapEventCreation;
 import info.rmapproject.core.rdfhandler.RDFType;
@@ -117,7 +119,6 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
 			
 			discoIri = rmapDisco.getId();
-			//TODO: System agent param is a default setting until we have proper auth handling.
 			event = (RMapEventCreation) rmapService.createDiSCO(rmapDisco, super.reqAgent);
 			
 			RMapIri eventUri = event.getId();
@@ -149,9 +150,54 @@ public class EventResponseManagerTest extends ResponseManagerTest {
 		}
 	}
 
-	/*@Test
+	@Test
 	public void testGetRMapEventRelatedObjs() {
-		fail("Not yet implemented");
-	}*/
+		//create RMapStatement
+		RMapEventCreation event = null;
+		RMapIri discoIri;
+		try {			
+			InputStream rdf = new ByteArrayInputStream(genericDiscoRdf.getBytes(StandardCharsets.UTF_8));
+			RMapDiSCO rmapDisco = rdfHandler.rdf2RMapDiSCO(rdf, RDFType.RDFXML, "");
+			
+			discoIri = rmapDisco.getId();
+			event = (RMapEventCreation) rmapService.createDiSCO(rmapDisco, super.reqAgent);
+			
+			RMapIri eventUri = event.getId();
+			
+			assertNotNull(eventUri);
+			
+			String sEventUri = eventUri.toString();
+			assertTrue(sEventUri.length()>0);
+			assertTrue(sEventUri.contains("rmap:"));
+			
+			//getRMapStatement
+			Response response = null;
+			
+			response = eventResponseManager.getRMapEventRelatedObjs(URLEncoder.encode(sEventUri, "UTF-8"), RMapObjectType.OBJECT, NonRdfType.JSON);
+			assertNotNull(response);
+			String body = response.getEntity().toString();
+			assertTrue(body.contains(discoIri.toString()));
+			assertEquals(200, response.getStatus());
+
+			response = eventResponseManager.getRMapEventRelatedObjs(URLEncoder.encode(sEventUri, "UTF-8"), RMapObjectType.DISCO, NonRdfType.JSON);
+			assertNotNull(response);
+			body = response.getEntity().toString();
+			assertTrue(body.contains(discoIri.toString()));
+			assertEquals(200, response.getStatus());
+			
+			response = eventResponseManager.getRMapEventRelatedObjs(URLEncoder.encode(sEventUri, "UTF-8"), RMapObjectType.AGENT, NonRdfType.JSON);
+			assertNotNull(response);
+			body = response.getEntity().toString();
+			assertTrue(body.contains("[]"));
+			assertEquals(200, response.getStatus());
+			
+			
+			rmapService.deleteDiSCO(discoIri.getIri(), super.reqAgent);
+
+		} catch (Exception e) {
+			e.printStackTrace();			
+			fail("Exception thrown " + e.getMessage());
+		}
+	}
 
 }

@@ -106,7 +106,7 @@ public class StatementResponseManager extends ResponseManager {
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {		
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/event>;rel=\"" + DC.DESCRIPTION.toString() + "\"";		
+			String linkRel = "<" +Utils.getDocumentationPath()+ ">;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
@@ -190,7 +190,7 @@ public class StatementResponseManager extends ResponseManager {
 				responseBldr = Response.status(Response.Status.OK)
 						.type(HttpTypeMediator.getResponseNonRdfMediaType(returnType));	
 				
-				if (matchingObjects.size()>limit || currPage>1) {
+				if (matchingObjects.size()>limit || (currPage!=null && currPage>1)) {
 					boolean showNextLink=matchingObjects.size()>limit;
 					String pageLinkTemplate = getPaginatedLinkTemplate(path, queryParams, limit);
 					String pageLinks = generatePaginationLinks(pageLinkTemplate, currPage, showNextLink);

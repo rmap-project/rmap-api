@@ -86,7 +86,6 @@ public class ResourceApiService {
 	 * @throws RMapApiException the RMap API exception
 	 */
 	@GET
-    @Produces("application/json;charset=UTF-8;")
     public Response apiGetServiceInfo() throws RMapApiException {
     	//TODO: for now returns same as options, but might want html response to describe API?
     	Response response = getResourceResponseManager().getResourceServiceOptions();
@@ -116,7 +115,6 @@ public class ResourceApiService {
 	 * @throws RMapApiException the RMap API exception
 	 */
     @OPTIONS
-    @Produces("application/json;charset=UTF-8;")
     public Response apiGetResourceApiDetailedOptions()	throws RMapApiException {
     	Response response = getResourceResponseManager().getResourceServiceOptions();
 	    return response;

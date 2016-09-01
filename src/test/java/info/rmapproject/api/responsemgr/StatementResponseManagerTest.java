@@ -129,7 +129,7 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 
 
 			MultivaluedMap<String, String> queryParams = new MultivaluedHashMap<String, String>();
-			queryParams.add("page", "1");
+			//queryParams.add("page", "1");
 			
 			//get disco as related to statement
 			response = statementResponseManager.getStatementRelatedDiSCOs("http://dx.doi.org/10.1109/ACCESS.2014.2332453", 
@@ -138,9 +138,9 @@ public class StatementResponseManagerTest extends ResponseManagerTest {
 
 			assertNotNull(response);
 			assertEquals(response.getStatus(),200);
-			assertEquals(response.getEntity(),"{\"" + Terms.RMAP_DISCO_PATH + "\":[\"" + discoURI + "\"]}");
+			assertTrue(response.getEntity().toString().contains(discoURI));
 			
-			rmapService.deleteDiSCO(new URI(discoURI), super.reqAgent);
+			rmapService.deleteDiSCO(rmapDisco.getId().getIri(), super.reqAgent);
 			
 		} catch (Exception e) {
 			e.printStackTrace();	

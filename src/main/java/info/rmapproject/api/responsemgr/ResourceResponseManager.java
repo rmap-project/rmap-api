@@ -107,7 +107,7 @@ public class ResourceResponseManager extends ResponseManager {
 		boolean reqSuccessful = false;
 		Response response = null;
 		try {			
-			String linkRel = "<http://rmapdns.ddns.net:8080/swagger/docs/resource>;rel=\"" + DC.DESCRIPTION.toString() + "\"";	
+			String linkRel = "<" +Utils.getDocumentationPath()+ ">;rel=\"" + DC.DESCRIPTION.toString() + "\"";
 			response = Response.status(Response.Status.OK)
 					.header("Allow", "HEAD,OPTIONS,GET")
 					.header("Link",linkRel)	
